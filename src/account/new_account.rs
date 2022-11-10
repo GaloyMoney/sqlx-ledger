@@ -5,17 +5,17 @@ use crate::primitives::*;
 #[derive(Builder)]
 pub struct NewAccount {
     #[builder(setter(into))]
-    code: String,
+    pub(super) code: String,
     #[builder(setter(into))]
-    name: String,
+    pub(super) name: String,
     #[builder(default)]
-    normal_balance_type: DebitOrCredit,
+    pub(super) normal_balance_type: DebitOrCredit,
     #[builder(setter(strip_option, into), default)]
-    description: Option<String>,
+    pub(super) description: Option<String>,
     #[builder(default)]
-    status: Status,
+    pub(super) status: Status,
     #[builder(setter(custom), default)]
-    metadata: Option<serde_json::Value>,
+    pub(super) metadata: Option<serde_json::Value>,
 }
 
 impl NewAccount {
