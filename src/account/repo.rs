@@ -1,6 +1,6 @@
 use sqlx::{Pool, Postgres};
 
-use super::new_account::*;
+use super::entity::*;
 use crate::{error::*, primitives::*};
 
 pub struct Accounts {

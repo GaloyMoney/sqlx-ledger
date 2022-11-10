@@ -2,8 +2,11 @@
 #![cfg_attr(feature = "fail-on-warnings", deny(clippy::all))]
 
 pub mod account;
+pub mod journal;
+
 mod error;
 mod ledger;
+mod macros;
 mod primitives;
 
 pub use error::*;

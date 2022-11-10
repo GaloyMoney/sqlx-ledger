@@ -1,11 +1,5 @@
-use uuid::Uuid;
-
-pub struct AccountId(pub(super) Uuid);
-impl From<Uuid> for AccountId {
-    fn from(uuid: Uuid) -> Self {
-        Self(uuid)
-    }
-}
+crate::entity_id! { AccountId }
+crate::entity_id! { JournalId }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, sqlx::Type)]
 #[sqlx(type_name = "DebitOrCredit", rename_all = "snake_case")]
