@@ -4,6 +4,7 @@
 pub mod account;
 pub mod journal;
 
+mod cel;
 mod error;
 mod ledger;
 mod macros;

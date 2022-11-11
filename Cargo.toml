@@ -16,6 +16,8 @@ sqlx = { version = "0.6", features = [ "offline", "runtime-tokio-rustls", "postg
 thiserror = "1.0.37"
 tokio = { version = "1.21.2", features = ["macros"] }
 uuid = { version = "1.2.1", features = ["serde"] }
+cel-interpreter = { git = "https://github.com/bodymindarts/cel-rust" }
+
 
 [dev-dependencies]
 anyhow = "1.0.66"
