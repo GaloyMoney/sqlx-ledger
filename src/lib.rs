@@ -3,6 +3,7 @@
 
 pub mod account;
 pub mod journal;
+pub mod tx_template;
 
 mod cel;
 mod error;

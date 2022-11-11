@@ -52,17 +52,22 @@ CREATE TABLE tx_templates_current (
   id UUID PRIMARY KEY,
   code VARCHAR(80) UNIQUE NOT NULL,
   version INT NOT NULL,
+  params JSONB NOT NULL,
+  tx_input JSONB NOT NULL,
   description VARCHAR,
+  metadata JSONB,
   modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE tx_templates_history (
   id UUID,
+  code VARCHAR(80) UNIQUE NOT NULL,
   version INT NOT NULL,
-  name VARCHAR(80) NOT NULL,
+  params JSONB NOT NULL,
+  tx_input JSONB NOT NULL,
   description VARCHAR,
-  status Status NOT NULL,
+  metadata JSONB,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   UNIQUE(id, version)
 );

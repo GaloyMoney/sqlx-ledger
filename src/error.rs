@@ -13,5 +13,5 @@ pub enum SqlxLedgerError {
 #[derive(Error, Debug)]
 pub enum CelError {
     #[error("CelError - CelParseError: {0}")]
-    CelParseError(#[from] cel_interpreter::ParseError),
+    CelParseError(String),
 }

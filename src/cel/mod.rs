@@ -1,57 +1,50 @@
+use cel_interpreter::{context::Context, objects::CelType};
+use cel_parser::{ast::Expression, parser::ExpressionParser};
+use serde::{Deserialize, Serialize};
+
 use crate::error::*;
-use cel_interpreter::{context::Context, Program};
-use std::rc::Rc;
 
-pub enum CelValue {
-    Int(i32),
-    UInt(u32),
-    Float(f64),
-    String(Rc<String>),
-    Bytes(Rc<Vec<u8>>),
-    Bool(bool),
-    Null,
-}
-
-pub struct Params {
-    inner: Context,
-}
-
+#[derive(Clone, Deserialize, Serialize)]
+#[serde(try_from = "String")]
+#[serde(into = "String")]
 pub struct CelExpression {
     source: String,
-    expression: Program,
+    expr: Expression,
 }
 
 impl CelExpression {
-    fn evaluate(&self, params: Params) -> Result<CelValue, CelError> {
-        unimplemented!()
+    pub fn evaluate(&self) -> CelType {
+        CelType::resolve(&self.expr, &Context::default())
     }
 }
+
+impl From<CelExpression> for String {
+    fn from(expr: CelExpression) -> Self {
+        expr.source
+    }
+}
+
 impl TryFrom<String> for CelExpression {
     type Error = CelError;
 
     fn try_from(source: String) -> Result<Self, Self::Error> {
-        let expression = Program::compile(&source)?;
-        Ok(Self { source, expression })
+        let expr = ExpressionParser::new()
+            .parse(&source)
+            .map_err(|e| CelError::CelParseError(e.to_string()))?;
+        Ok(Self { source, expr })
     }
 }
+impl TryFrom<&str> for CelExpression {
+    type Error = CelError;
 
+    fn try_from(source: &str) -> Result<Self, Self::Error> {
+        Self::try_from(source.to_string())
+    }
+}
 impl std::str::FromStr for CelExpression {
     type Err = CelError;
 
     fn from_str(source: &str) -> Result<Self, Self::Err> {
-        CelExpression::try_from(source.to_string())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_builds() {
-        // let cel_expression = CelExpression {
-        //     expression: "expression".to_string(),
-        // };
-        // assert_eq!(cel_expression.expression, "expression");
+        Self::try_from(source.to_string())
     }
 }
