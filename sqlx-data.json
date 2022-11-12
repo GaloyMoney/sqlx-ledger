@@ -1,6 +1,6 @@
 {
   "db": "PostgreSQL",
-  "2ef414070e38efda7215d47302e08f4638f6e9a29b40140616a091eb0902c328": {
+  "0bc202a8b1979805a12903593fbed773fe99be673775d31c83f4327d3bd6babf": {
     "describe": {
       "columns": [
         {
@@ -54,29 +54,71 @@
         ]
       }
     },
-    "query": "INSERT INTO accounts_current (id, version, code, name, normal_balance_type, description, status, metadata)\n            VALUES (gen_random_uuid(), 1, $1, $2, $3, $4, $5, $6)\n            RETURNING id, version, created_at"
+    "query": "INSERT INTO accounts (id, version, code, name, normal_balance_type, description, status, metadata)\n            VALUES (gen_random_uuid(), 1, $1, $2, $3, $4, $5, $6)\n            RETURNING id, version, created_at"
   },
-  "bcbd70b14340848a586e08f1283863949b00b7b02f0301a13786d27c86c27dd5": {
+  "cb25a2ccfb53cd1d3a2649e8cf1ddbf45617d266965fa77e72a8a353f106fb97": {
     "describe": {
-      "columns": [],
-      "nullable": [],
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "version",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
       "parameters": {
         "Left": [
-          "Uuid",
-          "Int4",
           "Varchar",
           "Varchar",
-          {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "debit",
-                  "credit"
-                ]
-              },
-              "name": "debitorcredit"
-            }
-          },
+          "Jsonb",
+          "Jsonb",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "INSERT INTO tx_templates (id, version, code, description, params, tx_input, metadata)\n            VALUES (gen_random_uuid(), 1, $1, $2, $3, $4, $5)\n            RETURNING id, version, created_at"
+  },
+  "dad21f3d7c62d03c743b786a9077405981609b5611e55164f3cf05798cbb74cd": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "version",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
           "Varchar",
           {
             "Custom": {
@@ -87,11 +129,10 @@
               },
               "name": "status"
             }
-          },
-          "Jsonb"
+          }
         ]
       }
     },
-    "query": "INSERT INTO accounts_history (id, version, code, name, normal_balance_type, description, status, metadata)\n            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
+    "query": "INSERT INTO journals (id, version, name, description, status)\n            VALUES (gen_random_uuid(), 1, $1, $2, $3)\n            RETURNING id, version, created_at"
   }
 }

@@ -23,9 +23,8 @@ impl Accounts {
             metadata,
         }: NewAccount,
     ) -> Result<AccountId, SqlxLedgerError> {
-        let mut tx = self.pool.begin().await?;
         let record = sqlx::query!(
-            r#"INSERT INTO accounts_current (id, version, code, name, normal_balance_type, description, status, metadata)
+            r#"INSERT INTO accounts (id, version, code, name, normal_balance_type, description, status, metadata)
             VALUES (gen_random_uuid(), 1, $1, $2, $3, $4, $5, $6)
             RETURNING id, version, created_at"#,
             code,
@@ -35,23 +34,8 @@ impl Accounts {
             status as Status,
             metadata
         )
-        .fetch_one(&mut tx)
+        .fetch_one(&self.pool)
         .await?;
-        sqlx::query!(
-            r#"INSERT INTO accounts_history (id, version, code, name, normal_balance_type, description, status, metadata)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"#,
-            record.id,
-            record.version,
-            code,
-            name,
-            normal_balance_type as DebitOrCredit,
-            description,
-            status as Status,
-            metadata
-        )
-        .execute(&mut tx)
-        .await?;
-        tx.commit().await?;
         Ok(AccountId::from(record.id))
     }
 }

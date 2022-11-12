@@ -20,29 +20,16 @@ impl Journals {
             status,
         }: NewJournal,
     ) -> Result<JournalId, SqlxLedgerError> {
-        let mut tx = self.pool.begin().await?;
         let record = sqlx::query!(
-            r#"INSERT INTO journals_current (id, version, name, description, status)
+            r#"INSERT INTO journals (id, version, name, description, status)
             VALUES (gen_random_uuid(), 1, $1, $2, $3)
             RETURNING id, version, created_at"#,
             name,
             description,
             status as Status,
         )
-        .fetch_one(&mut tx)
+        .fetch_one(&self.pool)
         .await?;
-        sqlx::query!(
-            r#"INSERT INTO journals_history (id, version, name, description, status)
-            VALUES ($1, $2, $3, $4, $5)"#,
-            record.id,
-            record.version,
-            name,
-            description,
-            status as Status,
-        )
-        .execute(&mut tx)
-        .await?;
-        tx.commit().await?;
         Ok(JournalId::from(record.id))
     }
 }
