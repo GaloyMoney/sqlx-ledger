@@ -3,6 +3,7 @@
 
 pub mod account;
 pub mod journal;
+pub mod transaction;
 pub mod tx_template;
 
 mod cel;

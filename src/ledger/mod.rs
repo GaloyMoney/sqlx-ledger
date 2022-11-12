@@ -1,6 +1,6 @@
 use sqlx::{Pool, Postgres};
 
-use crate::{account::Accounts, tx_template::TxTemplates};
+use crate::{account::Accounts, transaction::*, tx_template::TxTemplates};
 
 pub struct SqlxLedger {
     pool: Pool<Postgres>,
@@ -17,5 +17,13 @@ impl SqlxLedger {
 
     pub fn tx_templates(&self) -> TxTemplates {
         TxTemplates::new(&self.pool)
+    }
+
+    pub async fn post_transaction(
+        &self,
+        tx_template_code: String,
+        params: Option<TxParams>,
+    ) -> Result<(), ()> {
+        Ok(())
     }
 }
