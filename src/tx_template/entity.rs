@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::cel::CelExpression;
 
-use super::param::*;
+use super::param_definition::*;
 
 #[derive(Builder)]
 pub struct NewTxTemplate {

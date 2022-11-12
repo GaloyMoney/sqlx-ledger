@@ -1,3 +1,3 @@
-mod tx_params;
+mod entity;
 
-pub use tx_params::*;
+use entity::*;
