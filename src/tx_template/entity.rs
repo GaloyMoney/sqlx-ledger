@@ -11,8 +11,8 @@ pub struct NewTxTemplate {
     pub(super) code: String,
     #[builder(setter(strip_option, into), default)]
     pub(super) description: Option<String>,
-    #[builder(default)]
-    pub(super) params: Vec<ParamDefinition>,
+    #[builder(setter(strip_option), default)]
+    pub(super) params: Option<Vec<ParamDefinition>>,
     pub(super) tx_input: TxInput,
     #[builder(setter(custom), default)]
     pub(super) metadata: Option<serde_json::Value>,
