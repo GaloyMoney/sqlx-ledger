@@ -1,6 +1,6 @@
 use sqlx::{Pool, Postgres};
 
-use super::{entity::*, perm::*};
+use super::{core::*, entity::*};
 use crate::{error::*, primitives::*};
 
 pub struct TxTemplates {
@@ -39,7 +39,7 @@ impl TxTemplates {
         Ok(TxTemplateId::from(record.id))
     }
 
-    pub(crate) async fn find_perm(&self, code: String) -> Result<TxTemplatePerm, SqlxLedgerError> {
+    pub(crate) async fn find_perm(&self, code: String) -> Result<TxTemplateCore, SqlxLedgerError> {
         let record = sqlx::query!(
             r#"SELECT id, code, params, tx_input FROM tx_templates WHERE code = $1 LIMIT 1"#,
             code
@@ -51,7 +51,7 @@ impl TxTemplates {
             None => None,
         };
         let tx_input = serde_json::from_value(record.tx_input)?;
-        Ok(TxTemplatePerm {
+        Ok(TxTemplateCore {
             id: TxTemplateId::from(record.id),
             code: record.code,
             params,

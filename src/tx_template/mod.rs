@@ -1,6 +1,6 @@
+mod core;
 mod entity;
 mod param_definition;
-mod perm;
 mod repo;
 mod tx_params;
 

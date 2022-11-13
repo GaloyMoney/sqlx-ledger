@@ -1,3 +1,3 @@
 mod entity;
 
-use entity::*;
+pub use entity::*;
