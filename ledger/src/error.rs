@@ -1,6 +1,7 @@
+use rust_decimal::Decimal;
 use thiserror::Error;
 
-use cel_interpreter::CelError;
+use cel_interpreter::{CelError, CelValue};
 
 use crate::tx_template::ParamDataType;
 
@@ -16,4 +17,10 @@ pub enum SqlxLedgerError {
     TxParamTypeMissmatch(ParamDataType),
     #[error("SqlxLedgerError - TooManyParameters")]
     TooManyParameters,
+    #[error("SqlxLedgerError - UnknownLayer: {0:?}")]
+    UnknownLayer(CelValue),
+    #[error("SqlxLedgerError - UnknownDebitOrCredit: {0:?}")]
+    UnknownDebitOrCredit(CelValue),
+    #[error("SqlxLedgerError - UnbalancedTransaction: currency {0} amount {1}")]
+    UnbalancedTransaction(String, Decimal),
 }

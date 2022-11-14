@@ -16,16 +16,25 @@ async fn test_tx_template() -> anyhow::Result<()> {
         .default_expr("'input'")
         .build()
         .unwrap()];
+    let tx_input = TxInput::builder()
+        .effective("1")
+        .journal_id("1")
+        .build()
+        .unwrap();
+    let entries = vec![EntryInput::builder()
+        .entry_type("'TEST_DR'")
+        .account_id("param.recipient")
+        .layer("'Settled'")
+        .direction("'Settled'")
+        .units("1290")
+        .currency("'BTC'")
+        .build()
+        .unwrap()];
     let new_template = NewTxTemplate::builder()
         .code(code)
         .params(params)
-        .tx_input(
-            TxInput::builder()
-                .effective("1")
-                .journal_id("1")
-                .build()
-                .unwrap(),
-        )
+        .tx_input(tx_input)
+        .entries(entries)
         .build()
         .unwrap();
     SqlxLedger::new(&pool)

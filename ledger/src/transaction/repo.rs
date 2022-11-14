@@ -24,7 +24,7 @@ impl Transactions {
             description,
             metadata,
         }: NewTransaction,
-    ) -> Result<(TransactionId, Transaction<'a, Postgres>), SqlxLedgerError> {
+    ) -> Result<(JournalId, TransactionId, Transaction<'a, Postgres>), SqlxLedgerError> {
         let mut tx = self.pool.begin().await?;
         let id = Uuid::new_v4();
         let record = sqlx::query!(
@@ -36,12 +36,12 @@ impl Transactions {
             Uuid::from(tx_template_id),
             effective,
             correlation_id.map(Uuid::from).unwrap_or(id),
-            external_id.map(Uuid::from),
+            external_id.map(Uuid::from).unwrap_or(id),
             description,
             metadata
         )
         .fetch_one(&mut tx)
         .await?;
-        Ok((TransactionId::from(record.id), tx))
+        Ok((journal_id, TransactionId::from(record.id), tx))
     }
 }

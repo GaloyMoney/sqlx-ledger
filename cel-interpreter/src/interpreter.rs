@@ -26,12 +26,12 @@ impl CelExpression {
     }
 
     pub fn evaluate(&self, ctx: &CelContext) -> Result<CelValue, CelError> {
-        if let EvalType::Value(val) = evaluate_expression(&self.expr, ctx)? {
-            Ok(val)
-        } else {
-            Err(CelError::Unexpected(
+        match evaluate_expression(&self.expr, ctx)? {
+            EvalType::Value(val) => Ok(val),
+            EvalType::ContextItem(ContextItem::Value(val)) => Ok(val.clone()),
+            _ => Err(CelError::Unexpected(
                 "evaluate didn't return a value".to_string(),
-            ))
+            )),
         }
     }
 }

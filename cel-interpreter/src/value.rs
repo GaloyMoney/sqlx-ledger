@@ -1,5 +1,6 @@
 use cel_parser::ast::Literal;
 use chrono::NaiveDate;
+use rust_decimal::Decimal;
 use uuid::Uuid;
 
 use std::{collections::HashMap, rc::Rc};
@@ -11,7 +12,7 @@ pub enum CelValue {
     Map(Rc<CelMap>),
     Int(i64),
     UInt(u64),
-    Double(f64),
+    Double(Decimal),
     String(Rc<String>),
     Bytes(Rc<Vec<u8>>),
     Bool(bool),
@@ -133,7 +134,7 @@ impl From<&Literal> for CelValue {
         match l {
             Int(i) => CelValue::Int(*i),
             UInt(u) => CelValue::UInt(*u),
-            Double(d) => CelValue::Double(*d),
+            Double(d) => CelValue::Double(d.parse().expect("Couldn't parse Decimal")),
             String(s) => CelValue::String(s.clone()),
             Bytes(b) => CelValue::Bytes(b.clone()),
             Bool(b) => CelValue::Bool(*b),
@@ -190,6 +191,19 @@ impl TryFrom<CelValue> for String {
     }
 }
 
+impl TryFrom<CelValue> for Decimal {
+    type Error = CelError;
+
+    fn try_from(v: CelValue) -> Result<Self, Self::Error> {
+        match v {
+            CelValue::Double(n) => Ok(n),
+            CelValue::Int(n) => Ok(Decimal::from(n)),
+            CelValue::UInt(n) => Ok(Decimal::from(n)),
+            _ => Err(CelError::BadType(CelType::Double, CelType::from(&v))),
+        }
+    }
+}
+
 impl From<&CelKey> for CelType {
     fn from(v: &CelKey) -> Self {
         match v {
@@ -221,7 +235,7 @@ impl TryFrom<CelValue> for serde_json::Value {
         Ok(match v {
             CelValue::Int(n) => Value::from(n),
             CelValue::UInt(n) => Value::from(n),
-            CelValue::Double(n) => Value::from(n),
+            CelValue::Double(n) => Value::from(n.to_string()),
             CelValue::Bool(b) => Value::from(b),
             CelValue::String(n) => Value::from(n.as_str()),
             CelValue::Null => Value::Null,

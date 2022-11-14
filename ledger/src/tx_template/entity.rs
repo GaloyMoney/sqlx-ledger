@@ -14,6 +14,7 @@ pub struct NewTxTemplate {
     #[builder(setter(strip_option), default)]
     pub(super) params: Option<Vec<ParamDefinition>>,
     pub(super) tx_input: TxInput,
+    pub(super) entries: Vec<EntryInput>,
     #[builder(setter(custom), default)]
     pub(super) metadata: Option<serde_json::Value>,
 }
@@ -87,6 +88,11 @@ pub struct EntryInput {
     description: Option<String>,
 }
 
+impl EntryInput {
+    pub fn builder() -> EntryInputBuilder {
+        EntryInputBuilder::default()
+    }
+}
 impl EntryInputBuilder {
     fn validate(&self) -> Result<(), String> {
         let _ = validate_expression(&self.entry_type)?;
@@ -100,7 +106,8 @@ impl EntryInputBuilder {
 }
 
 fn validate_expression(expr: &Option<String>) -> Result<(), String> {
-    let _ = CelExpression::try_from(expr.as_ref().unwrap().as_str()).map_err(|e| e.to_string())?;
+    let _ = CelExpression::try_from(expr.as_ref().expect("Mandatory field not set").as_str())
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 fn validate_optional_expression(expr: &Option<Option<String>>) -> Result<(), String> {
@@ -118,6 +125,15 @@ mod tests {
     #[test]
     fn it_builds() {
         let journal_id = Uuid::new_v4();
+        let entries = vec![EntryInput::builder()
+            .entry_type("'TEST_DR'")
+            .account_id("param.recipient")
+            .layer("'Settled'")
+            .direction("'Settled'")
+            .units("1290")
+            .currency("'BTC'")
+            .build()
+            .unwrap()];
         let new_journal = NewTxTemplate::builder()
             .code("CODE")
             .tx_input(
@@ -127,6 +143,7 @@ mod tests {
                     .build()
                     .unwrap(),
             )
+            .entries(entries)
             .build()
             .unwrap();
         assert_eq!(new_journal.description, None);

@@ -1,5 +1,6 @@
 CREATE TYPE DebitOrCredit AS ENUM ('debit', 'credit');
 CREATE TYPE Status AS ENUM ('active');
+CREATE TYPE Layer AS ENUM ('settled', 'pending', 'encumbered');
 
 CREATE TABLE accounts (
   id UUID NOT NULL,
@@ -35,6 +36,7 @@ CREATE TABLE tx_templates (
   version INT NOT NULL,
   params JSONB,
   tx_input JSONB NOT NULL,
+  entries JSONB NOT NULL,
   description VARCHAR,
   metadata JSONB,
   modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -50,9 +52,27 @@ CREATE TABLE transactions (
   tx_template_id UUID NOT NULL,
   correlation_id UUID NOT NULL,
   effective Date NOT NULL,
-  external_id UUID,
+  external_id UUID NOT NULL,
   description VARCHAR,
   metadata JSONB,
+  modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  UNIQUE(id, version)
+);
+
+CREATE TABLE entries (
+  id UUID NOT NULL,
+  version INT NOT NULL,
+  transaction_id UUID NOT NULL,
+  account_id UUID NOT NULL,
+  journal_id UUID NOT NULL,
+  entry_type VARCHAR NOT NULL,
+  layer Layer NOT NULL,
+  units Numeric NOT NULL,
+  currency VARCHAR NOT NULL,
+  direction DebitOrCredit NOT NULL,
+  sequence INT NOT NULL,
+  description VARCHAR,
   modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   UNIQUE(id, version)

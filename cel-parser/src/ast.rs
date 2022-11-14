@@ -89,7 +89,7 @@ pub enum Member {
 pub enum Literal {
     Int(i64),
     UInt(u64),
-    Double(f64),
+    Double(Rc<String>),
     String(Rc<String>),
     Bytes(Rc<Vec<u8>>),
     Bool(bool),
@@ -149,7 +149,7 @@ mod tests {
 
     #[test]
     fn simple_float() {
-        assert_parse_eq("1.0", Literal(Double(1.0)))
+        assert_parse_eq("1.0", Literal(Double("1.0".to_string().into())))
     }
 
     #[test]
