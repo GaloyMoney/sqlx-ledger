@@ -4,6 +4,17 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::*;
 
+pub struct CelContext {
+    inner: Context,
+}
+impl Default for CelContext {
+    fn default() -> Self {
+        Self {
+            inner: Context::default(),
+        }
+    }
+}
+
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(try_from = "String")]
 #[serde(into = "String")]
@@ -13,8 +24,8 @@ pub struct CelExpression {
 }
 
 impl CelExpression {
-    pub fn evaluate(&self) -> CelType {
-        CelType::resolve(&self.expr, &Context::default())
+    pub fn evaluate(&self, ctx: &CelContext) -> CelType {
+        CelType::resolve(&self.expr, &ctx.inner)
     }
 }
 

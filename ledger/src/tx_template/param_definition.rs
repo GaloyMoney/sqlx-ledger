@@ -4,7 +4,7 @@ use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::cel::CelExpression;
+use crate::cel::{CelContext, CelExpression};
 
 #[derive(Clone, Deserialize, Serialize, Builder)]
 #[builder(build_fn(validate = "Self::validate"))]
@@ -28,7 +28,7 @@ impl ParamDefinitionBuilder {
     fn validate(&self) -> Result<(), String> {
         if let Some(Some(expr)) = self.default.as_ref() {
             let expr = CelExpression::try_from(expr.as_str()).map_err(|e| e.to_string())?;
-            let param_type = ParamDataType::try_from(expr.evaluate())?;
+            let param_type = ParamDataType::try_from(expr.evaluate(&CelContext::default()))?;
             let specified_type = self.r#type.as_ref().unwrap();
             if &param_type != specified_type {
                 return Err(format!(

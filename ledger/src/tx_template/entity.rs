@@ -34,7 +34,7 @@ impl NewTxTemplateBuilder {
     }
 }
 
-#[derive(Clone, Deserialize, Serialize, Builder)]
+#[derive(Clone, Serialize, Builder)]
 #[builder(build_fn(validate = "Self::validate"))]
 pub struct TxInput {
     #[builder(setter(into))]

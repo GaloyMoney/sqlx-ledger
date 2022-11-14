@@ -30,7 +30,7 @@ impl SqlxLedger {
         tx_template_code: String,
         params: Option<TxParams>,
     ) -> Result<(), SqlxLedgerError> {
-        let tx_template = self.tx_templates.find_perm(tx_template_code).await?;
+        let tx_template = self.tx_templates.find_core(tx_template_code).await?;
         // tx_template.prep_tx(params);
         Ok(())
     }

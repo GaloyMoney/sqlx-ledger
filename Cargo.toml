@@ -1,25 +1,5 @@
-[package]
-name = "sqlx-ledger"
-version = "0.1.0"
-edition = "2021"
-
-[features]
-
-fail-on-warnings = []
-
-[dependencies]
-chrono = "0.4.22"
-derive_builder = "0.11.2"
-serde = "1.0.147"
-serde_json = "1.0.87"
-sqlx = { version = "0.6", features = [ "offline", "runtime-tokio-rustls", "postgres", "decimal", "uuid", "chrono", "json" ] }
-thiserror = "1.0.37"
-tokio = { version = "1.21.2", features = ["macros"] }
-uuid = { version = "1.2.1", features = ["serde", "v4"] }
-cel-interpreter = { git = "https://github.com/bodymindarts/cel-rust" }
-cel-parser = { git = "https://github.com/bodymindarts/cel-rust" }
-
-
-[dev-dependencies]
-anyhow = "1.0.66"
-rand = "0.8.5"
+[workspace]
+members = [
+  "cel-parser",
+  "ledger"
+]

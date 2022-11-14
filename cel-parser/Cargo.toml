@@ -1,0 +1,16 @@
+[package]
+name = "cel-parser"
+description = "A parser for the Common Expression Language (CEL)"
+repository = "https://github.com/orf/cel-rust"
+version = "0.1.0"
+authors = ["Tom Forbes <tom@tomforb.es>", "Justin Carter <justin@galoy.io>"]
+edition = "2021"
+license = "MIT"
+categories = ["parsing", "cel"]
+
+[dependencies]
+lalrpop-util = { version = "0.19", features = ["lexer"] }
+regex = "1.4"
+
+[build-dependencies]
+lalrpop = { version = "0.19", features = ["lexer"] }
