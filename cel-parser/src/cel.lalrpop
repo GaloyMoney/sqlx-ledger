@@ -116,12 +116,12 @@ Literal: Literal = {
     r"[-+]?[0-9]+[eE][-+]?[0-9]+" => Literal::Double(<>.parse().unwrap()),
 
     // Double quoted string
-    r#""(\\.|[^"\n])*""# => Literal::String(<>.to_string().into()),
-    r#""""(\\.|[^"{3}])*""""# => Literal::String(<>.to_string().into()),
+    r#""(\\.|[^"\n])*""# => Literal::String(<>[1..(<>.len()-1)].to_string().into()),
+    r#""""(\\.|[^"{3}])*""""# => Literal::String(<>[3..(<>.len()-3)].to_string().into()),
 
     // Single quoted string
-    r#"'(\\.|[^'\n])*'"# => Literal::String(<>.to_string().into()),
-    r#"'''(\\.|[^'{3}])*'''"# => Literal::String(<>.to_string().into()),
+    r#"'(\\.|[^'\n])*'"# => Literal::String(<>[1..(<>.len()-1)].to_string().into()),
+    r#"'''(\\.|[^'{3}])*'''"# => Literal::String(<>[3..(<>.len()-3)].to_string().into()),
 
     // Double quoted bytes
     r#"[bB]"(\\.|[^"\n])*""# => Literal::Bytes(Vec::from(<>.as_bytes()).into()),

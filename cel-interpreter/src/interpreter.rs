@@ -18,6 +18,13 @@ pub struct CelExpression {
 }
 
 impl CelExpression {
+    pub fn try_evaluate<T: TryFrom<CelValue, Error = E>, E: From<CelError>>(
+        &self,
+        ctx: &CelContext,
+    ) -> Result<T, E> {
+        Ok(T::try_from(self.evaluate(ctx)?)?)
+    }
+
     pub fn evaluate(&self, ctx: &CelContext) -> Result<CelValue, CelError> {
         if let EvalType::Value(val) = evaluate_expression(&self.expr, ctx)? {
             Ok(val)
@@ -29,7 +36,6 @@ impl CelExpression {
     }
 }
 
-#[derive(Debug)]
 enum EvalType<'a> {
     Value(CelValue),
     ContextItem(&'a ContextItem),
@@ -88,7 +94,7 @@ fn evaluate_expression<'a>(
         }
         Member(expr, member) => {
             let ident = evaluate_expression(expr, ctx)?;
-            evaluate_member(ident, member)
+            evaluate_member(ident, member, ctx)
         }
         Map(entries) => {
             let mut map = CelMap::new();
@@ -105,14 +111,28 @@ fn evaluate_expression<'a>(
     }
 }
 
-fn evaluate_member<'a>(target: EvalType, member: &ast::Member) -> Result<EvalType<'a>, CelError> {
+fn evaluate_member<'a>(
+    target: EvalType,
+    member: &ast::Member,
+    ctx: &CelContext,
+) -> Result<EvalType<'a>, CelError> {
     use ast::Member::*;
     match member {
         Attribute(name) => match target {
             EvalType::ContextItem(ContextItem::Value(CelValue::Map(map))) => {
                 Ok(EvalType::Value(map.get(name)))
             }
-            _ => Err(CelError::IllegalTarget(format!("{:?}", target))),
+            _ => Err(CelError::IllegalTarget),
+        },
+        FunctionCall(exprs) => match target {
+            EvalType::ContextItem(ContextItem::Function(f)) => {
+                let mut args = Vec::new();
+                for e in exprs {
+                    args.push(evaluate_expression(e, ctx)?.try_value()?)
+                }
+                Ok(EvalType::Value(f(args)?))
+            }
+            _ => Err(CelError::IllegalTarget),
         },
         _ => unimplemented!(),
     }
@@ -152,6 +172,7 @@ impl std::str::FromStr for CelExpression {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::NaiveDate;
 
     #[test]
     fn literals() {
@@ -165,14 +186,13 @@ mod tests {
         let expression = "-1".parse::<CelExpression>().unwrap();
         assert_eq!(expression.evaluate(&context).unwrap(), CelValue::Int(-1));
 
-        // Tokenizer needs rewriting
-        // let expression = "'hello'".parse::<CelExpression>().unwrap();
-        // assert_eq!(
-        //     expression.evaluate(&context).unwrap(),
-        //     CelValue::String("hello".to_string().into())
-        // );
+        let expression = "'hello'".parse::<CelExpression>().unwrap();
+        assert_eq!(
+            expression.evaluate(&context).unwrap(),
+            CelValue::String("hello".to_string().into())
+        );
 
-        // Tokenizer needs rewriting
+        // Tokenizer needs fixing
         // let expression = "1u".parse::<CelExpression>().unwrap();
         // assert_eq!(expression.evaluate(&context).unwrap(), CelValue::UInt(1))
     }
@@ -201,5 +221,15 @@ mod tests {
         params.insert("hello", 42);
         context.add_variable("params", params);
         assert_eq!(expression.evaluate(&context).unwrap(), CelValue::Int(42));
+    }
+
+    #[test]
+    fn function() {
+        let expression = "date('2022-10-10')".parse::<CelExpression>().unwrap();
+        let context = CelContext::new();
+        assert_eq!(
+            expression.evaluate(&context).unwrap(),
+            CelValue::Date(NaiveDate::parse_from_str("2022-10-10", "%Y-%m-%d").unwrap())
+        );
     }
 }

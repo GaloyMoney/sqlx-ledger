@@ -17,6 +17,12 @@ macro_rules! entity_id {
             }
         }
 
+        impl From<$name> for cel_interpreter::CelValue {
+            fn from(id: $name) -> Self {
+                cel_interpreter::CelValue::Uuid(id.0)
+            }
+        }
+
         impl std::fmt::Display for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 write!(f, "{}", self.0)

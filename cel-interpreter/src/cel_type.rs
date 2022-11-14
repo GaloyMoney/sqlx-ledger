@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CelType {
     Map,
     Int,
@@ -8,4 +8,7 @@ pub enum CelType {
     Bytes,
     Bool,
     Null,
+
+    Date,
+    Uuid,
 }

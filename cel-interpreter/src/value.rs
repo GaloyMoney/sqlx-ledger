@@ -1,6 +1,8 @@
-use std::{collections::HashMap, rc::Rc};
-
 use cel_parser::ast::Literal;
+use chrono::NaiveDate;
+use uuid::Uuid;
+
+use std::{collections::HashMap, rc::Rc};
 
 use crate::{cel_type::*, error::*};
 
@@ -14,6 +16,9 @@ pub enum CelValue {
     Bytes(Rc<Vec<u8>>),
     Bool(bool),
     Null,
+
+    Date(NaiveDate),
+    Uuid(Uuid),
 }
 
 impl CelValue {
@@ -76,6 +81,12 @@ impl From<&str> for CelKey {
     }
 }
 
+impl From<String> for CelKey {
+    fn from(s: String) -> Self {
+        CelKey::String(Rc::from(s))
+    }
+}
+
 impl From<&Rc<String>> for CelKey {
     fn from(s: &Rc<String>) -> Self {
         CelKey::String(s.clone())
@@ -93,6 +104,9 @@ impl From<&CelValue> for CelType {
             CelValue::Bytes(_) => CelType::Bytes,
             CelValue::Bool(_) => CelType::Bool,
             CelValue::Null => CelType::Null,
+
+            CelValue::Date(_) => CelType::Date,
+            CelValue::Uuid(_) => CelType::Uuid,
         }
     }
 }
@@ -109,5 +123,104 @@ impl From<&Literal> for CelValue {
             Bool(b) => CelValue::Bool(*b),
             Null => CelValue::Null,
         }
+    }
+}
+
+impl TryFrom<&CelValue> for Rc<String> {
+    type Error = CelError;
+
+    fn try_from(v: &CelValue) -> Result<Self, Self::Error> {
+        if let CelValue::String(s) = v {
+            Ok(s.clone())
+        } else {
+            Err(CelError::BadType(CelType::String, CelType::from(v)))
+        }
+    }
+}
+
+impl TryFrom<CelValue> for NaiveDate {
+    type Error = CelError;
+
+    fn try_from(v: CelValue) -> Result<Self, Self::Error> {
+        if let CelValue::Date(d) = v {
+            Ok(d)
+        } else {
+            Err(CelError::BadType(CelType::Date, CelType::from(&v)))
+        }
+    }
+}
+
+impl TryFrom<CelValue> for Uuid {
+    type Error = CelError;
+
+    fn try_from(v: CelValue) -> Result<Self, Self::Error> {
+        if let CelValue::Uuid(id) = v {
+            Ok(id)
+        } else {
+            Err(CelError::BadType(CelType::Uuid, CelType::from(&v)))
+        }
+    }
+}
+
+impl TryFrom<CelValue> for String {
+    type Error = CelError;
+
+    fn try_from(v: CelValue) -> Result<Self, Self::Error> {
+        if let CelValue::String(s) = v {
+            Ok(s.to_string())
+        } else {
+            Err(CelError::BadType(CelType::String, CelType::from(&v)))
+        }
+    }
+}
+
+impl From<&CelKey> for CelType {
+    fn from(v: &CelKey) -> Self {
+        match v {
+            CelKey::Int(_) => CelType::Int,
+            CelKey::UInt(_) => CelType::UInt,
+            CelKey::Bool(_) => CelType::Bool,
+            CelKey::String(_) => CelType::String,
+        }
+    }
+}
+
+impl TryFrom<&CelKey> for String {
+    type Error = CelError;
+
+    fn try_from(v: &CelKey) -> Result<Self, Self::Error> {
+        if let CelKey::String(s) = v {
+            Ok(s.to_string())
+        } else {
+            Err(CelError::BadType(CelType::String, CelType::from(v)))
+        }
+    }
+}
+
+impl TryFrom<CelValue> for serde_json::Value {
+    type Error = CelError;
+
+    fn try_from(v: CelValue) -> Result<Self, Self::Error> {
+        use serde_json::*;
+        Ok(match v {
+            CelValue::Int(n) => Value::from(n),
+            CelValue::UInt(n) => Value::from(n),
+            CelValue::Double(n) => Value::from(n),
+            CelValue::Bool(b) => Value::from(b),
+            CelValue::String(n) => Value::from(n.as_str()),
+            CelValue::Null => Value::Null,
+            CelValue::Date(d) => Value::from(d.to_string()),
+            CelValue::Uuid(u) => Value::from(u.to_string()),
+            CelValue::Map(m) => {
+                let mut res = serde_json::Map::new();
+                for (k, v) in m.inner.iter() {
+                    let key: String = k.try_into()?;
+                    let value = Self::try_from(v.clone())?;
+                    res.insert(key, value);
+                }
+                Value::from(res)
+            }
+            _ => unimplemented!(),
+        })
     }
 }

@@ -143,8 +143,11 @@ name = "cel-interpreter"
 version = "0.1.0"
 dependencies = [
  "cel-parser",
+ "chrono",
  "serde",
+ "serde_json",
  "thiserror",
+ "uuid",
 ]
 
 [[package]]

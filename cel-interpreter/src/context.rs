@@ -1,24 +1,30 @@
 use std::{collections::HashMap, rc::Rc};
 
-use crate::{error::*, value::*};
+use crate::{builtins, error::*, value::*};
 
-// type CelFunction = Box<dyn Fn(Option<&Value>, &[Expression], &Context) -> CelValue>;
+type CelFunction = Box<dyn Fn(Vec<CelValue>) -> Result<CelValue, CelError>>;
 pub struct CelContext {
     idents: HashMap<String, ContextItem>,
 }
 
 impl CelContext {
     pub fn new() -> Self {
-        Self {
-            idents: HashMap::new(),
-        }
+        let mut idents = HashMap::new();
+        idents.insert(
+            "date".to_string(),
+            ContextItem::Function(Box::new(builtins::date)),
+        );
+        idents.insert(
+            "uuid".to_string(),
+            ContextItem::Function(Box::new(builtins::uuid)),
+        );
+        Self { idents }
     }
 }
 
-#[derive(Debug)]
 pub(crate) enum ContextItem {
     Value(CelValue),
-    // Function(CelFunction),
+    Function(CelFunction),
 }
 
 impl CelContext {

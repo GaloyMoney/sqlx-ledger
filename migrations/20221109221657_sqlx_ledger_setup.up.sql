@@ -42,3 +42,18 @@ CREATE TABLE tx_templates (
   UNIQUE(id, version),
   UNIQUE(code, version)
 );
+
+CREATE TABLE transactions (
+  id UUID NOT NULL,
+  version INT NOT NULL,
+  journal_id UUID NOT NULL,
+  tx_template_id UUID NOT NULL,
+  correlation_id UUID NOT NULL,
+  effective Date NOT NULL,
+  external_id UUID,
+  description VARCHAR,
+  metadata JSONB,
+  modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  UNIQUE(id, version)
+);

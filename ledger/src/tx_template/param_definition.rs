@@ -63,6 +63,11 @@ impl TryFrom<CelValue> for ParamDataType {
             Int => Ok(ParamDataType::INTEGER),
             String => Ok(ParamDataType::STRING),
             Map => Ok(ParamDataType::JSON),
+            Date => Ok(ParamDataType::DATE),
+            // String(inner) if Uuid::parse_str(&inner).is_ok() => Ok(ParamDataType::UUID),
+            // String(inner) if DateTime::parse_from_rfc3339(&inner).is_ok() => {
+            //     Ok(ParamDataType::TIMESTAMP)
+            // }
             _ => Err(format!("Unsupported type: {:?}", value)),
         }
     }

@@ -1,6 +1,7 @@
 crate::entity_id! { AccountId }
 crate::entity_id! { JournalId }
 crate::entity_id! { TxTemplateId }
+crate::entity_id! { TransactionId }
 crate::entity_id! { CorrelationId }
 crate::entity_id! { ExternalId }
 

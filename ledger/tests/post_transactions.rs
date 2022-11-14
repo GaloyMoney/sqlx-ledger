@@ -1,5 +1,5 @@
 use rand::distributions::{Alphanumeric, DistString};
-use sqlx_ledger::{tx_template::*, *};
+use sqlx_ledger::{journal::*, tx_template::*, *};
 
 #[tokio::test]
 async fn post_transaction() -> anyhow::Result<()> {
@@ -10,10 +10,15 @@ async fn post_transaction() -> anyhow::Result<()> {
 
     let code = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
 
+    let name = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
+    let new_journal = NewJournal::builder().name(name).build().unwrap();
+    let ledger = SqlxLedger::new(&pool);
+
+    let journal_id = ledger.journals().create(new_journal).await.unwrap();
+
     let params = vec![ParamDefinition::builder()
-        .name("input1")
-        .r#type(ParamDataType::STRING)
-        .default_expr("'input'")
+        .name("journal_id")
+        .r#type(ParamDataType::UUID)
         .build()
         .unwrap()];
     let new_template = NewTxTemplate::builder()
@@ -21,15 +26,16 @@ async fn post_transaction() -> anyhow::Result<()> {
         .params(params)
         .tx_input(
             TxInput::builder()
-                .effective("1")
-                .journal_id("1")
+                .effective("date('2022-10-11')")
+                .journal_id("params.journal_id")
                 .build()
                 .unwrap(),
         )
         .build()
         .unwrap();
-    let ledger = SqlxLedger::new(&pool);
     ledger.tx_templates().create(new_template).await.unwrap();
-    ledger.post_transaction(code, None).await.unwrap();
+    let mut params = TxParams::new();
+    params.insert("journal_id", journal_id);
+    ledger.post_transaction(code, Some(params)).await.unwrap();
     Ok(())
 }
