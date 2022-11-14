@@ -44,8 +44,6 @@ pub enum LeftRightOp {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
     Ternary(Box<Expression>, Box<Expression>, Box<Expression>),
-    Or(Box<Expression>, Box<Expression>),
-    And(Box<Expression>, Box<Expression>),
     Relation(RelationOp, Box<Expression>, Box<Expression>),
     Arithmetic(ArithmeticOp, Box<Expression>, Box<Expression>),
     Unary(UnaryOp, Box<Expression>),
@@ -64,8 +62,16 @@ impl Expression {
     pub(crate) fn from_op(op: LeftRightOp, left: Box<Expression>, right: Box<Expression>) -> Self {
         use LeftRightOp::*;
         match op {
-            Logic(LogicOp::Or) => Expression::Or(left, right),
-            Logic(LogicOp::And) => Expression::And(left, right),
+            Logic(LogicOp::Or) => Expression::Ternary(
+                left,
+                Box::new(Expression::Literal(Literal::Bool(true))),
+                right,
+            ),
+            Logic(LogicOp::And) => Expression::Ternary(
+                left,
+                right,
+                Box::new(Expression::Literal(Literal::Bool(false))),
+            ),
             Relation(op) => Expression::Relation(op, left, right),
             Arithmetic(op) => Expression::Arithmetic(op, left, right),
         }
@@ -105,16 +111,6 @@ mod tests {
         assert_eq!(parse(input), expected);
     }
 
-    #[test]
-    fn logic() {
-        assert_parse_eq(
-            "true || false && true",
-            Or(
-                Literal(Bool(true)).into(),
-                And(Literal(Bool(false)).into(), Literal(Bool(true)).into()).into(),
-            ),
-        )
-    }
     #[test]
     fn op_precendence() {
         assert_parse_eq(

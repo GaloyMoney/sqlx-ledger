@@ -1,0 +1,13 @@
+[package]
+name = "cel-interpreter"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+
+fail-on-warnings = []
+
+[dependencies]
+
+cel-parser = { path="../cel-parser" }
+thiserror = "1.0.37"
