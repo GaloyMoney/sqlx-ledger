@@ -35,11 +35,10 @@ pub enum UnaryOp {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub enum Operation {
+pub enum LeftRightOp {
     Logic(LogicOp),
     Relation(RelationOp),
     Arithmetic(ArithmeticOp),
-    Unary(UnaryOp),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -62,14 +61,13 @@ pub enum Expression {
 }
 
 impl Expression {
-    pub(crate) fn from_op(op: Operation, left: Box<Expression>, right: Box<Expression>) -> Self {
-        use Operation::*;
+    pub(crate) fn from_op(op: LeftRightOp, left: Box<Expression>, right: Box<Expression>) -> Self {
+        use LeftRightOp::*;
         match op {
             Logic(LogicOp::Or) => Expression::Or(left, right),
             Logic(LogicOp::And) => Expression::And(left, right),
             Relation(op) => Expression::Relation(op, left, right),
             Arithmetic(op) => Expression::Arithmetic(op, left, right),
-            _ => unreachable!(),
         }
     }
 }
@@ -158,19 +156,19 @@ mod tests {
         assert_parse_eq("1.0", Literal(Double(1.0)))
     }
 
-    // #[test]
-    // fn nested_attributes() {
-    //     assert_parse_eq(
-    //         "a.b[1]",
-    //         Member(
-    //             Member(
-    //                 Ident("a".to_string().into()).into(),
-    //                 Attribute("b".to_string().into()).into(),
-    //             )
-    //             .into(),
-    //             Index(Literal(Int(1)).into()).into(),
-    //         )
-    //         .into(),
-    //     )
-    // }
+    #[test]
+    fn nested_attributes() {
+        assert_parse_eq(
+            "a.b[1]",
+            Member(
+                Member(
+                    Ident("a".to_string().into()).into(),
+                    Attribute("b".to_string().into()).into(),
+                )
+                .into(),
+                Index(Literal(Int(1)).into()).into(),
+            )
+            .into(),
+        )
+    }
 }

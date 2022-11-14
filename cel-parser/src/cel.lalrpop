@@ -1,4 +1,4 @@
-use crate::{Operation, LogicOp, RelationOp, ArithmeticOp, Expression, UnaryOp, Member, Literal};
+use crate::{LeftRightOp, LogicOp, RelationOp, ArithmeticOp, Expression, UnaryOp, Member, Literal};
 use std::rc::Rc;
 
 grammar;
@@ -12,12 +12,12 @@ match {
 }
 
 pub Expression: Expression = {
-    <condition:ConditionalOr> "?" <left:ConditionalOr> ":" <right:Expression> => Expression::Ternary(condition.into(), left.into(), right.into()),
+    <condition:ConditionalOr> "?" <left:ConditionalOr> ":" <right:Expression> => Expression::Ternary(Box::new(condition), Box::new(left), Box::new(right)),
     ConditionalOr
 };
 
-Tier<Op,NextTier>: Expression = {
-    <left:Tier<Op,NextTier>> <op:Op> <right:NextTier> => Expression::from_op(op, left.into(), right.into()),
+Tier<Op, NextTier>: Expression = {
+    <left:Tier<Op, NextTier>> <op:Op> <right:NextTier> => Expression::from_op(op, left.into(), right.into()),
     NextTier
 };
 
@@ -33,24 +33,24 @@ Unary: Expression = {
 };
 
 Member: Expression = {
-    <left:Member> "." <identifier:Ident> => Expression::Member(left.into(), Member::Attribute(identifier.into()).into()).into(),
+    <left:Member> "." <identifier:Ident> => Expression::Member(left.into(), Box::new(Member::Attribute(identifier))),
     <left:Member> "." <identifier:Ident> "(" <arguments:CommaSeparated<Expression>> ")" => {
-            let inner = Expression::Member(left.into(), Member::Attribute(identifier.into()).into()).into();
-            Expression::Member(inner, Member::FunctionCall(arguments).into()).into()
+            let inner = Expression::Member(Box::new(left), Box::new(Member::Attribute(identifier)));
+            Expression::Member(Box::new(inner), Member::FunctionCall(arguments).into())
     },
-    <left:Member> "[" <expression:Expression> "]" => Expression::Member(left.into(), Member::Index(expression.into()).into()).into(),
+    <left:Member> "[" <expression:Expression> "]" => Expression::Member(Box::new(left), Box::new(Member::Index(expression.into()))),
     Primary,
 }
 
 Primary: Expression = {
     "."? <Ident> => Expression::Ident(<>.into()),
     "."? <identifier:Ident> "(" <arguments:CommaSeparated<Expression>> ")" => {
-            let inner = Expression::Ident(identifier.into()).into();
-            Expression::Member(inner, Member::FunctionCall(arguments).into()).into()
+            let inner = Expression::Ident(identifier);
+            Expression::Member(Box::new(inner), Box::new(Member::FunctionCall(arguments)))
     },
     "(" <Expression> ")",
-    "[" <members:CommaSeparated<Expression>> "]" => Expression::List(<>).into(),
-    "{" <fields:CommaSeparated<MapInits>> "}" => Expression::Map(<>).into(),
+    "[" <members:CommaSeparated<Expression>> "]" => Expression::List(<>),
+    "{" <fields:CommaSeparated<MapInits>> "}" => Expression::Map(<>),
     "."? <ident:Ident+> "{" <fields:CommaSeparated<FieldInits>> "}" => Expression::Struct(ident,fields),
     Literal => Expression::Literal(<>)
 }
@@ -74,29 +74,29 @@ CommaSeparated<T>: Vec<T> = {
     }
 };
 
-LogicOr: Operation = {
-  "||" => Operation::Logic(LogicOp::Or)
+LogicOr: LeftRightOp = {
+  "||" => LeftRightOp::Logic(LogicOp::Or)
 };
-LogicAnd: Operation = {
-  "&&" => Operation::Logic(LogicOp::And)
+LogicAnd: LeftRightOp = {
+  "&&" => LeftRightOp::Logic(LogicOp::And)
 };
-RelationOp: Operation = {
-    "<" => Operation::Relation(RelationOp::LessThan),
-    "<=" => Operation::Relation(RelationOp::LessThanEq),
-    ">" => Operation::Relation(RelationOp::GreaterThan),
-    ">=" => Operation::Relation(RelationOp::GreaterThanEq),
-    "==" => Operation::Relation(RelationOp::Equals),
-    "!=" => Operation::Relation(RelationOp::NotEquals),
-    "in" => Operation::Relation(RelationOp::In)
+RelationOp: LeftRightOp = {
+    "<" => LeftRightOp::Relation(RelationOp::LessThan),
+    "<=" => LeftRightOp::Relation(RelationOp::LessThanEq),
+    ">" => LeftRightOp::Relation(RelationOp::GreaterThan),
+    ">=" => LeftRightOp::Relation(RelationOp::GreaterThanEq),
+    "==" => LeftRightOp::Relation(RelationOp::Equals),
+    "!=" => LeftRightOp::Relation(RelationOp::NotEquals),
+    "in" => LeftRightOp::Relation(RelationOp::In)
 }
-AdditionOp: Operation = {
-    "+" => Operation::Arithmetic(ArithmeticOp::Add),
-    "-" => Operation::Arithmetic(ArithmeticOp::Subtract),
+AdditionOp: LeftRightOp = {
+    "+" => LeftRightOp::Arithmetic(ArithmeticOp::Add),
+    "-" => LeftRightOp::Arithmetic(ArithmeticOp::Subtract),
 };
-MultiplicationOp: Operation = {
-    "*" => Operation::Arithmetic(ArithmeticOp::Multiply),
-    "/" => Operation::Arithmetic(ArithmeticOp::Divide),
-    "%" => Operation::Arithmetic(ArithmeticOp::Modulus),
+MultiplicationOp: LeftRightOp = {
+    "*" => LeftRightOp::Arithmetic(ArithmeticOp::Multiply),
+    "/" => LeftRightOp::Arithmetic(ArithmeticOp::Divide),
+    "%" => LeftRightOp::Arithmetic(ArithmeticOp::Modulus),
 };
 UnaryOp: UnaryOp = {
     <v:"!"+> => if v.len() % 2 == 0 { UnaryOp::DoubleNot } else { UnaryOp::Not },
