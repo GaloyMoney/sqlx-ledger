@@ -1,4 +1,9 @@
-use cel_parser::{ast::Expression, parser::ExpressionParser};
+use cel_parser::{
+    ast::{self, Expression},
+    parser::ExpressionParser,
+};
+
+use std::rc::Rc;
 
 use crate::{context::*, error::*, value::*};
 
@@ -9,11 +14,34 @@ pub struct CelExpression {
 
 impl CelExpression {
     pub fn evaluate(&self, ctx: &CelContext) -> Result<CelValue, CelError> {
-        Ok(evaluate_expression(&self.expr, ctx)?)
+        if let EvalType::Value(val) = evaluate_expression(&self.expr, ctx)? {
+            Ok(val)
+        } else {
+            Err(CelError::Unexpected("evaluate didn't return a value"))
+        }
     }
 }
 
-fn evaluate_expression(expr: &Expression, ctx: &CelContext) -> Result<CelValue, CelError> {
+#[derive(Debug)]
+enum EvalType<'a> {
+    Value(CelValue),
+    ContextItem(&'a ContextItem),
+}
+
+impl<'a> EvalType<'a> {
+    fn try_bool(&self) -> Result<bool, CelError> {
+        if let EvalType::Value(val) = self {
+            val.try_bool()
+        } else {
+            Err(CelError::Unexpected("Expression didn't resolve to a bool"))
+        }
+    }
+}
+
+fn evaluate_expression<'a>(
+    expr: &Expression,
+    ctx: &'a CelContext,
+) -> Result<EvalType<'a>, CelError> {
     use Expression::*;
     match expr {
         Ternary(cond, left, right) => {
@@ -23,7 +51,25 @@ fn evaluate_expression(expr: &Expression, ctx: &CelContext) -> Result<CelValue, 
                 evaluate_expression(right, ctx)
             }
         }
-        Literal(val) => Ok(CelValue::from(val)),
+        Member(expr, member) => {
+            let ident = evaluate_expression(expr, ctx)?;
+            evaluate_member(ident, member)
+        }
+        Literal(val) => Ok(EvalType::Value(CelValue::from(val))),
+        Ident(name) => Ok(EvalType::ContextItem(ctx.lookup(Rc::clone(name))?)),
+        _ => unimplemented!(),
+    }
+}
+
+fn evaluate_member<'a>(target: EvalType, member: &ast::Member) -> Result<EvalType<'a>, CelError> {
+    use ast::Member::*;
+    match member {
+        Attribute(name) => match target {
+            EvalType::ContextItem(ContextItem::Value(CelValue::Map(map))) => {
+                Ok(EvalType::Value(map.get(name)))
+            }
+            _ => Err(CelError::IllegalTarget(format!("{:?}", target))),
+        },
         _ => unimplemented!(),
     }
 }
@@ -101,5 +147,15 @@ mod tests {
             .parse::<CelExpression>()
             .unwrap();
         assert_eq!(expression.evaluate(&context).unwrap(), CelValue::Bool(true))
+    }
+
+    #[test]
+    fn lookup() {
+        let expression = "params.hello".parse::<CelExpression>().unwrap();
+        let mut context = CelContext::new();
+        let mut params = CelMap::new();
+        params.insert("hello", 42);
+        context.add_variable("params", params);
+        assert_eq!(expression.evaluate(&context).unwrap(), CelValue::Int(42));
     }
 }

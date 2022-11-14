@@ -153,6 +153,17 @@ mod tests {
     }
 
     #[test]
+    fn lookup() {
+        assert_parse_eq(
+            "hello.world",
+            Member(
+                Ident("hello".to_string().into()).into(),
+                Attribute("world".to_string().into()).into(),
+            ),
+        )
+    }
+
+    #[test]
     fn nested_attributes() {
         assert_parse_eq(
             "a.b[1]",
