@@ -1,4 +1,4 @@
-use crate::{RelationOp, ArithmeticOp, Expression, UnaryOp, Member, Atom};
+use crate::{Operation, LogicOp, RelationOp, ArithmeticOp, Expression, UnaryOp, Member, Literal};
 use std::rc::Rc;
 
 grammar;
@@ -12,44 +12,54 @@ match {
 }
 
 pub Expression: Expression = {
-    <left:Expression> <op:ArithmeticOp> <right:Member> => Expression::Arithmetic(left.into(), op, right.into()),
-    <left:Expression> <op:RelationOp> <right:Member> => Expression::Relation(left.into(), op, right.into()),
-    <condition:Expression> "?" <left:Member> ":" <right:Primary> => Expression::Ternary(condition.into(), left.into(), right.into()),
-    <left:Expression> "||" <right:Member> => Expression::Or(left.into(), right.into()),
-    <left:Expression> "&&" <right:Member> => Expression::And(left.into(), right.into()),
-    <op:UnaryOp> <right:Member> => Expression::Unary(op, right.into()),
-
-    Member,
+    <condition:ConditionalOr> "?" <left:ConditionalOr> ":" <right:Expression> => Expression::Ternary(condition.into(), left.into(), right.into()),
+    ConditionalOr
 };
 
-pub Member: Expression = {
+Tier<Op,NextTier>: Expression = {
+    <left:Tier<Op,NextTier>> <op:Op> <right:NextTier> => Expression::from_op(op, left.into(), right.into()),
+    NextTier
+};
+
+ConditionalOr: Expression = Tier<LogicOr, ConditionalAnd>;
+ConditionalAnd: Expression = Tier<LogicAnd, Relation>;
+Relation: Expression = Tier<RelationOp, Addition>;
+Addition: Expression = Tier<AdditionOp, Multiplication>;
+Multiplication: Expression = Tier<MultiplicationOp, Unary>;
+
+Unary: Expression = {
+    <op:UnaryOp> <expr:Member> => Expression::Unary(op, expr.into()),
+    Member
+};
+
+Member: Expression = {
     <left:Member> "." <identifier:Ident> => Expression::Member(left.into(), Member::Attribute(identifier.into()).into()).into(),
     <left:Member> "." <identifier:Ident> "(" <arguments:CommaSeparated<Expression>> ")" => {
             let inner = Expression::Member(left.into(), Member::Attribute(identifier.into()).into()).into();
             Expression::Member(inner, Member::FunctionCall(arguments).into()).into()
     },
     <left:Member> "[" <expression:Expression> "]" => Expression::Member(left.into(), Member::Index(expression.into()).into()).into(),
-    <left:Member> "{" <fields:CommaSeparated<FieldInits>> "}" => Expression::Member(left.into(), Member::Fields(fields.into()).into()).into(),
     Primary,
 }
 
-pub Primary: Expression = {
-    "."? <Ident> => Expression::Ident(<>.into()).into(),
+Primary: Expression = {
+    "."? <Ident> => Expression::Ident(<>.into()),
     "."? <identifier:Ident> "(" <arguments:CommaSeparated<Expression>> ")" => {
             let inner = Expression::Ident(identifier.into()).into();
             Expression::Member(inner, Member::FunctionCall(arguments).into()).into()
     },
-    Atom => Expression::Atom(<>).into(),
+    "(" <Expression> ")",
     "[" <members:CommaSeparated<Expression>> "]" => Expression::List(<>).into(),
     "{" <fields:CommaSeparated<MapInits>> "}" => Expression::Map(<>).into(),
-    "(" <Expression> ")"
+    "."? <ident:Ident+> "{" <fields:CommaSeparated<FieldInits>> "}" => Expression::Struct(ident,fields),
+    Literal => Expression::Literal(<>)
 }
 
-pub FieldInits: (Rc<String>, Expression) = {
+FieldInits: (Rc<String>, Expression) = {
     <Ident> ":" <Expression>
 }
 
-pub MapInits: (Expression, Expression) = {
+MapInits: (Expression, Expression) = {
     <Expression> ":" <Expression>
 }
 
@@ -64,62 +74,66 @@ CommaSeparated<T>: Vec<T> = {
     }
 };
 
-ArithmeticOp: ArithmeticOp = { // (3)
-    "+" => ArithmeticOp::Add,
-    "-" => ArithmeticOp::Subtract,
-    "*" => ArithmeticOp::Multiply,
-    "/" => ArithmeticOp::Divide,
-    "%" => ArithmeticOp::Modulus,
+LogicOr: Operation = {
+  "||" => Operation::Logic(LogicOp::Or)
+};
+LogicAnd: Operation = {
+  "&&" => Operation::Logic(LogicOp::And)
+};
+RelationOp: Operation = {
+    "<" => Operation::Relation(RelationOp::LessThan),
+    "<=" => Operation::Relation(RelationOp::LessThanEq),
+    ">" => Operation::Relation(RelationOp::GreaterThan),
+    ">=" => Operation::Relation(RelationOp::GreaterThanEq),
+    "==" => Operation::Relation(RelationOp::Equals),
+    "!=" => Operation::Relation(RelationOp::NotEquals),
+    "in" => Operation::Relation(RelationOp::In)
+}
+AdditionOp: Operation = {
+    "+" => Operation::Arithmetic(ArithmeticOp::Add),
+    "-" => Operation::Arithmetic(ArithmeticOp::Subtract),
+};
+MultiplicationOp: Operation = {
+    "*" => Operation::Arithmetic(ArithmeticOp::Multiply),
+    "/" => Operation::Arithmetic(ArithmeticOp::Divide),
+    "%" => Operation::Arithmetic(ArithmeticOp::Modulus),
+};
+UnaryOp: UnaryOp = {
+    <v:"!"+> => if v.len() % 2 == 0 { UnaryOp::DoubleNot } else { UnaryOp::Not },
+    <v:"-"+> => if v.len() % 2 == 0 { UnaryOp::DoubleMinus } else { UnaryOp::Minus },
 };
 
-UnaryOp: UnaryOp = {
-    "!" => UnaryOp::Not,
-    "!!" => UnaryOp::DoubleNot,
-    "-" => UnaryOp::Minus,
-    "--" => UnaryOp::DoubleMinus,
-}
-
-RelationOp: RelationOp = {
-    "<" => RelationOp::LessThan,
-    "<=" => RelationOp::LessThanEq,
-    ">" => RelationOp::GreaterThan,
-    ">=" => RelationOp::GreaterThanEq,
-    "==" => RelationOp::Equals,
-    "!=" => RelationOp::NotEquals,
-    "in" => RelationOp::In
-}
-
-Atom: Atom = {
+Literal: Literal = {
     // Integer literals. Annoying to parse :/
-    r"-?[0-9]+" => Atom::Int(<>.parse().unwrap()),
-    r"-?0[xX]([0-9a-fA-F]+)" => Atom::Int(i64::from_str_radix(<>, 16).unwrap()),
-    r"-?[0-9]+ [uU]" => Atom::UInt(<>.parse().unwrap()),
-    r"-?0[xX]([0-9a-fA-F]+) [uU]" => Atom::UInt(u64::from_str_radix(<>, 16).unwrap()),
+    r"-?[0-9]+" => Literal::Int(<>.parse().unwrap()),
+    r"-?0[xX]([0-9a-fA-F]+)" => Literal::Int(i64::from_str_radix(<>, 16).unwrap()),
+    r"-?[0-9]+ [uU]" => Literal::UInt(<>.parse().unwrap()),
+    r"-?0[xX]([0-9a-fA-F]+) [uU]" => Literal::UInt(u64::from_str_radix(<>, 16).unwrap()),
 
     // Float with decimals and optional exponent
-    r"([-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?)" => Atom::Float(<>.parse().unwrap()),
+    r"([-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?)" => Literal::Double(<>.parse().unwrap()),
     // Float with no decimals and required exponent
-    r"[-+]?[0-9]+[eE][-+]?[0-9]+" => Atom::Float(<>.parse().unwrap()),
+    r"[-+]?[0-9]+[eE][-+]?[0-9]+" => Literal::Double(<>.parse().unwrap()),
 
     // Double quoted string
-    r#""(\\.|[^"\n])*""# => Atom::String(<>.to_string().into()),
-    r#""""(\\.|[^"{3}])*""""# => Atom::String(<>.to_string().into()),
+    r#""(\\.|[^"\n])*""# => Literal::String(<>.to_string().into()),
+    r#""""(\\.|[^"{3}])*""""# => Literal::String(<>.to_string().into()),
 
     // Single quoted string
-    r#"'(\\.|[^'\n])*'"# => Atom::String(<>.to_string().into()),
-    r#"'''(\\.|[^'{3}])*'''"# => Atom::String(<>.to_string().into()),
+    r#"'(\\.|[^'\n])*'"# => Literal::String(<>.to_string().into()),
+    r#"'''(\\.|[^'{3}])*'''"# => Literal::String(<>.to_string().into()),
 
     // Double quoted bytes
-    r#"[bB]"(\\.|[^"\n])*""# => Atom::Bytes(Vec::from(<>.as_bytes()).into()),
-    r#"[bB]"""(\\.|[^"{3}])*""""# => Atom::Bytes(Vec::from(<>.as_bytes()).into()),
+    r#"[bB]"(\\.|[^"\n])*""# => Literal::Bytes(Vec::from(<>.as_bytes()).into()),
+    r#"[bB]"""(\\.|[^"{3}])*""""# => Literal::Bytes(Vec::from(<>.as_bytes()).into()),
 
     // Single quoted bytes
-    r#"[bB]'(\\.|[^'\n])*'"# => Atom::Bytes(Vec::from(<>.as_bytes()).into()),
-    r#"[bB]'''(\\.|[^'{3}])*'''"# => Atom::Bytes(Vec::from(<>.as_bytes()).into()),
+    r#"[bB]'(\\.|[^'\n])*'"# => Literal::Bytes(Vec::from(<>.as_bytes()).into()),
+    r#"[bB]'''(\\.|[^'{3}])*'''"# => Literal::Bytes(Vec::from(<>.as_bytes()).into()),
 
-    "true" => Atom::Bool(true),
-    "false" => Atom::Bool(false),
-    "null" => Atom::Null,
+    "true" => Literal::Bool(true),
+    "false" => Literal::Bool(false),
+    "null" => Literal::Null,
 };
 
 Ident: Rc<String> = {
