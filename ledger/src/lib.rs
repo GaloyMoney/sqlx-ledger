@@ -6,7 +6,6 @@ pub mod journal;
 pub mod transaction;
 pub mod tx_template;
 
-mod cel;
 mod error;
 mod ledger;
 mod macros;

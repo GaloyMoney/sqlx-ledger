@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use cel_parser::{
     ast::{self, Expression},
     parser::ExpressionParser,
@@ -7,6 +9,9 @@ use std::rc::Rc;
 
 use crate::{context::*, error::*, value::*};
 
+#[derive(Clone, Deserialize, Serialize)]
+#[serde(try_from = "String")]
+#[serde(into = "String")]
 pub struct CelExpression {
     source: String,
     expr: Expression,
@@ -17,7 +22,9 @@ impl CelExpression {
         if let EvalType::Value(val) = evaluate_expression(&self.expr, ctx)? {
             Ok(val)
         } else {
-            Err(CelError::Unexpected("evaluate didn't return a value"))
+            Err(CelError::Unexpected(
+                "evaluate didn't return a value".to_string(),
+            ))
         }
     }
 }
@@ -33,7 +40,35 @@ impl<'a> EvalType<'a> {
         if let EvalType::Value(val) = self {
             val.try_bool()
         } else {
-            Err(CelError::Unexpected("Expression didn't resolve to a bool"))
+            Err(CelError::Unexpected(
+                "Expression didn't resolve to a bool".to_string(),
+            ))
+        }
+    }
+
+    fn try_key(&self) -> Result<CelKey, CelError> {
+        if let EvalType::Value(val) = self {
+            match val {
+                CelValue::Int(i) => Ok(CelKey::Int(*i)),
+                CelValue::UInt(u) => Ok(CelKey::UInt(*u)),
+                CelValue::Bool(b) => Ok(CelKey::Bool(*b)),
+                CelValue::String(s) => Ok(CelKey::String(s.clone())),
+                _ => Err(CelError::Unexpected(
+                    "Expression didn't resolve to a valid key".to_string(),
+                )),
+            }
+        } else {
+            Err(CelError::Unexpected(
+                "Expression didn't resolve to value".to_string(),
+            ))
+        }
+    }
+
+    fn try_value(&self) -> Result<CelValue, CelError> {
+        if let EvalType::Value(val) = self {
+            Ok(val.clone())
+        } else {
+            Err(CelError::Unexpected("Couldn't unwrap value".to_string()))
         }
     }
 }
@@ -55,9 +90,18 @@ fn evaluate_expression<'a>(
             let ident = evaluate_expression(expr, ctx)?;
             evaluate_member(ident, member)
         }
-        Literal(val) => Ok(EvalType::Value(CelValue::from(val))),
+        Map(entries) => {
+            let mut map = CelMap::new();
+            for (k, v) in entries {
+                let key = evaluate_expression(k, ctx)?;
+                let value = evaluate_expression(v, ctx)?;
+                map.insert(key.try_key()?, value.try_value()?)
+            }
+            Ok(EvalType::Value(CelValue::from(map)))
+        }
         Ident(name) => Ok(EvalType::ContextItem(ctx.lookup(Rc::clone(name))?)),
-        _ => unimplemented!(),
+        Literal(val) => Ok(EvalType::Value(CelValue::from(val))),
+        e => Err(CelError::Unexpected(format!("unimplemented {e:?}"))),
     }
 }
 

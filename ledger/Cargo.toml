@@ -16,8 +16,7 @@ sqlx = { version = "0.6", features = [ "offline", "runtime-tokio-rustls", "postg
 thiserror = "1.0.37"
 tokio = { version = "1.21.2", features = ["macros"] }
 uuid = { version = "1.2.1", features = ["serde", "v4"] }
-cel-interpreter = { git = "https://github.com/bodymindarts/cel-rust" }
-cel-parser = { git = "https://github.com/bodymindarts/cel-rust" }
+cel-interpreter = { path = "../cel-interpreter" }
 
 
 [dev-dependencies]

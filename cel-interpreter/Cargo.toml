@@ -10,4 +10,5 @@ fail-on-warnings = []
 [dependencies]
 
 cel-parser = { path="../cel-parser" }
+serde = "1.0.147"
 thiserror = "1.0.37"

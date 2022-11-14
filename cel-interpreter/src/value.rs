@@ -64,8 +64,8 @@ impl From<i64> for CelValue {
 
 #[derive(Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub enum CelKey {
-    Integer(i64),
-    Uint(u32),
+    Int(i64),
+    UInt(u64),
     Bool(bool),
     String(Rc<String>),
 }

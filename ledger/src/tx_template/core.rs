@@ -1,6 +1,7 @@
 use serde::Deserialize;
 
-use crate::{cel::CelExpression, primitives::*, transaction::NewTransaction};
+use crate::{primitives::*, transaction::NewTransaction};
+use cel_interpreter::CelExpression;
 
 use super::{entity::TxInput, param_definition::ParamDefinition, tx_params::TxParams};
 

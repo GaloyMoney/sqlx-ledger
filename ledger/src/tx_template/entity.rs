@@ -1,7 +1,7 @@
 use derive_builder::Builder;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-use crate::cel::CelExpression;
+use cel_interpreter::CelExpression;
 
 use super::param_definition::*;
 

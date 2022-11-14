@@ -15,5 +15,5 @@ pub enum CelError {
     #[error("CelError - IllegalTarget: {0}")]
     IllegalTarget(String),
     #[error("CelError - Unexpected: {0}")]
-    Unexpected(&'static str),
+    Unexpected(String),
 }
