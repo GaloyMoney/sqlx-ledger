@@ -1,8 +1,6 @@
 use cel_interpreter::{CelContext, CelExpression, CelType, CelValue};
-use chrono::{DateTime, NaiveDate};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 #[derive(Clone, Deserialize, Serialize, Builder)]
 #[builder(build_fn(validate = "Self::validate"))]
@@ -20,6 +18,12 @@ impl ParamDefinition {
     pub fn builder() -> ParamDefinitionBuilder {
         ParamDefinitionBuilder::default()
     }
+
+    pub fn default_expr(&self) -> Option<CelExpression> {
+        self.default
+            .as_ref()
+            .map(|v| v.parse().expect("Couldn't create default_expr"))
+    }
 }
 
 impl ParamDefinitionBuilder {
@@ -27,7 +31,8 @@ impl ParamDefinitionBuilder {
         if let Some(Some(expr)) = self.default.as_ref() {
             let expr = CelExpression::try_from(expr.as_str()).map_err(|e| e.to_string())?;
             let param_type = ParamDataType::try_from(
-                expr.evaluate(&CelContext::new())
+                &expr
+                    .evaluate(&CelContext::new())
                     .map_err(|e| format!("{e}"))?,
             )?;
             let specified_type = self.r#type.as_ref().unwrap();
@@ -54,20 +59,17 @@ pub enum ParamDataType {
     JSON,
 }
 
-impl TryFrom<CelValue> for ParamDataType {
+impl TryFrom<&CelValue> for ParamDataType {
     type Error = String;
 
-    fn try_from(value: CelValue) -> Result<Self, Self::Error> {
+    fn try_from(value: &CelValue) -> Result<Self, Self::Error> {
         use cel_interpreter::CelType::*;
-        match CelType::from(&value) {
+        match CelType::from(value) {
             Int => Ok(ParamDataType::INTEGER),
             String => Ok(ParamDataType::STRING),
             Map => Ok(ParamDataType::JSON),
             Date => Ok(ParamDataType::DATE),
-            // String(inner) if Uuid::parse_str(&inner).is_ok() => Ok(ParamDataType::UUID),
-            // String(inner) if DateTime::parse_from_rfc3339(&inner).is_ok() => {
-            //     Ok(ParamDataType::TIMESTAMP)
-            // }
+            Uuid => Ok(ParamDataType::UUID),
             _ => Err(format!("Unsupported type: {:?}", value)),
         }
     }

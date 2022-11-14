@@ -16,17 +16,25 @@ async fn post_transaction() -> anyhow::Result<()> {
 
     let journal_id = ledger.journals().create(new_journal).await.unwrap();
 
-    let params = vec![ParamDefinition::builder()
-        .name("journal_id")
-        .r#type(ParamDataType::UUID)
-        .build()
-        .unwrap()];
+    let params = vec![
+        ParamDefinition::builder()
+            .name("journal_id")
+            .r#type(ParamDataType::UUID)
+            .build()
+            .unwrap(),
+        ParamDefinition::builder()
+            .name("effective")
+            .r#type(ParamDataType::DATE)
+            .default_expr("date()")
+            .build()
+            .unwrap(),
+    ];
     let new_template = NewTxTemplate::builder()
         .code(&code)
         .params(params)
         .tx_input(
             TxInput::builder()
-                .effective("date('2022-10-11')")
+                .effective("params.effective")
                 .journal_id("params.journal_id")
                 .build()
                 .unwrap(),

@@ -25,16 +25,11 @@ pub(crate) struct TxTemplateCore {
 }
 
 impl TxTemplateCore {
-    pub(crate) fn prep_tx(
-        &self,
-        params: Option<TxParams>,
-    ) -> Result<NewTransaction, SqlxLedgerError> {
+    pub(crate) fn prep_tx(mut self, params: TxParams) -> Result<NewTransaction, SqlxLedgerError> {
         let mut tx_builder = NewTransaction::builder();
         tx_builder.tx_template_id(self.id);
 
-        let ctx = params
-            .map(CelContext::from)
-            .unwrap_or_else(|| CelContext::new());
+        let ctx = params.to_context(self.params.take())?;
 
         let journal_id: Uuid = self.tx_input.journal_id.try_evaluate(&ctx)?;
         tx_builder.journal_id(journal_id.into());

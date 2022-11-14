@@ -55,6 +55,16 @@ impl CelMap {
     }
 }
 
+impl From<HashMap<String, CelValue>> for CelMap {
+    fn from(map: HashMap<String, CelValue>) -> Self {
+        let mut res = CelMap::new();
+        for (k, v) in map {
+            res.insert(CelKey::String(Rc::from(k)), v);
+        }
+        res
+    }
+}
+
 impl From<CelMap> for CelValue {
     fn from(m: CelMap) -> Self {
         CelValue::Map(Rc::from(m))
@@ -64,6 +74,12 @@ impl From<CelMap> for CelValue {
 impl From<i64> for CelValue {
     fn from(i: i64) -> Self {
         CelValue::Int(i)
+    }
+}
+
+impl From<&str> for CelValue {
+    fn from(s: &str) -> Self {
+        CelValue::String(Rc::from(s.to_string()))
     }
 }
 

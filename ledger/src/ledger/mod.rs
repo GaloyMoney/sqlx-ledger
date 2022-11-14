@@ -39,7 +39,7 @@ impl SqlxLedger {
         params: Option<TxParams>,
     ) -> Result<(), SqlxLedgerError> {
         let tx_template = self.tx_templates.find_core(tx_template_code).await?;
-        let new_tx = tx_template.prep_tx(params)?;
+        let new_tx = tx_template.prep_tx(params.unwrap_or_else(TxParams::new))?;
         let (_, tx) = self.transactions.create(new_tx).await?;
         tx.commit().await?;
         Ok(())
