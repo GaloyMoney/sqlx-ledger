@@ -47,7 +47,7 @@ impl SqlxLedger {
         let tx_template = self.tx_templates.find_core(tx_template_code).await?;
         let (new_tx, new_entries) = tx_template.prep_tx(params.unwrap_or_else(TxParams::new))?;
         let (journal_id, tx_id, tx) = self.transactions.create(new_tx).await?;
-        let tx = self
+        let (entries, tx) = self
             .entries
             .create_all(journal_id, tx_id, new_entries, tx)
             .await?;
