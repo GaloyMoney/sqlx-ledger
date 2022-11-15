@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use sqlx::{PgPool, Postgres, QueryBuilder, Row, Transaction};
 use uuid::Uuid;
@@ -18,6 +19,8 @@ pub(crate) struct StagedEntry {
     pub(crate) units: Decimal,
     pub(crate) currency: String,
     pub(crate) direction: DebitOrCredit,
+    pub(crate) layer: Layer,
+    pub(crate) created_at: DateTime<Utc>,
 }
 
 impl Entries {
@@ -30,12 +33,13 @@ impl Entries {
         journal_id: JournalId,
         transaction_id: TransactionId,
         entries: Vec<NewEntry>,
-        mut tx: Transaction<'a, Postgres>,
-    ) -> Result<(Vec<StagedEntry>, Transaction<'a, Postgres>), SqlxLedgerError> {
+        tx: &mut Transaction<'a, Postgres>,
+    ) -> Result<Vec<StagedEntry>, SqlxLedgerError> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            r#"INSERT INTO entries
-                (id, version, transaction_id, journal_id, entry_type, layer,
-                 units, currency, direction, description, sequence, account_id)"#,
+            r#"WITH new_entries as (
+                 INSERT INTO entries
+                  (id, transaction_id, journal_id, entry_type, layer,
+                   units, currency, direction, description, sequence, account_id)"#,
         );
         let mut partial_ret = HashMap::new();
         let mut sequence = 1;
@@ -52,7 +56,6 @@ impl Entries {
                  description,
              }: NewEntry| {
                 builder.push("gen_random_uuid()");
-                builder.push("1");
                 builder.push_bind(Uuid::from(transaction_id));
                 builder.push_bind(Uuid::from(journal_id));
                 builder.push_bind(entry_type);
@@ -65,36 +68,35 @@ impl Entries {
                 builder.push("(SELECT id FROM accounts WHERE id = ");
                 builder.push_bind_unseparated(Uuid::from(account_id));
                 builder.push_unseparated(")");
-                partial_ret.insert(sequence, (account_id, units, currency, direction));
+                partial_ret.insert(sequence, (account_id, units, currency, layer, direction));
                 sequence += 1;
             },
         );
-        query_builder.push("RETURNING id");
+        query_builder.push(
+            "RETURNING id, sequence, created_at ) SELECT * FROM new_entries ORDER BY sequence",
+        );
         let query = query_builder.build();
-        let records = query.fetch_all(&mut tx).await?;
+        let records = query.fetch_all(&mut *tx).await?;
 
         let mut ret = Vec::new();
         sequence = 1;
         for r in records {
-            let entry_id = Uuid::from_slice(
-                r.try_get_raw("id")
-                    .expect("Couldn't get raw id")
-                    .as_bytes()
-                    .expect("Couldn't convert to bytes"),
-            )
-            .expect("Couldn't convert to Uuid");
-            let (account_id, units, currency, direction) =
+            let entry_id: Uuid = r.get("id");
+            let created_at = r.get("created_at");
+            let (account_id, units, currency, layer, direction) =
                 partial_ret.remove(&sequence).expect("sequence not found");
             ret.push(StagedEntry {
                 entry_id: entry_id.into(),
                 account_id,
                 units,
                 currency,
+                layer,
                 direction,
+                created_at,
             });
             sequence += 1;
         }
 
-        Ok((ret, tx))
+        Ok(ret)
     }
 }

@@ -2,6 +2,7 @@
 #![cfg_attr(feature = "fail-on-warnings", deny(clippy::all))]
 
 pub mod account;
+pub mod balance;
 pub mod entry;
 pub mod journal;
 pub mod transaction;

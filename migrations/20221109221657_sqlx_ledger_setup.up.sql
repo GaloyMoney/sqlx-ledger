@@ -4,7 +4,7 @@ CREATE TYPE Layer AS ENUM ('settled', 'pending', 'encumbered');
 
 CREATE TABLE accounts (
   id UUID NOT NULL,
-  version INT NOT NULL,
+  version INT NOT NULL DEFAULT 1,
   code VARCHAR(80) NOT NULL,
   name VARCHAR(80) NOT NULL,
   description VARCHAR,
@@ -20,7 +20,7 @@ CREATE TABLE accounts (
 
 CREATE TABLE journals (
   id UUID NOT NULL,
-  version INT NOT NULL,
+  version INT NOT NULL DEFAULT 1,
   name VARCHAR(80) NOT NULL,
   description VARCHAR,
   status Status NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE journals (
 CREATE TABLE tx_templates (
   id UUID NOT NULL,
   code VARCHAR(80) NOT NULL,
-  version INT NOT NULL,
+  version INT NOT NULL DEFAULT 1,
   params JSONB,
   tx_input JSONB NOT NULL,
   entries JSONB NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE tx_templates (
 
 CREATE TABLE transactions (
   id UUID NOT NULL,
-  version INT NOT NULL,
+  version INT NOT NULL DEFAULT 1,
   journal_id UUID NOT NULL,
   tx_template_id UUID NOT NULL,
   correlation_id UUID NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE transactions (
 
 CREATE TABLE entries (
   id UUID NOT NULL,
-  version INT NOT NULL,
+  version INT NOT NULL DEFAULT 1,
   transaction_id UUID NOT NULL,
   account_id UUID NOT NULL,
   journal_id UUID NOT NULL,
@@ -76,4 +76,34 @@ CREATE TABLE entries (
   modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   UNIQUE(id, version)
+);
+
+CREATE TABLE balances (
+  journal_id UUID NOT NULL,
+  account_id UUID NOT NULL,
+  entry_id UUID NOT NULL,
+  currency VARCHAR NOT NULL,
+  settled_dr_balance NUMERIC NOT NULL,
+  settled_cr_balance NUMERIC NOT NULL,
+  settled_entry_id UUID NOT NULL,
+  settled_modified_at TIMESTAMP NOT NULL,
+  pending_dr_balance NUMERIC NOT NULL,
+  pending_cr_balance NUMERIC NOT NULL,
+  pending_entry_id UUID NOT NULL,
+  pending_modified_at TIMESTAMP NOT NULL,
+  encumbered_dr_balance NUMERIC NOT NULL,
+  encumbered_cr_balance NUMERIC NOT NULL,
+  encumbered_entry_id UUID NOT NULL,
+  encumbered_modified_at TIMESTAMP NOT NULL,
+  version INT NOT NULL,
+  modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  UNIQUE(account_id, version)
+);
+
+CREATE TABLE current_balances (
+  account_id UUID NOT NULL,
+  currency VARCHAR NOT NULL,
+  version INT NOT NULL,
+  UNIQUE(account_id, currency)
 );

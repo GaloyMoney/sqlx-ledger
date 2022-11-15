@@ -1,5 +1,9 @@
 DROP TABLE accounts;
 DROP TABLE journals;
 DROP TABLE tx_templates;
+DROP TABLE transactions;
+DROP TABLE entries;
+DROP TABLE balances;
+DROP TABLE current_balances;
 DROP TYPE Status;
 DROP TYPE DebitOrCredit;

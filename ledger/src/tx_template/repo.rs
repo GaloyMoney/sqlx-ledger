@@ -27,8 +27,8 @@ impl TxTemplates {
         let tx_input_json = serde_json::to_value(&tx_input)?;
         let entries_json = serde_json::to_value(&entries)?;
         let record = sqlx::query!(
-            r#"INSERT INTO tx_templates (id, version, code, description, params, tx_input, entries, metadata)
-            VALUES (gen_random_uuid(), 1, $1, $2, $3, $4, $5, $6)
+            r#"INSERT INTO tx_templates (id, code, description, params, tx_input, entries, metadata)
+            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)
             RETURNING id, version, created_at"#,
             code,
             description,

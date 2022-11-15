@@ -24,8 +24,8 @@ impl Accounts {
         }: NewAccount,
     ) -> Result<AccountId, SqlxLedgerError> {
         let record = sqlx::query!(
-            r#"INSERT INTO accounts (id, version, code, name, normal_balance_type, description, status, metadata)
-            VALUES (gen_random_uuid(), 1, $1, $2, $3, $4, $5, $6)
+            r#"INSERT INTO accounts (id, code, name, normal_balance_type, description, status, metadata)
+            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)
             RETURNING id, version, created_at"#,
             code,
             name,
