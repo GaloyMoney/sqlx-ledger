@@ -23,4 +23,6 @@ pub enum SqlxLedgerError {
     UnknownDebitOrCredit(CelValue),
     #[error("SqlxLedgerError - UnbalancedTransaction: currency {0} amount {1}")]
     UnbalancedTransaction(String, Decimal),
+    #[error("SqlxLedgerError - OptimisticLockingError")]
+    OptimisticLockingError,
 }

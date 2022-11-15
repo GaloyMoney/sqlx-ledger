@@ -93,6 +93,7 @@ impl Balances {
             }
             previous_versions.insert((account_id, currency), version - 1);
         }
+        let expected_accounts_effected = latest_versions.len();
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"INSERT INTO current_balances
                   (account_id, currency, version)"#,
@@ -135,7 +136,11 @@ impl Balances {
                 builder.push_bind(version);
             },
         );
-        query_builder.build().execute(&mut *tx).await?;
+        let result = query_builder.build().execute(&mut *tx).await?;
+        if result.rows_affected() != (expected_accounts_effected as u64) {
+            return Err(SqlxLedgerError::OptimisticLockingError);
+        }
+
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"INSERT INTO balances (
                  journal_id, account_id, entry_id, currency,
