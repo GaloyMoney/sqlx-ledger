@@ -17,7 +17,7 @@ impl Balances {
 
     pub(crate) async fn find_for_update<'a>(
         &self,
-        ids: Vec<AccountId>,
+        ids: Vec<(AccountId, &String)>,
         tx: &mut Transaction<'a, Postgres>,
     ) -> Result<HashMap<AccountId, Balance>, SqlxLedgerError> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
@@ -26,15 +26,19 @@ impl Balances {
               settled_dr_balance, settled_cr_balance, settled_entry_id, settled_modified_at,
               pending_dr_balance, pending_cr_balance, pending_entry_id, pending_modified_at,
               encumbered_dr_balance, encumbered_cr_balance, encumbered_entry_id, encumbered_modified_at,
-              c.version AS version, created_at
-                FROM balances b JOIN current_balances c 
-                  ON b.account_id = c.account_id AND b.version = c.version AND b.currency = c.currency
-                WHERE b.account_id IN"#,
+              c.version, modified_at, created_at
+                FROM balances b JOIN (
+                    SELECT * FROM current_balances WHERE (account_id, currency) IN"#,
         );
-        query_builder.push_tuples(ids, |mut builder, id| {
+        query_builder.push_tuples(ids, |mut builder, (id, currency)| {
             builder.push_bind(Uuid::from(id));
+            builder.push_bind(currency);
         });
-        query_builder.push("FOR UPDATE OF c");
+        query_builder.push(
+            r#") c ON
+        b.account_id = c.account_id AND b.version = c.version AND b.currency = c.currency
+        FOR UPDATE OF c"#,
+        );
 
         let query = query_builder.build();
         let records = query.fetch_all(&mut *tx).await?;

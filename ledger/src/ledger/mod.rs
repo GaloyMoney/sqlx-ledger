@@ -63,7 +63,10 @@ impl SqlxLedger {
             .create_all(journal_id, tx_id, new_entries, &mut tx)
             .await?;
         {
-            let ids = entries.iter().map(|entry| entry.account_id).collect();
+            let ids = entries
+                .iter()
+                .map(|entry| (entry.account_id, &entry.currency))
+                .collect();
             let mut balance_tx = tx.begin().await?;
 
             let mut balances = self.balances.find_for_update(ids, &mut balance_tx).await?;
