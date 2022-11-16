@@ -36,8 +36,8 @@ impl Balances {
         });
         query_builder.push(
             r#") c ON
-        b.account_id = c.account_id AND b.version = c.version AND b.currency = c.currency
-        FOR UPDATE OF c"#,
+                b.account_id = c.account_id AND b.currency = c.currency AND b.version = c.version
+                FOR UPDATE OF c"#,
         );
 
         let query = query_builder.build();

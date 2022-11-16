@@ -98,7 +98,7 @@ CREATE TABLE balances (
   version INT NOT NULL,
   modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  UNIQUE(account_id, version)
+  UNIQUE(account_id, currency, version)
 );
 
 CREATE TABLE current_balances (
