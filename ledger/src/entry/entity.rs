@@ -9,7 +9,7 @@ pub(crate) struct NewEntry {
     pub(super) entry_type: String,
     pub(super) layer: Layer,
     pub(super) units: Decimal,
-    pub(super) currency: String,
+    pub(super) currency: Currency,
     pub(super) direction: DebitOrCredit,
     #[builder(setter(strip_option), default)]
     pub(super) description: Option<String>,

@@ -22,7 +22,7 @@ impl CelExpression {
         &self,
         ctx: &CelContext,
     ) -> Result<T, E> {
-        Ok(T::try_from(self.evaluate(ctx)?)?)
+        T::try_from(self.evaluate(ctx)?)
     }
 
     pub fn evaluate(&self, ctx: &CelContext) -> Result<CelValue, CelError> {

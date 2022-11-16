@@ -1,6 +1,6 @@
 {
   "db": "PostgreSQL",
-  "0bc202a8b1979805a12903593fbed773fe99be673775d31c83f4327d3bd6babf": {
+  "0da5ff824b974d0349dbed6ff22ff56e162b912000474ab0f4bb0d4996b424a4": {
     "describe": {
       "columns": [
         {
@@ -54,9 +54,9 @@
         ]
       }
     },
-    "query": "INSERT INTO accounts (id, version, code, name, normal_balance_type, description, status, metadata)\n            VALUES (gen_random_uuid(), 1, $1, $2, $3, $4, $5, $6)\n            RETURNING id, version, created_at"
+    "query": "INSERT INTO accounts (id, code, name, normal_balance_type, description, status, metadata)\n            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)\n            RETURNING id, version, created_at"
   },
-  "cb25a2ccfb53cd1d3a2649e8cf1ddbf45617d266965fa77e72a8a353f106fb97": {
+  "35071bef899076ec6d3fc6d2d27e28adf9c506f2a4ac7f6819e5dcdc12620ed2": {
     "describe": {
       "columns": [
         {
@@ -86,11 +86,95 @@
           "Varchar",
           "Jsonb",
           "Jsonb",
+          "Jsonb",
           "Jsonb"
         ]
       }
     },
-    "query": "INSERT INTO tx_templates (id, version, code, description, params, tx_input, metadata)\n            VALUES (gen_random_uuid(), 1, $1, $2, $3, $4, $5)\n            RETURNING id, version, created_at"
+    "query": "INSERT INTO tx_templates (id, code, description, params, tx_input, entries, metadata)\n            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)\n            RETURNING id, version, created_at"
+  },
+  "6dc6b345328820ef509e0af474c5a3c8aedc083de1e0ec9cfb6a264129002ccd": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "code",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "params",
+          "ordinal": 2,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "tx_input",
+          "ordinal": 3,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "entries",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id, code, params, tx_input, entries FROM tx_templates WHERE code = $1 LIMIT 1"
+  },
+  "d66a5eeac9720614b6b38700d4d3f71a15dc53246495b93cb962e0b9e0f60ae6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "version",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid",
+          "Date",
+          "Uuid",
+          "Uuid",
+          "Varchar",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "INSERT INTO transactions (id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata)\n            VALUES ($1, 1, (SELECT id FROM journals WHERE id = $2 LIMIT 1), (SELECT id FROM tx_templates WHERE id = $3 LIMIT 1), $4, $5, $6, $7, $8)\n            RETURNING id, version, created_at"
   },
   "dad21f3d7c62d03c743b786a9077405981609b5611e55164f3cf05798cbb74cd": {
     "describe": {

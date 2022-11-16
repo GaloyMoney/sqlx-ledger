@@ -9,7 +9,7 @@ use super::entity::*;
 use crate::{error::*, primitives::*};
 
 pub struct Entries {
-    pool: PgPool,
+    _pool: PgPool,
 }
 
 #[derive(Debug)]
@@ -17,7 +17,7 @@ pub(crate) struct StagedEntry {
     pub(crate) account_id: AccountId,
     pub(crate) entry_id: EntryId,
     pub(crate) units: Decimal,
-    pub(crate) currency: String,
+    pub(crate) currency: Currency,
     pub(crate) direction: DebitOrCredit,
     pub(crate) layer: Layer,
     pub(crate) created_at: DateTime<Utc>,
@@ -25,7 +25,9 @@ pub(crate) struct StagedEntry {
 
 impl Entries {
     pub fn new(pool: &PgPool) -> Self {
-        Self { pool: pool.clone() }
+        Self {
+            _pool: pool.clone(),
+        }
     }
 
     pub(crate) async fn create_all<'a>(
@@ -61,7 +63,7 @@ impl Entries {
                 builder.push_bind(entry_type);
                 builder.push_bind(layer);
                 builder.push_bind(units);
-                builder.push_bind(currency.clone());
+                builder.push_bind(currency.code());
                 builder.push_bind(direction);
                 builder.push_bind(description);
                 builder.push_bind(sequence as i32);

@@ -56,6 +56,12 @@ impl CelMap {
     }
 }
 
+impl Default for CelMap {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl From<HashMap<String, CelValue>> for CelMap {
     fn from(map: HashMap<String, CelValue>) -> Self {
         let mut res = CelMap::new();

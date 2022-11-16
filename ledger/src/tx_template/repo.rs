@@ -56,7 +56,7 @@ impl TxTemplates {
         let tx_input = serde_json::from_value(record.tx_input)?;
         Ok(TxTemplateCore {
             id: TxTemplateId::from(record.id),
-            code: record.code,
+            _code: record.code,
             params,
             entries: serde_json::from_value(record.entries)?,
             tx_input,

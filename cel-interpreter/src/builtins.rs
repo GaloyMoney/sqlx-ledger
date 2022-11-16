@@ -1,5 +1,4 @@
 use chrono::{NaiveDate, Utc};
-use uuid::Uuid;
 
 use std::rc::Rc;
 
@@ -7,7 +6,7 @@ use super::value::*;
 use crate::error::*;
 
 pub(crate) fn date(args: Vec<CelValue>) -> Result<CelValue, CelError> {
-    if args.len() == 0 {
+    if args.is_empty() {
         return Ok(CelValue::Date(Utc::now().date().naive_utc()));
     }
 

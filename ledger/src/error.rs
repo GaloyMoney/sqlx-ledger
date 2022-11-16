@@ -1,9 +1,9 @@
 use rust_decimal::Decimal;
 use thiserror::Error;
 
-use cel_interpreter::{CelError, CelValue};
+use cel_interpreter::CelError;
 
-use crate::tx_template::ParamDataType;
+use crate::{primitives::*, tx_template::ParamDataType};
 
 #[derive(Error, Debug)]
 pub enum SqlxLedgerError {
@@ -18,11 +18,13 @@ pub enum SqlxLedgerError {
     #[error("SqlxLedgerError - TooManyParameters")]
     TooManyParameters,
     #[error("SqlxLedgerError - UnknownLayer: {0:?}")]
-    UnknownLayer(CelValue),
+    UnknownLayer(String),
     #[error("SqlxLedgerError - UnknownDebitOrCredit: {0:?}")]
-    UnknownDebitOrCredit(CelValue),
+    UnknownDebitOrCredit(String),
+    #[error("SqlxLedgerError - UnknownCurrency: {0}")]
+    UnknownCurrency(String),
     #[error("SqlxLedgerError - UnbalancedTransaction: currency {0} amount {1}")]
-    UnbalancedTransaction(String, Decimal),
+    UnbalancedTransaction(Currency, Decimal),
     #[error("SqlxLedgerError - OptimisticLockingError")]
     OptimisticLockingError,
 }

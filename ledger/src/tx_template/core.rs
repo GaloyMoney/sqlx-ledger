@@ -33,7 +33,7 @@ pub(crate) struct EntryCel {
 
 pub(crate) struct TxTemplateCore {
     pub(super) id: TxTemplateId,
-    pub(super) code: String,
+    pub(super) _code: String,
     pub(super) params: Option<Vec<ParamDefinition>>,
     pub(super) tx_input: TxInputCel,
     pub(super) entries: Vec<EntryCel>,
@@ -96,10 +96,11 @@ impl TxTemplateCore {
             builder.layer(layer);
 
             let units: Decimal = entry.units.try_evaluate(&ctx)?;
-            let currency: String = entry.currency.try_evaluate(&ctx)?;
+            let code: String = entry.currency.try_evaluate(&ctx)?;
+            let currency = code.parse()?;
             let direction: DebitOrCredit = entry.direction.try_evaluate(&ctx)?;
 
-            let total = totals.entry(currency.clone()).or_insert(Decimal::ZERO);
+            let total = totals.entry(currency).or_insert(Decimal::ZERO);
             match direction {
                 DebitOrCredit::Debit => *total -= units,
                 DebitOrCredit::Credit => *total += units,
@@ -108,7 +109,7 @@ impl TxTemplateCore {
             builder.currency(currency);
             builder.direction(direction);
 
-            if let Some(description) = self.tx_input.description.as_ref() {
+            if let Some(description) = entry.description.as_ref() {
                 let description: String = description.try_evaluate(&ctx)?;
                 builder.description(description);
             }

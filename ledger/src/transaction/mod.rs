@@ -1,5 +1,5 @@
 mod entity;
 mod repo;
 
-pub use entity::*;
+pub(crate) use entity::*;
 pub use repo::*;

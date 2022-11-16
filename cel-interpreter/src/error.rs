@@ -1,8 +1,6 @@
 use chrono::ParseError;
 use thiserror::Error;
 
-use std::rc::Rc;
-
 use crate::cel_type::*;
 
 #[derive(Error, Debug)]
@@ -12,7 +10,7 @@ pub enum CelError {
     #[error("CelError - BadType: expected {0:?} found {1:?}")]
     BadType(CelType, CelType),
     #[error("CelError - UnknownIdentifier: {0}")]
-    UnknownIdent(Rc<String>),
+    UnknownIdent(String),
     #[error("CelError - IllegalTarget")]
     IllegalTarget,
     #[error("CelError - MissingArgument")]

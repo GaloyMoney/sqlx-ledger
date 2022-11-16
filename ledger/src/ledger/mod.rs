@@ -8,7 +8,7 @@ use crate::{
 };
 
 pub struct SqlxLedger {
-    pool: PgPool,
+    _pool: PgPool,
     accounts: Accounts,
     journals: Journals,
     tx_templates: TxTemplates,
@@ -26,7 +26,7 @@ impl SqlxLedger {
             transactions: Transactions::new(pool),
             entries: Entries::new(pool),
             balances: Balances::new(pool),
-            pool: pool.clone(),
+            _pool: pool.clone(),
         }
     }
 

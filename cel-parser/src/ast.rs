@@ -85,7 +85,7 @@ pub enum Member {
     Index(Box<Expression>),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Literal {
     Int(i64),
     UInt(u64),

@@ -60,11 +60,11 @@ impl TxInput {
 
 impl TxInputBuilder {
     fn validate(&self) -> Result<(), String> {
-        let _ = validate_expression(&self.effective)?;
-        let _ = validate_expression(&self.journal_id)?;
-        let _ = validate_optional_expression(&self.correlation_id)?;
-        let _ = validate_optional_expression(&self.external_id)?;
-        let _ = validate_optional_expression(&self.description)?;
+        validate_expression(&self.effective)?;
+        validate_expression(&self.journal_id)?;
+        validate_optional_expression(&self.correlation_id)?;
+        validate_optional_expression(&self.external_id)?;
+        validate_optional_expression(&self.description)?;
         validate_optional_expression(&self.metadata)
     }
 }
@@ -95,24 +95,24 @@ impl EntryInput {
 }
 impl EntryInputBuilder {
     fn validate(&self) -> Result<(), String> {
-        let _ = validate_expression(&self.entry_type)?;
-        let _ = validate_expression(&self.account_id)?;
-        let _ = validate_expression(&self.layer)?;
-        let _ = validate_expression(&self.direction)?;
-        let _ = validate_expression(&self.units)?;
-        let _ = validate_expression(&self.currency)?;
+        validate_expression(&self.entry_type)?;
+        validate_expression(&self.account_id)?;
+        validate_expression(&self.layer)?;
+        validate_expression(&self.direction)?;
+        validate_expression(&self.units)?;
+        validate_expression(&self.currency)?;
         validate_optional_expression(&self.description)
     }
 }
 
 fn validate_expression(expr: &Option<String>) -> Result<(), String> {
-    let _ = CelExpression::try_from(expr.as_ref().expect("Mandatory field not set").as_str())
+    CelExpression::try_from(expr.as_ref().expect("Mandatory field not set").as_str())
         .map_err(|e| e.to_string())?;
     Ok(())
 }
 fn validate_optional_expression(expr: &Option<Option<String>>) -> Result<(), String> {
     if let Some(Some(expr)) = expr.as_ref() {
-        let _ = CelExpression::try_from(expr.as_str()).map_err(|e| e.to_string())?;
+        CelExpression::try_from(expr.as_str()).map_err(|e| e.to_string())?;
     }
     Ok(())
 }

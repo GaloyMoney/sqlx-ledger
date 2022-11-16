@@ -41,6 +41,11 @@ impl CelContext {
         Self { idents }
     }
 }
+impl Default for CelContext {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 pub(crate) enum ContextItem {
     Value(CelValue),
@@ -51,7 +56,7 @@ impl CelContext {
     pub(crate) fn lookup(&self, name: Rc<String>) -> Result<&ContextItem, CelError> {
         self.idents
             .get(name.as_ref())
-            .ok_or_else(|| CelError::UnknownIdent(name.clone()))
+            .ok_or_else(|| CelError::UnknownIdent(name.to_string()))
     }
 
     pub fn add_variable(&mut self, name: impl Into<String>, value: impl Into<CelValue>) {

@@ -43,10 +43,16 @@ impl TxParams {
             ctx.add_variable("params", cel_map);
         }
 
-        if self.values.len() != 0 {
+        if !self.values.is_empty() {
             return Err(SqlxLedgerError::TooManyParameters);
         }
 
         Ok(ctx)
+    }
+}
+
+impl Default for TxParams {
+    fn default() -> Self {
+        Self::new()
     }
 }

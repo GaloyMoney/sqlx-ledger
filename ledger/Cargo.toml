@@ -18,6 +18,7 @@ thiserror = "1.0.37"
 tokio = { version = "1.21.2", features = ["macros"] }
 uuid = { version = "1.2.1", features = ["serde", "v4"] }
 cel-interpreter = { path = "../cel-interpreter" }
+rusty-money = { version = "0.4.1", features = ["iso", "crypto"] }
 
 
 [dev-dependencies]

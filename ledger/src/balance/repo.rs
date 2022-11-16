@@ -7,17 +7,19 @@ use super::entity::*;
 use crate::{error::*, primitives::*};
 
 pub struct Balances {
-    pool: PgPool,
+    _pool: PgPool,
 }
 
 impl Balances {
     pub fn new(pool: &PgPool) -> Self {
-        Self { pool: pool.clone() }
+        Self {
+            _pool: pool.clone(),
+        }
     }
 
     pub(crate) async fn find_for_update<'a>(
         &self,
-        ids: Vec<(AccountId, &String)>,
+        ids: Vec<(AccountId, &Currency)>,
         tx: &mut Transaction<'a, Postgres>,
     ) -> Result<HashMap<AccountId, Balance>, SqlxLedgerError> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
@@ -32,7 +34,7 @@ impl Balances {
         );
         query_builder.push_tuples(ids, |mut builder, (id, currency)| {
             builder.push_bind(Uuid::from(id));
-            builder.push_bind(currency);
+            builder.push_bind(currency.code());
         });
         query_builder.push(
             r#") c ON
@@ -51,7 +53,7 @@ impl Balances {
                     account_id,
                     journal_id: JournalId::from(r.get::<Uuid, _>("journal_id")),
                     entry_id: EntryId::from(r.get::<Uuid, _>("entry_id")),
-                    currency: r.get("currency"),
+                    currency: r.get::<&str, _>("currency").parse()?,
                     settled_dr_balance: r.get("settled_dr_balance"),
                     settled_cr_balance: r.get("settled_cr_balance"),
                     settled_entry_id: EntryId::from(r.get::<Uuid, _>("settled_entry_id")),
@@ -105,7 +107,7 @@ impl Balances {
                 if version == &0 {
                     any_new = true;
                     builder.push_bind(Uuid::from(**account_id));
-                    builder.push_bind(currency);
+                    builder.push_bind(currency.code());
                     builder.push_bind(version);
                 }
             },
@@ -123,7 +125,7 @@ impl Balances {
             query_builder.push(" WHEN account_id = ");
             query_builder.push_bind(Uuid::from(*account_id));
             query_builder.push(" AND currency = ");
-            query_builder.push_bind(currency);
+            query_builder.push_bind(currency.code());
             query_builder.push(" THEN ");
             query_builder.push_bind(version);
         }
@@ -154,7 +156,7 @@ impl Balances {
             builder.push_bind(Uuid::from(b.journal_id));
             builder.push_bind(Uuid::from(b.account_id));
             builder.push_bind(Uuid::from(b.entry_id));
-            builder.push_bind(b.currency);
+            builder.push_bind(b.currency.code());
             builder.push_bind(b.settled_dr_balance);
             builder.push_bind(b.settled_cr_balance);
             builder.push_bind(Uuid::from(b.settled_entry_id));
