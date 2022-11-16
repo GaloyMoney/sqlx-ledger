@@ -115,6 +115,17 @@ impl std::str::FromStr for Currency {
     }
 }
 
+impl TryFrom<CelValue> for Currency {
+    type Error = SqlxLedgerError;
+
+    fn try_from(val: CelValue) -> Result<Self, Self::Error> {
+        match val {
+            CelValue::String(v) => v.as_ref().parse(),
+            v => Err(SqlxLedgerError::UnknownCurrency(format!("{v:?}"))),
+        }
+    }
+}
+
 impl<'r, DB: sqlx::Database> sqlx::Decode<'r, DB> for Currency
 where
     &'r str: sqlx::Decode<'r, DB>,

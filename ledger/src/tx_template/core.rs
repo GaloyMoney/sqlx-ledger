@@ -96,8 +96,7 @@ impl TxTemplateCore {
             builder.layer(layer);
 
             let units: Decimal = entry.units.try_evaluate(&ctx)?;
-            let code: String = entry.currency.try_evaluate(&ctx)?;
-            let currency = code.parse()?;
+            let currency: Currency = entry.currency.try_evaluate(&ctx)?;
             let direction: DebitOrCredit = entry.direction.try_evaluate(&ctx)?;
 
             let total = totals.entry(currency).or_insert(Decimal::ZERO);
