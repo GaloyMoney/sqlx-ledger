@@ -30,12 +30,7 @@ clean-deps:
 start-deps:
 	docker compose up -d integration-deps
 
-start-deps-local:
-	docker compose up -d user-trades-db hedging-db
-
 reset-deps: clean-deps start-deps setup-db
-
-reset-deps-local: clean-deps start-deps-local setup-db
 
 setup-db:
 	cargo sqlx migrate run
