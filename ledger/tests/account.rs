@@ -15,9 +15,11 @@ async fn test_account() -> anyhow::Result<()> {
         .code(code)
         .build()
         .unwrap();
-    SqlxLedger::new(&pool)
+    let ledger = SqlxLedger::new(&pool);
+    let id = ledger.accounts().create(new_account).await.unwrap();
+    ledger
         .accounts()
-        .create(new_account)
+        .update::<()>(id, Some("new description".to_string()), None)
         .await
         .unwrap();
 
