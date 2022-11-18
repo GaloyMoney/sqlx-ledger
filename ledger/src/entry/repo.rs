@@ -39,7 +39,7 @@ impl Entries {
     ) -> Result<Vec<StagedEntry>, SqlxLedgerError> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"WITH new_entries as (
-                 INSERT INTO entries
+                 INSERT INTO sqlx_ledger_entries
                   (id, transaction_id, journal_id, entry_type, layer,
                    units, currency, direction, description, sequence, account_id)"#,
         );
@@ -67,7 +67,7 @@ impl Entries {
                 builder.push_bind(direction);
                 builder.push_bind(description);
                 builder.push_bind(sequence as i32);
-                builder.push("(SELECT id FROM accounts WHERE id = ");
+                builder.push("(SELECT id FROM sqlx_ledger_accounts WHERE id = ");
                 builder.push_bind_unseparated(Uuid::from(account_id));
                 builder.push_unseparated(")");
                 partial_ret.insert(sequence, (account_id, units, currency, layer, direction));

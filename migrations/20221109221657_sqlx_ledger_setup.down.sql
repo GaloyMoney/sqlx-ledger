@@ -1,9 +1,9 @@
-DROP TABLE accounts;
-DROP TABLE journals;
-DROP TABLE tx_templates;
-DROP TABLE transactions;
-DROP TABLE entries;
-DROP TABLE balances;
-DROP TABLE current_balances;
+DROP TABLE sqlx_ledger_accounts;
+DROP TABLE sqlx_ledger_journals;
+DROP TABLE sqlx_ledger_tx_templates;
+DROP TABLE sqlx_ledger_transactions;
+DROP TABLE sqlx_ledger_entries;
+DROP TABLE sqlx_ledger_balances;
+DROP TABLE sqlx_ledger_current_balances;
 DROP TYPE Status;
 DROP TYPE DebitOrCredit;

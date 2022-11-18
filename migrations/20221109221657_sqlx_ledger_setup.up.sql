@@ -2,7 +2,7 @@ CREATE TYPE DebitOrCredit AS ENUM ('debit', 'credit');
 CREATE TYPE Status AS ENUM ('active');
 CREATE TYPE Layer AS ENUM ('settled', 'pending', 'encumbered');
 
-CREATE TABLE accounts (
+CREATE TABLE sqlx_ledger_accounts (
   id UUID NOT NULL,
   version INT NOT NULL DEFAULT 1,
   code VARCHAR(80) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE accounts (
   UNIQUE(name, version)
 );
 
-CREATE TABLE journals (
+CREATE TABLE sqlx_ledger_journals (
   id UUID NOT NULL,
   version INT NOT NULL DEFAULT 1,
   name VARCHAR(80) NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE journals (
   UNIQUE(name, version)
 );
 
-CREATE TABLE tx_templates (
+CREATE TABLE sqlx_ledger_tx_templates (
   id UUID NOT NULL,
   code VARCHAR(80) NOT NULL,
   version INT NOT NULL DEFAULT 1,
@@ -45,7 +45,7 @@ CREATE TABLE tx_templates (
   UNIQUE(code, version)
 );
 
-CREATE TABLE transactions (
+CREATE TABLE sqlx_ledger_transactions (
   id UUID NOT NULL,
   version INT NOT NULL DEFAULT 1,
   journal_id UUID NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE transactions (
   UNIQUE(id, version)
 );
 
-CREATE TABLE entries (
+CREATE TABLE sqlx_ledger_entries (
   id UUID NOT NULL,
   version INT NOT NULL DEFAULT 1,
   transaction_id UUID NOT NULL,
@@ -78,7 +78,7 @@ CREATE TABLE entries (
   UNIQUE(id, version)
 );
 
-CREATE TABLE balances (
+CREATE TABLE sqlx_ledger_balances (
   journal_id UUID NOT NULL,
   account_id UUID NOT NULL,
   entry_id UUID NOT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE balances (
   UNIQUE(account_id, currency, version)
 );
 
-CREATE TABLE current_balances (
+CREATE TABLE sqlx_ledger_current_balances (
   account_id UUID NOT NULL,
   currency VARCHAR NOT NULL,
   version INT NOT NULL,

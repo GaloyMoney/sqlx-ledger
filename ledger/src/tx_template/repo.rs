@@ -27,7 +27,7 @@ impl TxTemplates {
         let tx_input_json = serde_json::to_value(&tx_input)?;
         let entries_json = serde_json::to_value(&entries)?;
         let record = sqlx::query!(
-            r#"INSERT INTO tx_templates (id, code, description, params, tx_input, entries, metadata)
+            r#"INSERT INTO sqlx_ledger_tx_templates (id, code, description, params, tx_input, entries, metadata)
             VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)
             RETURNING id, version, created_at"#,
             code,
@@ -44,7 +44,7 @@ impl TxTemplates {
 
     pub(crate) async fn find_core(&self, code: String) -> Result<TxTemplateCore, SqlxLedgerError> {
         let record = sqlx::query!(
-            r#"SELECT id, code, params, tx_input, entries FROM tx_templates WHERE code = $1 LIMIT 1"#,
+            r#"SELECT id, code, params, tx_input, entries FROM sqlx_ledger_tx_templates WHERE code = $1 LIMIT 1"#,
             code
         )
         .fetch_one(&self.pool)

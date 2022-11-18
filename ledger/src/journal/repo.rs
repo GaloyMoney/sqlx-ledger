@@ -21,7 +21,7 @@ impl Journals {
         }: NewJournal,
     ) -> Result<JournalId, SqlxLedgerError> {
         let record = sqlx::query!(
-            r#"INSERT INTO journals (id, version, name, description, status)
+            r#"INSERT INTO sqlx_ledger_journals (id, version, name, description, status)
             VALUES (gen_random_uuid(), 1, $1, $2, $3)
             RETURNING id, version, created_at"#,
             name,

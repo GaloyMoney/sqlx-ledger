@@ -29,8 +29,8 @@ impl Balances {
               pending_dr_balance, pending_cr_balance, pending_entry_id, pending_modified_at,
               encumbered_dr_balance, encumbered_cr_balance, encumbered_entry_id, encumbered_modified_at,
               c.version, modified_at, created_at
-                FROM balances b JOIN (
-                    SELECT * FROM current_balances WHERE (account_id, currency) IN"#,
+                FROM sqlx_ledger_balances b JOIN (
+                    SELECT * FROM sqlx_ledger_current_balances WHERE (account_id, currency) IN"#,
         );
         query_builder.push_tuples(ids, |mut builder, (id, currency)| {
             builder.push_bind(Uuid::from(id));
@@ -97,7 +97,7 @@ impl Balances {
         }
         let expected_accounts_effected = latest_versions.len();
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            r#"INSERT INTO current_balances
+            r#"INSERT INTO sqlx_ledger_current_balances
                   (account_id, currency, version)"#,
         );
         let mut any_new = false;
@@ -116,7 +116,7 @@ impl Balances {
             query_builder.build().execute(&mut *tx).await?;
         }
         let mut query_builder: QueryBuilder<Postgres> =
-            QueryBuilder::new(r#"UPDATE current_balances SET version = CASE"#);
+            QueryBuilder::new(r#"UPDATE sqlx_ledger_current_balances SET version = CASE"#);
         let mut bind_numbers = HashMap::new();
         let mut next_bind_number = 1;
         for ((account_id, currency), version) in latest_versions {
@@ -144,7 +144,7 @@ impl Balances {
         }
 
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            r#"INSERT INTO balances (
+            r#"INSERT INTO sqlx_ledger_balances (
                  journal_id, account_id, entry_id, currency,
                  settled_dr_balance, settled_cr_balance, settled_entry_id, settled_modified_at,
                  pending_dr_balance, pending_cr_balance, pending_entry_id, pending_modified_at,
