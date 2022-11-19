@@ -7,9 +7,9 @@ services:
   postgres:
     image: postgres:14.1
     environment:
-      - POSTGRES_USER=ledger
-      - POSTGRES_PASSWORD=ledger
-      - POSTGRES_DB=ledger
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=pg
   integration-tests:
     image: us.gcr.io/galoy-org/rust-concourse
     depends_on:
