@@ -1,5 +1,5 @@
 use serde::Serialize;
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Postgres, Transaction};
 use uuid::Uuid;
 
 use super::entity::*;
@@ -14,8 +14,16 @@ impl Accounts {
         Self { pool: pool.clone() }
     }
 
-    pub async fn create(
+    pub async fn create(&self, new_account: NewAccount) -> Result<AccountId, SqlxLedgerError> {
+        let mut tx = self.pool.begin().await?;
+        let res = self.create_in_tx(&mut tx, new_account).await?;
+        tx.commit().await?;
+        Ok(res)
+    }
+
+    pub async fn create_in_tx<'a>(
         &self,
+        tx: &mut Transaction<'a, Postgres>,
         NewAccount {
             id,
             code,
@@ -38,7 +46,7 @@ impl Accounts {
             status as Status,
             metadata
         )
-        .fetch_one(&self.pool)
+        .fetch_one(&mut *tx)
         .await?;
         Ok(AccountId::from(record.id))
     }

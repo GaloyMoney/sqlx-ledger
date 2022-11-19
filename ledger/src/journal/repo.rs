@@ -1,4 +1,4 @@
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Postgres, Transaction};
 use uuid::Uuid;
 
 use super::entity::*;
@@ -13,8 +13,16 @@ impl Journals {
         Self { pool: pool.clone() }
     }
 
-    pub async fn create(
+    pub async fn create(&self, new_journal: NewJournal) -> Result<JournalId, SqlxLedgerError> {
+        let mut tx = self.pool.begin().await?;
+        let res = self.create_in_tx(&mut tx, new_journal).await?;
+        tx.commit().await?;
+        Ok(res)
+    }
+
+    pub async fn create_in_tx<'a>(
         &self,
+        tx: &mut Transaction<'a, Postgres>,
         NewJournal {
             id,
             name,
@@ -31,7 +39,7 @@ impl Journals {
             description,
             status as Status,
         )
-        .fetch_one(&self.pool)
+        .fetch_one(&mut *tx)
         .await?;
         Ok(JournalId::from(record.id))
     }
