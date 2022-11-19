@@ -1,6 +1,20 @@
 {
   "db": "PostgreSQL",
-  "5e2d291c70d022bd4e06445e79f805206fcf4b9680bfd14d96891b7bdc2342a6": {
+  "19ff1c916c204f57f6bfcf0f72570ca6d41602ead734b4a65e11de95b9ab7c7f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "INSERT INTO sqlx_ledger_accounts\n  (id, version, code, name, normal_balance_type, description, status, metadata, created_at)\n(\n SELECT id, version + 1, code, name, normal_balance_type, COALESCE($2, description), status, COALESCE($3, metadata), created_at\n FROM sqlx_ledger_accounts WHERE id = $1 ORDER BY version DESC LIMIT 1\n)\n"
+  },
+  "6e82fe7ca0798715e4316b5acf6a3ccfbe0326ce3f5f3cd238ccad0f641cbe4e": {
     "describe": {
       "columns": [
         {
@@ -26,6 +40,7 @@
       ],
       "parameters": {
         "Left": [
+          "Uuid",
           "Varchar",
           "Varchar",
           {
@@ -41,7 +56,7 @@
         ]
       }
     },
-    "query": "INSERT INTO sqlx_ledger_journals (id, version, name, description, status)\n            VALUES (gen_random_uuid(), 1, $1, $2, $3)\n            RETURNING id, version, created_at"
+    "query": "INSERT INTO sqlx_ledger_journals (id, name, description, status)\n            VALUES ($1, $2, $3, $4)\n            RETURNING id, version, created_at"
   },
   "77599d77a146babd748cd8ebbd10c89fbb9a5aa3109b6fd0d326d685aecad587": {
     "describe": {
@@ -124,6 +139,63 @@
     },
     "query": "INSERT INTO sqlx_ledger_tx_templates (id, code, description, params, tx_input, entries, metadata)\n            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)\n            RETURNING id, version, created_at"
   },
+  "c7f4751f63df559566362c0d251f9833a1ce2fd44bad7e61ba04f8e4526e1e73": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "version",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "debit",
+                  "credit"
+                ]
+              },
+              "name": "debitorcredit"
+            }
+          },
+          "Varchar",
+          {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "active"
+                ]
+              },
+              "name": "status"
+            }
+          },
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "INSERT INTO sqlx_ledger_accounts (id, code, name, normal_balance_type, description, status, metadata)\n            VALUES ($1, $2, $3, $4, $5, $6, $7)\n            RETURNING id, version, created_at"
+  },
   "d7e7415d2c9b59e503b1ac93de8bdfbe9083e1cf4a69d2ebe8636c92b882176a": {
     "describe": {
       "columns": [
@@ -162,61 +234,5 @@
       }
     },
     "query": "INSERT INTO sqlx_ledger_transactions (id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata)\n            VALUES ($1, 1, (SELECT id FROM sqlx_ledger_journals WHERE id = $2 LIMIT 1), (SELECT id FROM sqlx_ledger_tx_templates WHERE id = $3 LIMIT 1), $4, $5, $6, $7, $8)\n            RETURNING id, version, created_at"
-  },
-  "f0e96e5fa97a3e3f8f18785ff40768a39b8a6c6ea90acfe31c9f543d0ad67b1e": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "version",
-          "ordinal": 1,
-          "type_info": "Int4"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Varchar",
-          "Varchar",
-          {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "debit",
-                  "credit"
-                ]
-              },
-              "name": "debitorcredit"
-            }
-          },
-          "Varchar",
-          {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "active"
-                ]
-              },
-              "name": "status"
-            }
-          },
-          "Jsonb"
-        ]
-      }
-    },
-    "query": "INSERT INTO sqlx_ledger_accounts (id, code, name, normal_balance_type, description, status, metadata)\n            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)\n            RETURNING id, version, created_at"
   }
 }
