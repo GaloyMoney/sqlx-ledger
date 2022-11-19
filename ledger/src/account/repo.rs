@@ -17,6 +17,7 @@ impl Accounts {
     pub async fn create(
         &self,
         NewAccount {
+            id,
             code,
             name,
             normal_balance_type,
@@ -27,8 +28,9 @@ impl Accounts {
     ) -> Result<AccountId, SqlxLedgerError> {
         let record = sqlx::query!(
             r#"INSERT INTO sqlx_ledger_accounts (id, code, name, normal_balance_type, description, status, metadata)
-            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id, version, created_at"#,
+            Uuid::from(id),
             code,
             name,
             normal_balance_type as DebitOrCredit,

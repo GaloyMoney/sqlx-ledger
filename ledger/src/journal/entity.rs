@@ -16,6 +16,8 @@ pub struct Journal {
 #[derive(Builder)]
 pub struct NewJournal {
     #[builder(setter(into))]
+    pub id: JournalId,
+    #[builder(setter(into))]
     pub(super) name: String,
     #[builder(setter(strip_option, into), default)]
     pub(super) description: Option<String>,
@@ -25,7 +27,9 @@ pub struct NewJournal {
 
 impl NewJournal {
     pub fn builder() -> NewJournalBuilder {
-        NewJournalBuilder::default()
+        let mut builder = NewJournalBuilder::default();
+        builder.id(JournalId::new());
+        builder
     }
 }
 

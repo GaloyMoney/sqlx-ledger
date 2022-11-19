@@ -19,6 +19,8 @@ pub struct Account<M> {
 #[derive(Builder)]
 pub struct NewAccount {
     #[builder(setter(into))]
+    pub id: AccountId,
+    #[builder(setter(into))]
     pub(super) code: String,
     #[builder(setter(into))]
     pub(super) name: String,
@@ -34,7 +36,9 @@ pub struct NewAccount {
 
 impl NewAccount {
     pub fn builder() -> NewAccountBuilder {
-        NewAccountBuilder::default()
+        let mut builder = NewAccountBuilder::default();
+        builder.id(AccountId::new());
+        builder
     }
 }
 

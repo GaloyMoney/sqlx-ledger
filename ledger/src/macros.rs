@@ -5,6 +5,12 @@ macro_rules! entity_id {
         #[serde(transparent)]
         pub struct $name(uuid::Uuid);
 
+        impl $name {
+            pub fn new() -> Self {
+                uuid::Uuid::new_v4().into()
+            }
+        }
+
         impl From<uuid::Uuid> for $name {
             fn from(uuid: uuid::Uuid) -> Self {
                 Self(uuid)
