@@ -53,7 +53,7 @@ impl SqlxLedger {
 
     pub async fn post_transaction(
         &self,
-        tx_template_code: String,
+        tx_template_code: &str,
         params: Option<TxParams>,
     ) -> Result<(), SqlxLedgerError> {
         let tx_template = self.tx_templates.find_core(tx_template_code).await?;

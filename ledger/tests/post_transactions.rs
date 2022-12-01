@@ -92,7 +92,7 @@ async fn post_transaction() -> anyhow::Result<()> {
     params.insert("sender", sender_account_id);
     params.insert("recipient", recipient_account_id);
     ledger
-        .post_transaction(tx_code, Some(params))
+        .post_transaction(&tx_code, Some(params))
         .await
         .unwrap();
     Ok(())

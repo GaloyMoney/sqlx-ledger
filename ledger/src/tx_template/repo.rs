@@ -43,7 +43,7 @@ impl TxTemplates {
         Ok(TxTemplateId::from(record.id))
     }
 
-    pub(crate) async fn find_core(&self, code: String) -> Result<TxTemplateCore, SqlxLedgerError> {
+    pub(crate) async fn find_core(&self, code: &str) -> Result<TxTemplateCore, SqlxLedgerError> {
         let record = sqlx::query!(
             r#"SELECT id, code, params, tx_input, entries FROM sqlx_ledger_tx_templates WHERE code = $1 LIMIT 1"#,
             code
