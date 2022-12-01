@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use super::entity::*;
 use crate::{error::*, primitives::*};
 
+#[derive(Debug, Clone)]
 pub struct Balances {
     _pool: PgPool,
 }

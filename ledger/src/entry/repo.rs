@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use super::entity::*;
 use crate::{error::*, primitives::*};
 
+#[derive(Debug, Clone)]
 pub struct Entries {
     _pool: PgPool,
 }

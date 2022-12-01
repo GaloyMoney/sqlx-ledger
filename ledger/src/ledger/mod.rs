@@ -7,6 +7,7 @@ use crate::{
     tx_template::*,
 };
 
+#[derive(Debug, Clone)]
 pub struct SqlxLedger {
     _pool: PgPool,
     accounts: Accounts,

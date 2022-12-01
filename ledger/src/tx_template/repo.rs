@@ -3,6 +3,7 @@ use sqlx::{Pool, Postgres};
 use super::{core::*, entity::*};
 use crate::{error::*, primitives::*};
 
+#[derive(Debug, Clone)]
 pub struct TxTemplates {
     pool: Pool<Postgres>,
 }

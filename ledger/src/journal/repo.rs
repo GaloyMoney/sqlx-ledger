@@ -4,6 +4,7 @@ use uuid::Uuid;
 use super::entity::*;
 use crate::{error::*, primitives::*};
 
+#[derive(Debug, Clone)]
 pub struct Journals {
     pool: Pool<Postgres>,
 }
