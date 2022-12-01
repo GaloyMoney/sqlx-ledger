@@ -84,6 +84,12 @@ impl From<i64> for CelValue {
     }
 }
 
+impl From<Decimal> for CelValue {
+    fn from(d: Decimal) -> Self {
+        CelValue::Double(d)
+    }
+}
+
 impl From<&str> for CelValue {
     fn from(s: &str) -> Self {
         CelValue::String(Rc::from(s.to_string()))
