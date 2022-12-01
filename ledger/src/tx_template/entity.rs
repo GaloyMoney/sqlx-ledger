@@ -60,8 +60,18 @@ impl TxInput {
 
 impl TxInputBuilder {
     fn validate(&self) -> Result<(), String> {
-        validate_expression(&self.effective)?;
-        validate_expression(&self.journal_id)?;
+        validate_expression(
+            &self
+                .effective
+                .as_ref()
+                .expect("Mandatory field 'effective' not set"),
+        )?;
+        validate_expression(
+            &self
+                .journal_id
+                .as_ref()
+                .expect("Mandatory field 'journal_id' not set"),
+        )?;
         validate_optional_expression(&self.correlation_id)?;
         validate_optional_expression(&self.external_id)?;
         validate_optional_expression(&self.description)?;
@@ -95,19 +105,48 @@ impl EntryInput {
 }
 impl EntryInputBuilder {
     fn validate(&self) -> Result<(), String> {
-        validate_expression(&self.entry_type)?;
-        validate_expression(&self.account_id)?;
-        validate_expression(&self.layer)?;
-        validate_expression(&self.direction)?;
-        validate_expression(&self.units)?;
-        validate_expression(&self.currency)?;
+        validate_expression(
+            &self
+                .entry_type
+                .as_ref()
+                .expect("Mandatory field 'entry_type' not set"),
+        )?;
+        validate_expression(
+            &self
+                .account_id
+                .as_ref()
+                .expect("Mandatory field 'account_id' not set"),
+        )?;
+        validate_expression(
+            &self
+                .layer
+                .as_ref()
+                .expect("Mandatory field 'layer' not set"),
+        )?;
+        validate_expression(
+            &self
+                .direction
+                .as_ref()
+                .expect("Mandatory field 'direction' not set"),
+        )?;
+        validate_expression(
+            &self
+                .units
+                .as_ref()
+                .expect("Mandatory field 'units' not set"),
+        )?;
+        validate_expression(
+            &self
+                .currency
+                .as_ref()
+                .expect("Mandatory field 'currency' not set"),
+        )?;
         validate_optional_expression(&self.description)
     }
 }
 
-fn validate_expression(expr: &Option<String>) -> Result<(), String> {
-    CelExpression::try_from(expr.as_ref().expect("Mandatory field not set").as_str())
-        .map_err(|e| e.to_string())?;
+fn validate_expression(expr: &String) -> Result<(), String> {
+    CelExpression::try_from(expr.as_str()).map_err(|e| e.to_string())?;
     Ok(())
 }
 fn validate_optional_expression(expr: &Option<Option<String>>) -> Result<(), String> {
