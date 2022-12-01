@@ -42,13 +42,13 @@ pub struct TxInput {
     effective: String,
     #[builder(setter(into))]
     journal_id: String,
-    #[builder(default)]
+    #[builder(setter(strip_option), default)]
     correlation_id: Option<String>,
-    #[builder(default)]
+    #[builder(setter(strip_option), default)]
     external_id: Option<String>,
-    #[builder(default)]
+    #[builder(setter(strip_option), default)]
     description: Option<String>,
-    #[builder(default)]
+    #[builder(setter(strip_option), default)]
     metadata: Option<String>,
 }
 
@@ -138,7 +138,7 @@ mod tests {
             .code("CODE")
             .tx_input(
                 TxInput::builder()
-                    .effective("'2022-11-01'")
+                    .effective("date('2022-11-01')")
                     .journal_id(format!("'{}'", journal_id))
                     .build()
                     .unwrap(),
