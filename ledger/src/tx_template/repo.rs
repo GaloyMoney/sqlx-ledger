@@ -51,6 +51,7 @@ impl TxTemplates {
         .fetch_one(&self.pool)
         .await?;
         let params = match record.params {
+            Some(serde_json::Value::Null) => None,
             Some(params) => Some(serde_json::from_value(params)?),
             None => None,
         };
