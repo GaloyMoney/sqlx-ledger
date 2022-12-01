@@ -72,4 +72,14 @@ impl Accounts {
         .await?;
         Ok(id)
     }
+
+    pub async fn find_by_code(&self, code: &str) -> Result<Option<AccountId>, SqlxLedgerError> {
+        let record = sqlx::query!(
+            r#"SELECT id FROM sqlx_ledger_accounts WHERE code = $1 LIMIT 1"#,
+            code
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+        Ok(record.map(|r| AccountId::from(r.id)))
+    }
 }
