@@ -54,10 +54,11 @@ impl SqlxLedger {
     pub async fn post_transaction(
         &self,
         tx_template_code: &str,
-        params: Option<TxParams>,
+        params: Option<impl Into<TxParams>>,
     ) -> Result<(), SqlxLedgerError> {
         let tx_template = self.tx_templates.find_core(tx_template_code).await?;
-        let (new_tx, new_entries) = tx_template.prep_tx(params.unwrap_or_else(TxParams::new))?;
+        let (new_tx, new_entries) =
+            tx_template.prep_tx(params.map(|p| p.into()).unwrap_or_else(TxParams::new))?;
         let (journal_id, tx_id, mut tx) = self.transactions.create(new_tx).await?;
         let entries = self
             .entries
