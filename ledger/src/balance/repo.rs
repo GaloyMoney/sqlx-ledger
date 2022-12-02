@@ -42,7 +42,7 @@ impl Balances {
         .await?;
         Ok(record.map(|record| AccountBalance {
             balance_type: record.normal_balance_type,
-            inner: Balance {
+            details: BalanceDetails {
                 journal_id,
                 account_id,
                 entry_id: EntryId::from(record.entry_id),
@@ -70,7 +70,7 @@ impl Balances {
         journal_id: JournalId,
         ids: Vec<(AccountId, &Currency)>,
         tx: &mut Transaction<'a, Postgres>,
-    ) -> Result<HashMap<AccountId, Balance>, SqlxLedgerError> {
+    ) -> Result<HashMap<AccountId, BalanceDetails>, SqlxLedgerError> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"SELECT
               b.journal_id, b.account_id, entry_id, b.currency,
@@ -99,7 +99,7 @@ impl Balances {
             let account_id = AccountId::from(r.get::<Uuid, _>("account_id"));
             ret.insert(
                 account_id,
-                Balance {
+                BalanceDetails {
                     account_id,
                     journal_id: JournalId::from(r.get::<Uuid, _>("journal_id")),
                     entry_id: EntryId::from(r.get::<Uuid, _>("entry_id")),
@@ -128,12 +128,12 @@ impl Balances {
     pub(crate) async fn update_balances<'a>(
         &self,
         journal_id: JournalId,
-        new_balances: Vec<Balance>,
+        new_balances: Vec<BalanceDetails>,
         tx: &mut Transaction<'a, Postgres>,
     ) -> Result<(), SqlxLedgerError> {
         let mut latest_versions = HashMap::new();
         let mut previous_versions = HashMap::new();
-        for Balance {
+        for BalanceDetails {
             account_id,
             version,
             currency,

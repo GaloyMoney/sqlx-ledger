@@ -7,21 +7,21 @@ use crate::primitives::*;
 #[derive(Debug, Clone)]
 pub struct AccountBalance {
     pub(super) balance_type: DebitOrCredit,
-    pub(super) inner: Balance,
+    pub details: BalanceDetails,
 }
 
 impl AccountBalance {
     pub fn pending(&self) -> Decimal {
         if self.balance_type == DebitOrCredit::Credit {
-            self.inner.pending_cr_balance - self.inner.pending_dr_balance
+            self.details.pending_cr_balance - self.details.pending_dr_balance
         } else {
-            self.inner.pending_dr_balance - self.inner.pending_cr_balance
+            self.details.pending_dr_balance - self.details.pending_cr_balance
         }
     }
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Balance {
+pub struct BalanceDetails {
     pub journal_id: JournalId,
     pub account_id: AccountId,
     pub entry_id: EntryId,
@@ -43,7 +43,7 @@ pub(crate) struct Balance {
     pub created_at: DateTime<Utc>,
 }
 
-impl Balance {
+impl BalanceDetails {
     pub(crate) fn update(self, entry: &StagedEntry) -> Self {
         self.update_inner(entry)
     }
