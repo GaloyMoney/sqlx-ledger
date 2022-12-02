@@ -22,17 +22,18 @@ impl Journals {
         Ok(res)
     }
 
-    #[instrument(name = "sqlx_ledger.journals.create", skip(self))]
+    #[instrument(name = "sqlx_ledger.journals.create", skip(self, tx))]
     pub async fn create_in_tx<'a>(
         &self,
         tx: &mut Transaction<'a, Postgres>,
-        NewJournal {
+        new_journal: NewJournal,
+    ) -> Result<JournalId, SqlxLedgerError> {
+        let NewJournal {
             id,
             name,
             description,
             status,
-        }: NewJournal,
-    ) -> Result<JournalId, SqlxLedgerError> {
+        } = new_journal;
         let record = sqlx::query!(
             r#"INSERT INTO sqlx_ledger_journals (id, name, description, status)
             VALUES ($1, $2, $3, $4)

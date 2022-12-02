@@ -16,7 +16,7 @@ pub struct Account<M> {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Builder)]
+#[derive(Builder, Debug)]
 pub struct NewAccount {
     #[builder(setter(into))]
     pub id: AccountId,

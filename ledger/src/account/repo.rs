@@ -23,11 +23,13 @@ impl Accounts {
         Ok(res)
     }
 
-    #[instrument(name = "sqlx_ledger.accounts.create", skip(self))]
+    #[instrument(name = "sqlx_ledger.accounts.create", skip(self, tx))]
     pub async fn create_in_tx<'a>(
         &self,
         tx: &mut Transaction<'a, Postgres>,
-        NewAccount {
+        new_account: NewAccount,
+    ) -> Result<AccountId, SqlxLedgerError> {
+        let NewAccount {
             id,
             code,
             name,
@@ -35,8 +37,7 @@ impl Accounts {
             description,
             status,
             metadata,
-        }: NewAccount,
-    ) -> Result<AccountId, SqlxLedgerError> {
+        } = new_account;
         let record = sqlx::query!(
             r#"INSERT INTO sqlx_ledger_accounts (id, code, name, normal_balance_type, description, status, metadata)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
