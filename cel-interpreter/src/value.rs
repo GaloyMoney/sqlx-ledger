@@ -96,9 +96,43 @@ impl From<NaiveDate> for CelValue {
     }
 }
 
+impl From<Uuid> for CelValue {
+    fn from(id: Uuid) -> Self {
+        CelValue::Uuid(id)
+    }
+}
+
 impl From<&str> for CelValue {
     fn from(s: &str) -> Self {
         CelValue::String(Rc::from(s.to_string()))
+    }
+}
+
+impl From<serde_json::Value> for CelValue {
+    fn from(v: serde_json::Value) -> Self {
+        use serde_json::Value::*;
+        match v {
+            Null => CelValue::Null,
+            Bool(b) => CelValue::Bool(b),
+            Number(n) => {
+                if let Some(u) = n.as_u64() {
+                    CelValue::UInt(u)
+                } else if let Some(i) = n.as_i64() {
+                    CelValue::Int(i)
+                } else {
+                    unimplemented!()
+                }
+            }
+            String(s) => CelValue::String(Rc::from(s)),
+            Object(o) => {
+                let mut map = CelMap::new();
+                for (k, v) in o.into_iter() {
+                    map.insert(CelKey::String(Rc::from(k)), CelValue::from(v));
+                }
+                CelValue::Map(Rc::from(map))
+            }
+            _ => unimplemented!(),
+        }
     }
 }
 

@@ -42,13 +42,13 @@ pub struct TxInput {
     effective: String,
     #[builder(setter(into))]
     journal_id: String,
-    #[builder(setter(strip_option), default)]
+    #[builder(setter(strip_option, into), default)]
     correlation_id: Option<String>,
-    #[builder(setter(strip_option), default)]
+    #[builder(setter(strip_option, into), default)]
     external_id: Option<String>,
-    #[builder(setter(strip_option), default)]
+    #[builder(setter(strip_option, into), default)]
     description: Option<String>,
-    #[builder(setter(strip_option), default)]
+    #[builder(setter(strip_option, into), default)]
     metadata: Option<String>,
 }
 
