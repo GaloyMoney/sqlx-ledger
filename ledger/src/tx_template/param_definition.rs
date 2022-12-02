@@ -2,7 +2,7 @@ use cel_interpreter::{CelContext, CelExpression, CelType, CelValue};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Deserialize, Serialize, Builder)]
+#[derive(Clone, Debug, Deserialize, Serialize, Builder)]
 #[builder(build_fn(validate = "Self::validate"))]
 pub struct ParamDefinition {
     #[builder(setter(into))]

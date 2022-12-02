@@ -13,7 +13,7 @@ pub struct Journal {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Builder)]
+#[derive(Debug, Builder)]
 pub struct NewJournal {
     #[builder(setter(into))]
     pub id: JournalId,

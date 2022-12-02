@@ -1,5 +1,6 @@
 use serde::Serialize;
 use sqlx::{Pool, Postgres, Transaction};
+use tracing::instrument;
 use uuid::Uuid;
 
 use super::entity::*;
@@ -22,6 +23,7 @@ impl Accounts {
         Ok(res)
     }
 
+    #[instrument(name = "sqlx_ledger.accounts.create", skip(self))]
     pub async fn create_in_tx<'a>(
         &self,
         tx: &mut Transaction<'a, Postgres>,
@@ -52,7 +54,8 @@ impl Accounts {
         Ok(AccountId::from(record.id))
     }
 
-    pub async fn update<T: Serialize>(
+    #[instrument(name = "sqlx_ledger.accounts.update", skip(self))]
+    pub async fn update<T: Serialize + std::fmt::Debug>(
         &self,
         id: AccountId,
         description: Option<String>,
@@ -73,6 +76,7 @@ impl Accounts {
         Ok(id)
     }
 
+    #[instrument(name = "sqlx_ledger.accounts.find_by_code", skip(self))]
     pub async fn find_by_code(&self, code: &str) -> Result<Option<AccountId>, SqlxLedgerError> {
         let record = sqlx::query!(
             r#"SELECT id FROM sqlx_ledger_accounts WHERE code = $1 LIMIT 1"#,

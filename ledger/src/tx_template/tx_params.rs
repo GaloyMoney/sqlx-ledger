@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use super::param_definition::{ParamDataType, ParamDefinition};
 use crate::error::SqlxLedgerError;
 
+#[derive(Debug)]
 pub struct TxParams {
     values: HashMap<String, CelValue>,
 }

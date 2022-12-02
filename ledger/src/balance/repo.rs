@@ -1,4 +1,5 @@
 use sqlx::{PgPool, Postgres, QueryBuilder, Row, Transaction};
+use tracing::instrument;
 use uuid::Uuid;
 
 use std::collections::HashMap;
@@ -16,6 +17,7 @@ impl Balances {
         Self { pool: pool.clone() }
     }
 
+    #[instrument(name = "sqlx_ledger.balances.find", skip(self))]
     pub async fn find(
         &self,
         journal_id: JournalId,

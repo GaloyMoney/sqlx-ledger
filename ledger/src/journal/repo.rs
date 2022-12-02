@@ -1,4 +1,5 @@
 use sqlx::{Pool, Postgres, Transaction};
+use tracing::instrument;
 use uuid::Uuid;
 
 use super::entity::*;
@@ -21,6 +22,7 @@ impl Journals {
         Ok(res)
     }
 
+    #[instrument(name = "sqlx_ledger.journals.create", skip(self))]
     pub async fn create_in_tx<'a>(
         &self,
         tx: &mut Transaction<'a, Postgres>,

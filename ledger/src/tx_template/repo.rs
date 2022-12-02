@@ -1,4 +1,5 @@
 use sqlx::{Pool, Postgres};
+use tracing::instrument;
 
 use super::{core::*, entity::*};
 use crate::{error::*, primitives::*};
@@ -13,6 +14,7 @@ impl TxTemplates {
         Self { pool: pool.clone() }
     }
 
+    #[instrument(name = "sqlx_ledger.tx_templates.create", skip_all)]
     pub async fn create(
         &self,
         NewTxTemplate {

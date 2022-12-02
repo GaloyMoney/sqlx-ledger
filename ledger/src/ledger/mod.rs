@@ -1,4 +1,5 @@
 use sqlx::{Acquire, PgPool, Postgres, Transaction};
+use tracing::instrument;
 
 use std::collections::HashMap;
 
@@ -54,7 +55,7 @@ impl SqlxLedger {
     pub async fn post_transaction(
         &self,
         tx_template_code: &str,
-        params: Option<impl Into<TxParams>>,
+        params: Option<impl Into<TxParams> + std::fmt::Debug>,
     ) -> Result<(), SqlxLedgerError> {
         let tx = self.pool.begin().await?;
         self.post_transaction_in_tx(tx, tx_template_code, params)
@@ -62,11 +63,12 @@ impl SqlxLedger {
         Ok(())
     }
 
+    #[instrument(name = "sqlx_ledger.ledger.post_transaction", skip(self, tx))]
     pub async fn post_transaction_in_tx(
         &self,
         mut tx: Transaction<'_, Postgres>,
         tx_template_code: &str,
-        params: Option<impl Into<TxParams>>,
+        params: Option<impl Into<TxParams> + std::fmt::Debug>,
     ) -> Result<(), SqlxLedgerError> {
         let (new_tx, new_entries) = {
             let tx_template = self.tx_templates.find_core(tx_template_code).await?;
@@ -103,7 +105,8 @@ impl SqlxLedger {
                     }
                     (_, Some(balance)) => balance,
                     _ => {
-                        latest_balances.insert(entry.account_id, BalanceDetails::init(journal_id, entry));
+                        latest_balances
+                            .insert(entry.account_id, BalanceDetails::init(journal_id, entry));
                         continue;
                     }
                 };
