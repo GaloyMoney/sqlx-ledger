@@ -7,7 +7,7 @@ use crate::error::*;
 
 pub(crate) fn date(args: Vec<CelValue>) -> Result<CelValue, CelError> {
     if args.is_empty() {
-        return Ok(CelValue::Date(Utc::now().date().naive_utc()));
+        return Ok(CelValue::Date(Utc::now().date_naive()));
     }
 
     let s: Rc<String> = assert_arg(args.get(0))?;

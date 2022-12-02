@@ -37,7 +37,7 @@ impl TxParams {
                     }
                 }
                 if let Some(expr) = d.default_expr() {
-                    cel_map.insert(d.name, expr.evaluate(&CelContext::new())?);
+                    cel_map.insert(d.name, expr.evaluate(&ctx)?);
                 }
             }
             ctx.add_variable("params", cel_map);

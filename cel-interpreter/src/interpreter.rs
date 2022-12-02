@@ -9,7 +9,7 @@ use std::rc::Rc;
 
 use crate::{context::*, error::*, value::*};
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(try_from = "String")]
 #[serde(into = "String")]
 pub struct CelExpression {

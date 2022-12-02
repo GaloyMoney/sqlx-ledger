@@ -3,6 +3,7 @@ use std::{collections::HashMap, rc::Rc};
 use crate::{builtins, error::*, value::*};
 
 type CelFunction = Box<dyn Fn(Vec<CelValue>) -> Result<CelValue, CelError>>;
+#[derive(Debug)]
 pub struct CelContext {
     idents: HashMap<String, ContextItem>,
 }
@@ -50,6 +51,15 @@ impl Default for CelContext {
 pub(crate) enum ContextItem {
     Value(CelValue),
     Function(CelFunction),
+}
+
+impl std::fmt::Debug for ContextItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ContextItem::Value(val) => write!(f, "Value({:?})", val),
+            ContextItem::Function(_) => write!(f, "Function"),
+        }
+    }
 }
 
 impl CelContext {
