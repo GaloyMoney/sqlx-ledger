@@ -28,8 +28,8 @@ pub struct Balance {
 }
 
 impl Balance {
-    pub(crate) fn update(&self, entry: &StagedEntry) -> Self {
-        self.clone().update_inner(entry)
+    pub(crate) fn update(self, entry: &StagedEntry) -> Self {
+        self.update_inner(entry)
     }
 
     pub(crate) fn init(journal_id: JournalId, entry: &StagedEntry) -> Self {

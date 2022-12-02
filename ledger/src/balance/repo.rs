@@ -103,14 +103,12 @@ impl Balances {
         );
         let mut any_new = false;
         query_builder.push_values(
-            previous_versions.iter(),
+            previous_versions.iter().filter(|(_, v)| **v == 0),
             |mut builder, ((account_id, currency), version)| {
-                if version == &0 {
-                    any_new = true;
-                    builder.push_bind(Uuid::from(**account_id));
-                    builder.push_bind(currency.code());
-                    builder.push_bind(version);
-                }
+                any_new = true;
+                builder.push_bind(Uuid::from(**account_id));
+                builder.push_bind(currency.code());
+                builder.push_bind(version);
             },
         );
         if any_new {
