@@ -1,4 +1,4 @@
-use sqlx::{Acquire, PgPool};
+use sqlx::{Acquire, PgPool, Postgres, Transaction};
 
 use std::collections::HashMap;
 
@@ -9,7 +9,7 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub struct SqlxLedger {
-    _pool: PgPool,
+    pool: PgPool,
     accounts: Accounts,
     journals: Journals,
     tx_templates: TxTemplates,
@@ -27,7 +27,7 @@ impl SqlxLedger {
             transactions: Transactions::new(pool),
             entries: Entries::new(pool),
             balances: Balances::new(pool),
-            _pool: pool.clone(),
+            pool: pool.clone(),
         }
     }
 
@@ -56,10 +56,22 @@ impl SqlxLedger {
         tx_template_code: &str,
         params: Option<impl Into<TxParams>>,
     ) -> Result<(), SqlxLedgerError> {
+        let tx = self.pool.begin().await?;
+        self.post_transaction_in_tx(tx, tx_template_code, params)
+            .await?;
+        Ok(())
+    }
+
+    pub async fn post_transaction_in_tx(
+        &self,
+        mut tx: Transaction<'_, Postgres>,
+        tx_template_code: &str,
+        params: Option<impl Into<TxParams>>,
+    ) -> Result<(), SqlxLedgerError> {
         let tx_template = self.tx_templates.find_core(tx_template_code).await?;
         let (new_tx, new_entries) =
             tx_template.prep_tx(params.map(|p| p.into()).unwrap_or_else(TxParams::new))?;
-        let (journal_id, tx_id, mut tx) = self.transactions.create(new_tx).await?;
+        let (journal_id, tx_id) = self.transactions.create_in_tx(&mut tx, new_tx).await?;
         let entries = self
             .entries
             .create_all(journal_id, tx_id, new_entries, &mut tx)

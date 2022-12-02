@@ -14,8 +14,9 @@ impl Transactions {
         Self { pool: pool.clone() }
     }
 
-    pub(crate) async fn create<'a>(
+    pub(crate) async fn create_in_tx(
         &self,
+        tx: &mut Transaction<'_, Postgres>,
         NewTransaction {
             journal_id,
             tx_template_id,
@@ -25,8 +26,7 @@ impl Transactions {
             description,
             metadata,
         }: NewTransaction,
-    ) -> Result<(JournalId, TransactionId, Transaction<'a, Postgres>), SqlxLedgerError> {
-        let mut tx = self.pool.begin().await?;
+    ) -> Result<(JournalId, TransactionId), SqlxLedgerError> {
         let id = Uuid::new_v4();
         let record = sqlx::query!(
             r#"INSERT INTO sqlx_ledger_transactions (id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata)
@@ -41,8 +41,8 @@ impl Transactions {
             description,
             metadata
         )
-        .fetch_one(&mut tx)
+        .fetch_one(&mut *tx)
         .await?;
-        Ok((journal_id, TransactionId::from(record.id), tx))
+        Ok((journal_id, TransactionId::from(record.id)))
     }
 }

@@ -1,12 +1,11 @@
+mod helpers;
+
 use rand::distributions::{Alphanumeric, DistString};
 use sqlx_ledger::{account::*, journal::*, tx_template::*, *};
 
 #[tokio::test]
 async fn post_transaction() -> anyhow::Result<()> {
-    let pg_host = std::env::var("PG_HOST").unwrap_or("localhost".to_string());
-
-    let pg_con = format!("postgres://ledger:ledger@{pg_host}:5432/ledger");
-    let pool = sqlx::PgPool::connect(&pg_con).await?;
+    let pool = helpers::init_pool().await?;
 
     let tx_code = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
 
