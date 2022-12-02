@@ -6,12 +6,14 @@ use crate::{error::*, primitives::*};
 
 #[derive(Debug, Clone)]
 pub struct Transactions {
-    pool: Pool<Postgres>,
+    _pool: Pool<Postgres>,
 }
 
 impl Transactions {
     pub fn new(pool: &Pool<Postgres>) -> Self {
-        Self { pool: pool.clone() }
+        Self {
+            _pool: pool.clone(),
+        }
     }
 
     pub(crate) async fn create_in_tx(

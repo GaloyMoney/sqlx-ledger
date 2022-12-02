@@ -50,7 +50,7 @@ impl TxTemplateCore {
         let ctx = params.to_context(self.params.take())?;
 
         let journal_id: Uuid = self.tx_input.journal_id.try_evaluate(&ctx)?;
-        tx_builder.journal_id(journal_id.into());
+        tx_builder.journal_id(journal_id);
 
         let effective: NaiveDate = self.tx_input.effective.try_evaluate(&ctx)?;
         tx_builder.effective(effective);

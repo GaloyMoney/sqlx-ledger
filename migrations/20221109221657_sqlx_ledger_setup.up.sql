@@ -98,12 +98,13 @@ CREATE TABLE sqlx_ledger_balances (
   version INT NOT NULL,
   modified_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(account_id, currency, version)
+  UNIQUE(journal_id, account_id, currency, version)
 );
 
 CREATE TABLE sqlx_ledger_current_balances (
+  journal_id UUID NOT NULL,
   account_id UUID NOT NULL,
   currency VARCHAR NOT NULL,
   version INT NOT NULL,
-  UNIQUE(account_id, currency)
+  UNIQUE(journal_id, account_id, currency)
 );

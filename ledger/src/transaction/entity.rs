@@ -4,6 +4,7 @@ use derive_builder::Builder;
 
 #[derive(Builder)]
 pub(crate) struct NewTransaction {
+    #[builder(setter(into))]
     pub(super) journal_id: JournalId,
     pub(super) tx_template_id: TxTemplateId,
     pub(super) effective: NaiveDate,

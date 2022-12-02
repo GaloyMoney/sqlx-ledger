@@ -20,27 +20,29 @@ impl Balances {
 
     pub(crate) async fn find_for_update<'a>(
         &self,
+        journal_id: JournalId,
         ids: Vec<(AccountId, &Currency)>,
         tx: &mut Transaction<'a, Postgres>,
     ) -> Result<HashMap<AccountId, Balance>, SqlxLedgerError> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"SELECT
-              journal_id, b.account_id, entry_id, b.currency,
+              b.journal_id, b.account_id, entry_id, b.currency,
               settled_dr_balance, settled_cr_balance, settled_entry_id, settled_modified_at,
               pending_dr_balance, pending_cr_balance, pending_entry_id, pending_modified_at,
               encumbered_dr_balance, encumbered_cr_balance, encumbered_entry_id, encumbered_modified_at,
               c.version, modified_at, created_at
                 FROM sqlx_ledger_balances b JOIN (
-                    SELECT * FROM sqlx_ledger_current_balances WHERE (account_id, currency) IN"#,
+                    SELECT * FROM sqlx_ledger_current_balances WHERE journal_id = "#,
         );
+        query_builder.push_bind(Uuid::from(journal_id));
+        query_builder.push(r#" AND (account_id, currency) IN"#);
         query_builder.push_tuples(ids, |mut builder, (id, currency)| {
             builder.push_bind(Uuid::from(id));
             builder.push_bind(currency.code());
         });
         query_builder.push(
-            r#") c ON
-                b.account_id = c.account_id AND b.currency = c.currency AND b.version = c.version
-                FOR UPDATE OF c"#,
+            r#"FOR UPDATE ) c ON
+                b.journal_id = c.journal_id AND b.account_id = c.account_id AND b.currency = c.currency AND b.version = c.version"#,
         );
 
         let query = query_builder.build();
@@ -78,6 +80,7 @@ impl Balances {
 
     pub(crate) async fn update_balances<'a>(
         &self,
+        journal_id: JournalId,
         new_balances: Vec<Balance>,
         tx: &mut Transaction<'a, Postgres>,
     ) -> Result<(), SqlxLedgerError> {
@@ -99,13 +102,14 @@ impl Balances {
         let expected_accounts_effected = latest_versions.len();
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"INSERT INTO sqlx_ledger_current_balances
-                  (account_id, currency, version)"#,
+                  (journal_id, account_id, currency, version)"#,
         );
         let mut any_new = false;
         query_builder.push_values(
             previous_versions.iter().filter(|(_, v)| **v == 0),
             |mut builder, ((account_id, currency), version)| {
                 any_new = true;
+                builder.push_bind(Uuid::from(journal_id));
                 builder.push_bind(Uuid::from(**account_id));
                 builder.push_bind(currency.code());
                 builder.push_bind(version);
@@ -128,7 +132,9 @@ impl Balances {
             query_builder.push(" THEN ");
             query_builder.push_bind(version);
         }
-        query_builder.push(" END WHERE (account_id, currency, version) IN");
+        query_builder.push(" END WHERE journal_id = ");
+        query_builder.push_bind(Uuid::from(journal_id));
+        query_builder.push(" AND (account_id, currency, version) IN");
         query_builder.push_tuples(
             previous_versions,
             |mut builder, ((account_id, currency), version)| {

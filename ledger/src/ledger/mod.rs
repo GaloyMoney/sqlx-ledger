@@ -85,7 +85,7 @@ impl SqlxLedger {
 
             let mut balances = self
                 .balances
-                .find_for_update(ids.clone(), &mut balance_tx)
+                .find_for_update(journal_id, ids.clone(), &mut balance_tx)
                 .await?;
             let mut latest_balances: HashMap<AccountId, Balance> = HashMap::new();
             let mut new_balances = Vec::new();
@@ -109,7 +109,7 @@ impl SqlxLedger {
             new_balances.extend(latest_balances.into_iter().map(|(_, v)| v));
 
             self.balances
-                .update_balances(new_balances, &mut balance_tx)
+                .update_balances(journal_id, new_balances, &mut balance_tx)
                 .await?;
             balance_tx.commit().await?;
         }
