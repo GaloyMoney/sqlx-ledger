@@ -8,16 +8,63 @@ use crate::{error::*, primitives::*};
 
 #[derive(Debug, Clone)]
 pub struct Balances {
-    _pool: PgPool,
+    pool: PgPool,
 }
 
 impl Balances {
     pub fn new(pool: &PgPool) -> Self {
-        Self {
-            _pool: pool.clone(),
-        }
+        Self { pool: pool.clone() }
     }
 
+    pub async fn find(
+        &self,
+        journal_id: JournalId,
+        account_id: AccountId,
+        currency: Currency,
+    ) -> Result<Option<AccountBalance>, SqlxLedgerError> {
+        let record = sqlx::query!(
+            r#"SELECT
+              a.normal_balance_type as "normal_balance_type: DebitOrCredit", b.journal_id, b.account_id, entry_id, b.currency,
+              settled_dr_balance, settled_cr_balance, settled_entry_id, settled_modified_at,
+              pending_dr_balance, pending_cr_balance, pending_entry_id, pending_modified_at,
+              encumbered_dr_balance, encumbered_cr_balance, encumbered_entry_id, encumbered_modified_at,
+              c.version, modified_at, created_at
+                FROM sqlx_ledger_balances b JOIN (
+                  SELECT * FROM sqlx_ledger_current_balances WHERE journal_id = $1 AND account_id = $2 AND currency = $3 ) c
+                ON b.journal_id = c.journal_id AND b.account_id = c.account_id AND b.currency = c.currency AND b.version = c.version
+                JOIN ( SELECT id, normal_balance_type FROM sqlx_ledger_accounts WHERE id = $2 LIMIT 1 ) a
+                  ON a.id = b.account_id"#,
+            Uuid::from(journal_id),
+            Uuid::from(account_id),
+            currency.code()
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+        Ok(record.map(|record| AccountBalance {
+            balance_type: record.normal_balance_type,
+            inner: Balance {
+                journal_id,
+                account_id,
+                entry_id: EntryId::from(record.entry_id),
+                currency,
+                settled_dr_balance: record.settled_dr_balance,
+                settled_cr_balance: record.settled_cr_balance,
+                settled_entry_id: EntryId::from(record.settled_entry_id),
+                settled_modified_at: record.settled_modified_at,
+                pending_dr_balance: record.pending_dr_balance,
+                pending_cr_balance: record.pending_cr_balance,
+                pending_entry_id: EntryId::from(record.pending_entry_id),
+                pending_modified_at: record.pending_modified_at,
+                encumbered_dr_balance: record.encumbered_dr_balance,
+                encumbered_cr_balance: record.encumbered_cr_balance,
+                encumbered_entry_id: EntryId::from(record.encumbered_entry_id),
+                encumbered_modified_at: record.encumbered_modified_at,
+                version: record.version,
+                modified_at: record.modified_at,
+                created_at: record.created_at,
+            },
+        }))
+    }
     pub(crate) async fn find_for_update<'a>(
         &self,
         journal_id: JournalId,

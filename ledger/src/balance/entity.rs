@@ -5,7 +5,23 @@ use crate::entry::StagedEntry;
 use crate::primitives::*;
 
 #[derive(Debug, Clone)]
-pub struct Balance {
+pub struct AccountBalance {
+    pub(super) balance_type: DebitOrCredit,
+    pub(super) inner: Balance,
+}
+
+impl AccountBalance {
+    pub fn pending(&self) -> Decimal {
+        if self.balance_type == DebitOrCredit::Credit {
+            self.inner.pending_cr_balance - self.inner.pending_dr_balance
+        } else {
+            self.inner.pending_dr_balance - self.inner.pending_cr_balance
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct Balance {
     pub journal_id: JournalId,
     pub account_id: AccountId,
     pub entry_id: EntryId,
