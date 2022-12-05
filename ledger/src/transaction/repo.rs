@@ -39,7 +39,7 @@ impl Transactions {
             Uuid::from(tx_template_id),
             effective,
             correlation_id.map(Uuid::from).unwrap_or(id),
-            external_id.map(Uuid::from).unwrap_or(id),
+            external_id.unwrap_or_else(|| id.to_string()),
             description,
             metadata
         )

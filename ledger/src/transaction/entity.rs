@@ -11,7 +11,7 @@ pub(crate) struct NewTransaction {
     #[builder(setter(strip_option), default)]
     pub(super) correlation_id: Option<CorrelationId>,
     #[builder(setter(strip_option), default)]
-    pub(super) external_id: Option<ExternalId>,
+    pub(super) external_id: Option<String>,
     #[builder(setter(strip_option), default)]
     pub(super) description: Option<String>,
     #[builder(setter(strip_option), default)]

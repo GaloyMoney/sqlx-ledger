@@ -61,8 +61,8 @@ impl TxTemplateCore {
         }
 
         if let Some(external_id) = self.tx_input.external_id.as_ref() {
-            let external_id: Uuid = external_id.try_evaluate(&ctx)?;
-            tx_builder.external_id(external_id.into());
+            let external_id: String = external_id.try_evaluate(&ctx)?;
+            tx_builder.external_id(external_id);
         }
 
         if let Some(description) = self.tx_input.description.as_ref() {

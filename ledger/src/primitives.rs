@@ -8,7 +8,6 @@ crate::entity_id! { TransactionId }
 crate::entity_id! { EntryId }
 crate::entity_id! { TxTemplateId }
 crate::entity_id! { CorrelationId }
-crate::entity_id! { ExternalId }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, sqlx::Type)]
 #[sqlx(type_name = "Layer", rename_all = "snake_case")]
