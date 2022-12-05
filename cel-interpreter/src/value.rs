@@ -90,6 +90,12 @@ impl From<Decimal> for CelValue {
     }
 }
 
+impl From<String> for CelValue {
+    fn from(s: String) -> Self {
+        CelValue::String(Rc::from(s))
+    }
+}
+
 impl From<NaiveDate> for CelValue {
     fn from(d: NaiveDate) -> Self {
         CelValue::Date(d)
