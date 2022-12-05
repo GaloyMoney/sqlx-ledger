@@ -18,6 +18,14 @@ impl AccountBalance {
             self.details.pending_dr_balance - self.details.pending_cr_balance
         }
     }
+
+    pub fn settled(&self) -> Decimal {
+        if self.balance_type == DebitOrCredit::Credit {
+            self.details.settled_cr_balance - self.details.settled_dr_balance
+        } else {
+            self.details.settled_dr_balance - self.details.settled_cr_balance
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
