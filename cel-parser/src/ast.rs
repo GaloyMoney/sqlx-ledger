@@ -17,7 +17,7 @@ pub enum RelationOp {
     In,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum ArithmeticOp {
     Add,
     Subtract,

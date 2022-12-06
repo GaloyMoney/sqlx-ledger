@@ -1,7 +1,8 @@
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use cel_parser::{
-    ast::{self, Expression},
+    ast::{self, ArithmeticOp, Expression},
     parser::ExpressionParser,
 };
 
@@ -107,6 +108,15 @@ fn evaluate_expression<'a>(
         }
         Ident(name) => Ok(EvalType::ContextItem(ctx.lookup(Rc::clone(name))?)),
         Literal(val) => Ok(EvalType::Value(CelValue::from(val))),
+        Arithmetic(op, left, right) => {
+            let left = evaluate_expression(left, ctx)?;
+            let right = evaluate_expression(right, ctx)?;
+            Ok(EvalType::Value(evaluate_arithmetic(
+                *op,
+                left.try_value()?,
+                right.try_value()?,
+            )?))
+        }
         e => Err(CelError::Unexpected(format!("unimplemented {e:?}"))),
     }
 }
@@ -133,6 +143,31 @@ fn evaluate_member<'a>(
                 Ok(EvalType::Value(f(args)?))
             }
             _ => Err(CelError::IllegalTarget),
+        },
+        _ => unimplemented!(),
+    }
+}
+
+fn evaluate_arithmetic(
+    op: ArithmeticOp,
+    left: CelValue,
+    right: CelValue,
+) -> Result<CelValue, CelError> {
+    use CelValue::*;
+    match op {
+        ArithmeticOp::Multiply => match (left, right) {
+            (UInt(l), UInt(r)) => Ok(UInt(l * r)),
+            (UInt(l), Int(r)) => Ok(Int(l as i64 * r)),
+            (UInt(l), Double(r)) => Ok(Double(Decimal::from(l) * r)),
+            (Int(l), UInt(r)) => Ok(Int(l * r as i64)),
+            (Int(l), Int(r)) => Ok(Int(l * r)),
+            (Int(l), Double(r)) => Ok(Double(Decimal::from(l) * r)),
+            (Double(l), UInt(r)) => Ok(Double(l * Decimal::from(r))),
+            (Double(l), Int(r)) => Ok(Double(l * Decimal::from(r))),
+            (Double(l), Double(r)) => Ok(Double(l * r)),
+            _ => Err(CelError::Unexpected(
+                "Invalid operands for multiplication".to_string(),
+            )),
         },
         _ => unimplemented!(),
     }
