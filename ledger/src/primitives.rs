@@ -1,5 +1,5 @@
 use crate::error::*;
-use cel_interpreter::CelValue;
+use cel_interpreter::{CelResult, CelValue};
 use rusty_money::{crypto, iso};
 
 crate::entity_id! { AccountId }
@@ -17,10 +17,10 @@ pub enum Layer {
     Encumbered,
 }
 
-impl TryFrom<CelValue> for Layer {
+impl<'a> TryFrom<CelResult<'a>> for Layer {
     type Error = SqlxLedgerError;
 
-    fn try_from(val: CelValue) -> Result<Self, Self::Error> {
+    fn try_from(CelResult { val, .. }: CelResult) -> Result<Self, Self::Error> {
         match val {
             CelValue::String(v) if v.as_ref() == "SETTLED" => Ok(Layer::Settled),
             CelValue::String(v) if v.as_ref() == "PENDING" => Ok(Layer::Pending),
@@ -37,10 +37,10 @@ pub enum DebitOrCredit {
     Credit,
 }
 
-impl TryFrom<CelValue> for DebitOrCredit {
+impl<'a> TryFrom<CelResult<'a>> for DebitOrCredit {
     type Error = SqlxLedgerError;
 
-    fn try_from(val: CelValue) -> Result<Self, Self::Error> {
+    fn try_from(CelResult { val, .. }: CelResult) -> Result<Self, Self::Error> {
         match val {
             CelValue::String(v) if v.as_ref() == "DEBIT" => Ok(DebitOrCredit::Debit),
             CelValue::String(v) if v.as_ref() == "CREDIT" => Ok(DebitOrCredit::Credit),
@@ -114,10 +114,10 @@ impl std::str::FromStr for Currency {
     }
 }
 
-impl TryFrom<CelValue> for Currency {
+impl<'a> TryFrom<CelResult<'a>> for Currency {
     type Error = SqlxLedgerError;
 
-    fn try_from(val: CelValue) -> Result<Self, Self::Error> {
+    fn try_from(CelResult { val, .. }: CelResult) -> Result<Self, Self::Error> {
         match val {
             CelValue::String(v) => v.as_ref().parse(),
             v => Err(SqlxLedgerError::UnknownCurrency(format!("{v:?}"))),

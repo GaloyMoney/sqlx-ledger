@@ -1,4 +1,4 @@
-use cel_parser::ast::Literal;
+use cel_parser::{ast::Literal, Expression};
 use chrono::NaiveDate;
 use rust_decimal::Decimal;
 use uuid::Uuid;
@@ -6,6 +6,11 @@ use uuid::Uuid;
 use std::{collections::HashMap, rc::Rc};
 
 use crate::{cel_type::*, error::*};
+
+pub struct CelResult<'a> {
+    pub expr: &'a Expression,
+    pub val: CelValue,
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CelValue {
@@ -213,51 +218,63 @@ impl TryFrom<&CelValue> for Rc<String> {
     }
 }
 
-impl TryFrom<CelValue> for NaiveDate {
+impl<'a> TryFrom<CelResult<'a>> for NaiveDate {
     type Error = CelError;
 
-    fn try_from(v: CelValue) -> Result<Self, Self::Error> {
-        if let CelValue::Date(d) = v {
+    fn try_from(CelResult { expr, val }: CelResult) -> Result<Self, Self::Error> {
+        if let CelValue::Date(d) = val {
             Ok(d)
         } else {
-            Err(CelError::BadType(CelType::Date, CelType::from(&v)))
+            Err(CelError::EvaluationError(
+                format!("{expr:?}"),
+                Box::new(CelError::BadType(CelType::Date, CelType::from(&val))),
+            ))
         }
     }
 }
 
-impl TryFrom<CelValue> for Uuid {
+impl<'a> TryFrom<CelResult<'a>> for Uuid {
     type Error = CelError;
 
-    fn try_from(v: CelValue) -> Result<Self, Self::Error> {
-        if let CelValue::Uuid(id) = v {
+    fn try_from(CelResult { expr, val }: CelResult) -> Result<Self, Self::Error> {
+        if let CelValue::Uuid(id) = val {
             Ok(id)
         } else {
-            Err(CelError::BadType(CelType::Uuid, CelType::from(&v)))
+            Err(CelError::EvaluationError(
+                format!("{expr:?}"),
+                Box::new(CelError::BadType(CelType::Uuid, CelType::from(&val))),
+            ))
         }
     }
 }
 
-impl TryFrom<CelValue> for String {
+impl<'a> TryFrom<CelResult<'a>> for String {
     type Error = CelError;
 
-    fn try_from(v: CelValue) -> Result<Self, Self::Error> {
-        if let CelValue::String(s) = v {
+    fn try_from(CelResult { expr, val }: CelResult) -> Result<Self, Self::Error> {
+        if let CelValue::String(s) = val {
             Ok(s.to_string())
         } else {
-            Err(CelError::BadType(CelType::String, CelType::from(&v)))
+            Err(CelError::EvaluationError(
+                format!("{expr:?}"),
+                Box::new(CelError::BadType(CelType::String, CelType::from(&val))),
+            ))
         }
     }
 }
 
-impl TryFrom<CelValue> for Decimal {
+impl<'a> TryFrom<CelResult<'a>> for Decimal {
     type Error = CelError;
 
-    fn try_from(v: CelValue) -> Result<Self, Self::Error> {
-        match v {
+    fn try_from(CelResult { expr, val }: CelResult) -> Result<Self, Self::Error> {
+        match val {
             CelValue::Double(n) => Ok(n),
             CelValue::Int(n) => Ok(Decimal::from(n)),
             CelValue::UInt(n) => Ok(Decimal::from(n)),
-            _ => Err(CelError::BadType(CelType::Double, CelType::from(&v))),
+            _ => Err(CelError::EvaluationError(
+                format!("{expr:?}"),
+                Box::new(CelError::BadType(CelType::Double, CelType::from(&val))),
+            )),
         }
     }
 }
@@ -285,12 +302,12 @@ impl TryFrom<&CelKey> for String {
     }
 }
 
-impl TryFrom<CelValue> for serde_json::Value {
+impl<'a> TryFrom<CelResult<'a>> for serde_json::Value {
     type Error = CelError;
 
-    fn try_from(v: CelValue) -> Result<Self, Self::Error> {
+    fn try_from(CelResult { expr, val }: CelResult) -> Result<Self, Self::Error> {
         use serde_json::*;
-        Ok(match v {
+        Ok(match val {
             CelValue::Int(n) => Value::from(n),
             CelValue::UInt(n) => Value::from(n),
             CelValue::Double(n) => Value::from(n.to_string()),
@@ -303,7 +320,10 @@ impl TryFrom<CelValue> for serde_json::Value {
                 let mut res = serde_json::Map::new();
                 for (k, v) in m.inner.iter() {
                     let key: String = k.try_into()?;
-                    let value = Self::try_from(v.clone())?;
+                    let value = Self::try_from(CelResult {
+                        expr,
+                        val: v.clone(),
+                    })?;
                     res.insert(key, value);
                 }
                 Value::from(res)

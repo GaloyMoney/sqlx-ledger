@@ -23,4 +23,7 @@ pub enum CelError {
     UuidError(String),
     #[error("CelError - Unexpected: {0}")]
     Unexpected(String),
+
+    #[error("Error evaluating cell expression '{0}' - {1}")]
+    EvaluationError(String, Box<Self>),
 }

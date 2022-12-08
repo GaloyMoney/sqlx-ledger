@@ -69,7 +69,7 @@ CREATE TABLE sqlx_ledger_entries (
   journal_id UUID NOT NULL,
   entry_type VARCHAR NOT NULL,
   layer Layer NOT NULL,
-  units Numeric NOT NULL,
+  units NUMERIC NOT NULL,
   currency VARCHAR NOT NULL,
   direction DebitOrCredit NOT NULL,
   sequence INT NOT NULL,

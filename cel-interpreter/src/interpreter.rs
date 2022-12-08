@@ -17,13 +17,16 @@ pub struct CelExpression {
     source: String,
     expr: Expression,
 }
-
 impl CelExpression {
-    pub fn try_evaluate<T: TryFrom<CelValue, Error = E>, E: From<CelError>>(
-        &self,
+    pub fn try_evaluate<'a, T: TryFrom<CelResult<'a>, Error = E>, E: From<CelError>>(
+        &'a self,
         ctx: &CelContext,
     ) -> Result<T, E> {
-        T::try_from(self.evaluate(ctx)?)
+        let res = self.evaluate(ctx)?;
+        T::try_from(CelResult {
+            expr: &self.expr,
+            val: res,
+        })
     }
 
     pub fn evaluate(&self, ctx: &CelContext) -> Result<CelValue, CelError> {
@@ -81,6 +84,16 @@ impl<'a> EvalType<'a> {
 }
 
 fn evaluate_expression<'a>(
+    expr: &Expression,
+    ctx: &'a CelContext,
+) -> Result<EvalType<'a>, CelError> {
+    match evaluate_expression_inner(expr, ctx) {
+        Ok(val) => Ok(val),
+        Err(e) => Err(CelError::EvaluationError(format!("{expr:?}"), Box::new(e))),
+    }
+}
+
+fn evaluate_expression_inner<'a>(
     expr: &Expression,
     ctx: &'a CelContext,
 ) -> Result<EvalType<'a>, CelError> {
