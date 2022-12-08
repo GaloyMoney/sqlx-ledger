@@ -61,14 +61,12 @@ impl TxInput {
 impl TxInputBuilder {
     fn validate(&self) -> Result<(), String> {
         validate_expression(
-            &self
-                .effective
+            self.effective
                 .as_ref()
                 .expect("Mandatory field 'effective' not set"),
         )?;
         validate_expression(
-            &self
-                .journal_id
+            self.journal_id
                 .as_ref()
                 .expect("Mandatory field 'journal_id' not set"),
         )?;
@@ -106,38 +104,32 @@ impl EntryInput {
 impl EntryInputBuilder {
     fn validate(&self) -> Result<(), String> {
         validate_expression(
-            &self
-                .entry_type
+            self.entry_type
                 .as_ref()
                 .expect("Mandatory field 'entry_type' not set"),
         )?;
         validate_expression(
-            &self
-                .account_id
+            self.account_id
                 .as_ref()
                 .expect("Mandatory field 'account_id' not set"),
         )?;
         validate_expression(
-            &self
-                .layer
+            self.layer
                 .as_ref()
                 .expect("Mandatory field 'layer' not set"),
         )?;
         validate_expression(
-            &self
-                .direction
+            self.direction
                 .as_ref()
                 .expect("Mandatory field 'direction' not set"),
         )?;
         validate_expression(
-            &self
-                .units
+            self.units
                 .as_ref()
                 .expect("Mandatory field 'units' not set"),
         )?;
         validate_expression(
-            &self
-                .currency
+            self.currency
                 .as_ref()
                 .expect("Mandatory field 'currency' not set"),
         )?;
@@ -145,8 +137,8 @@ impl EntryInputBuilder {
     }
 }
 
-fn validate_expression(expr: &String) -> Result<(), String> {
-    CelExpression::try_from(expr.as_str()).map_err(|e| e.to_string())?;
+fn validate_expression(expr: &str) -> Result<(), String> {
+    CelExpression::try_from(expr).map_err(|e| e.to_string())?;
     Ok(())
 }
 fn validate_optional_expression(expr: &Option<Option<String>>) -> Result<(), String> {

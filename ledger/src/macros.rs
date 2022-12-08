@@ -6,6 +6,7 @@ macro_rules! entity_id {
         pub struct $name(uuid::Uuid);
 
         impl $name {
+            #[allow(clippy::new_without_default)]
             pub fn new() -> Self {
                 uuid::Uuid::new_v4().into()
             }
