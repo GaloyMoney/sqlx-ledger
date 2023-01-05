@@ -26,6 +26,14 @@ impl AccountBalance {
             self.details.settled_dr_balance - self.details.settled_cr_balance
         }
     }
+
+    pub fn encumbered(&self) -> Decimal {
+        if self.balance_type == DebitOrCredit::Credit {
+            self.details.encumbered_cr_balance - self.details.encumbered_dr_balance
+        } else {
+            self.details.encumbered_dr_balance - self.details.encumbered_cr_balance
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
