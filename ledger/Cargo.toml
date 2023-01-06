@@ -15,7 +15,7 @@ serde = "1.0.147"
 serde_json = "1.0.87"
 sqlx = { version = "0.6", features = [ "offline", "runtime-tokio-rustls", "postgres", "decimal", "uuid", "chrono", "json" ] }
 thiserror = "1.0.37"
-tokio = { version = "1.21.2", features = ["macros"] }
+tokio = { version = "1.23.1", features = ["macros"] }
 uuid = { version = "1.2.1", features = ["serde", "v4"] }
 cel-interpreter = { path = "../cel-interpreter" }
 rusty-money = { version = "0.4.1", features = ["iso", "crypto"] }
