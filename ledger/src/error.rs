@@ -16,8 +16,8 @@ pub enum SqlxLedgerError {
     SerdeJson(#[from] serde_json::Error),
     #[error("SqlxLedgerError - CelError: {0}")]
     CelError(#[from] CelError),
-    #[error("SqlxLedgerError - TxParamTypeMissmatch: expected {0:?}")]
-    TxParamTypeMissmatch(ParamDataType),
+    #[error("SqlxLedgerError - TxParamTypeMismatch: expected {0:?}")]
+    TxParamTypeMismatch(ParamDataType),
     #[error("SqlxLedgerError - TooManyParameters")]
     TooManyParameters,
     #[error("SqlxLedgerError - UnknownLayer: {0:?}")]

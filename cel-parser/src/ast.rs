@@ -112,7 +112,7 @@ mod tests {
     }
 
     #[test]
-    fn op_precendence() {
+    fn op_precedence() {
         assert_parse_eq(
             "1 + 2 * 3",
             Arithmetic(

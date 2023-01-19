@@ -34,7 +34,7 @@ impl TxParams {
                             cel_map.insert(d.name, v);
                             continue;
                         }
-                        _ => return Err(SqlxLedgerError::TxParamTypeMissmatch(d.r#type)),
+                        _ => return Err(SqlxLedgerError::TxParamTypeMismatch(d.r#type)),
                     }
                 }
                 if let Some(expr) = d.default_expr() {
