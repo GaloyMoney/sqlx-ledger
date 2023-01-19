@@ -112,7 +112,7 @@ impl SqlxLedger {
                 };
                 latest_balances.insert(entry.account_id, balance.update(entry));
             }
-            new_balances.extend(latest_balances.into_iter().map(|(_, v)| v));
+            new_balances.extend(latest_balances.into_values());
 
             self.balances
                 .update_balances(journal_id, new_balances, &mut balance_tx)

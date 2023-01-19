@@ -67,7 +67,7 @@ impl Entries {
                 builder.push_bind(currency.code());
                 builder.push_bind(direction);
                 builder.push_bind(description);
-                builder.push_bind(sequence as i32);
+                builder.push_bind(sequence);
                 builder.push("(SELECT id FROM sqlx_ledger_accounts WHERE id = ");
                 builder.push_bind_unseparated(Uuid::from(account_id));
                 builder.push_unseparated(")");
