@@ -13,7 +13,7 @@ check-code:
 	SQLX_OFFLINE=true cargo audit
 
 test-in-ci:
-	SQLX_OFFLINE=true cargo nextest run --verbose --locked
+	SQLX_OFFLINE=true cargo nextest run --verbose
 
 clean-deps:
 	docker compose down
