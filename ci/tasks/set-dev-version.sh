@@ -5,7 +5,7 @@ VERSION="$(cat version/version)-dev"
 pushd repo
 
 for file in $(find . -mindepth 2 -name Cargo.toml); do
-    sed -i'' "0,/^version/{s/^version.*/version = \"${VERSION}\"/}" ${file}
+    sed -i'' "s/^version.*/version = \"${VERSION}\"/" ${file}
 done
 
 sed -i'' "s/cel-parser\", version = .*/cel-parser\", version = \"${VERSION}\" }/" cel-interpreter/Cargo.toml
