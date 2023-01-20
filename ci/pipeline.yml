@@ -25,7 +25,6 @@ groups:
     - check-code
     - test-integration
     - release
-    - publish
     - set-dev-version
 
 jobs:
@@ -95,27 +94,6 @@ jobs:
       - name: repo
       run:
         path: pipeline-tasks/ci/tasks/update-repo.sh
-  - put: repo
-    params:
-      tag: artifacts/gh-release-tag
-      repository: repo
-      merge: true
-  - put: version
-    params:
-      file: version/version
-  - put: gh-release
-    params:
-      name: artifacts/gh-release-name
-      tag: artifacts/gh-release-tag
-      body: artifacts/gh-release-notes.md
-
-- name: publish
-  public: true
-  plan:
-  - in_parallel:
-    - { get: repo, passed: [release] }
-    - { get: version, passed: [release], trigger: true }
-    - { get: pipeline-tasks }
   - task: publish-to-crates
     config:
       image_resource: #@ rust_task_image_config()
@@ -131,6 +109,20 @@ jobs:
       - path: cargo-target-dir
       run:
         path: pipeline-tasks/ci/tasks/publish-to-crates.sh
+  - in_parallel:
+    - put: repo
+      params:
+        tag: artifacts/gh-release-tag
+        repository: repo
+        merge: true
+    - put: version
+      params:
+        file: version/version
+    - put: gh-release
+      params:
+        name: artifacts/gh-release-name
+        tag: artifacts/gh-release-tag
+        body: artifacts/gh-release-notes.md
 
 - name: set-dev-version
   plan:
