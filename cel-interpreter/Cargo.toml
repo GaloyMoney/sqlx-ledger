@@ -11,7 +11,7 @@ categories = ["parsing", "cel"]
 fail-on-warnings = []
 
 [dependencies]
-cel-parser = { path = "../cel-parser", package = "sqlx-ledger-cel-parser", version = "0.0.1" }
+cel-parser = { path = "../cel-parser", package = "sqlx-ledger-cel-parser", version = "0.0.4-dev" }
 
 chrono = "0.4.22"
 rust_decimal = "1.26.1"
