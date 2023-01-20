@@ -2,7 +2,7 @@
 name = "sqlx-ledger-cel-interpreter"
 description = "An interpreter for the Common Expression Language (CEL)"
 repository = "https://github.com/GaloyMoney/sqlx-ledger"
-version = "0.0.4"
+version = "0.0.5-dev"
 edition = "2021"
 license = "MIT"
 categories = ["parsing", "cel"]
