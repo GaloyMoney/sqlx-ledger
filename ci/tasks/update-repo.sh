@@ -23,6 +23,9 @@ for file in $(find . -mindepth 2 -name Cargo.toml); do
     sed -i'' "0,/version/{s/version.*/version = \"${VERSION}\"/}" ${file}
 done
 
+sed -i'' "s/cel-parser\", version = .*/cel-parser\", version = \"${VERSION}\" }/" cel-interpreter/Cargo.toml
+sed -i'' "s/cel-interpreter\", version = .*/cel-interpreter\", version = \"${VERSION}\" }/" ledger/Cargo.toml
+
 git status
 git add .
 

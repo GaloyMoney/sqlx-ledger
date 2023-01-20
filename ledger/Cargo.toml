@@ -11,7 +11,7 @@ categories = ["accounting", "ledger"]
 fail-on-warnings = []
 
 [dependencies]
-cel-interpreter = { path = "../cel-interpreter", package = "sqlx-ledger-cel-interpreter" }
+cel-interpreter = { path = "../cel-interpreter", package = "sqlx-ledger-cel-interpreter", version = "0.0.1" }
 
 chrono = "0.4.22"
 rust_decimal = "1.26.1"
