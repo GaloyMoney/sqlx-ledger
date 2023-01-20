@@ -1,0 +1,6 @@
+[workspace]
+members = [
+  "cel-parser",
+  "cel-interpreter",
+  "ledger"
+]

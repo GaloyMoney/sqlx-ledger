@@ -1,0 +1,20 @@
+[package]
+name = "sqlx-ledger-cel-parser"
+description = "A parser for the Common Expression Language (CEL)"
+repository = "https://github.com/GaloyMoney/sqlx-ledger"
+version = "0.0.1"
+authors = ["Justin Carter <justin@galoy.io>"]
+edition = "2021"
+license = "MIT"
+categories = ["parsing", "cel"]
+
+[features]
+
+fail-on-warnings = []
+
+[dependencies]
+lalrpop-util = { version = "0.19", features = ["lexer"] }
+regex = "1.4"
+
+[build-dependencies]
+lalrpop = { version = "0.19", features = ["lexer"] }
