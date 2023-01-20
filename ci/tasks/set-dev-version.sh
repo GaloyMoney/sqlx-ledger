@@ -5,9 +5,7 @@ VERSION="$(cat version/version)-dev"
 pushd repo
 
 for file in $(find . -mindepth 2 -name Cargo.toml); do
-    sed -i'' "s/^version.*/version = \"${VERSION}\"/" ${file}
-    name=$(grep "name = " ${file} | sed 's/name = "\(.*\)"/\1/')
-    sed -i'' "/^name = \"${name}/,/version/{s/version.*/version = \"${VERSION}\"/}" ./Cargo.lock
+    sed -i'' "0,/version/{s/version.*/version = \"${VERSION}\"/}" ${file}
 done
 
 if [[ -z $(git config --global user.email) ]]; then

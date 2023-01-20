@@ -103,22 +103,6 @@ jobs:
   - put: version
     params:
       file: version/version
-  - task: github-release
-    config:
-      image_resource: #@ rust_task_image_config()
-      platform: linux
-      inputs:
-      - name: x86_64-apple-darwin
-      - name: x86_64-unknown-linux-musl
-      - name: version
-      - name: pipeline-tasks
-      - name: artifacts
-      outputs:
-      - name: artifacts
-      params:
-        BRANCH: #@ data.values.git_branch
-      run:
-        path: pipeline-tasks/ci/tasks/github-release.sh
   - put: gh-release
     params:
       name: artifacts/gh-release-name
