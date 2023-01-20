@@ -1,5 +1,6 @@
 [package]
 name = "sqlx-ledger-cel-interpreter"
+description = "An interpreter for the Common Expression Language (CEL)"
 repository = "https://github.com/GaloyMoney/sqlx-ledger"
 version = "0.0.4"
 edition = "2021"

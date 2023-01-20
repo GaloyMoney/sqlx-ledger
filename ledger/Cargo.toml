@@ -1,5 +1,6 @@
 [package]
 name = "sqlx-ledger"
+description = "An embeddable double sided accounting ledger built on PG/SQLx"
 repository = "https://github.com/GaloyMoney/sqlx-ledger"
 version = "0.0.4"
 edition = "2021"
