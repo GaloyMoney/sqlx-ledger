@@ -2,7 +2,7 @@
 name = "sqlx-ledger"
 description = "An embeddable double sided accounting ledger built on PG/SQLx"
 repository = "https://github.com/GaloyMoney/sqlx-ledger"
-version = "0.0.6-dev"
+version = "0.1.0"
 edition = "2021"
 license = "MIT"
 categories = ["accounting", "ledger"]
@@ -12,7 +12,7 @@ categories = ["accounting", "ledger"]
 fail-on-warnings = []
 
 [dependencies]
-cel-interpreter = { path = "../cel-interpreter", package = "sqlx-ledger-cel-interpreter", version = "0.0.6-dev" }
+cel-interpreter = { path = "../cel-interpreter", package = "sqlx-ledger-cel-interpreter", version = "0.1.0" }
 
 chrono = "0.4.22"
 rust_decimal = "1.26.1"

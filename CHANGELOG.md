@@ -1,3 +1,91 @@
+# [sqlx-ledger release v0.1.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.1.0)
+
+
+### Bug Fixes
+
+- Referenced dev versions
+- Balance is unique accross journal_id
+- Updating existing balances
+- Null params should become None
+- .gitignore
+- Unique index on balances
+
+### Features
+
+- Add op to cel
+- Balances e2e
+- Journals
+- Create account
+
+### Miscellaneous Tasks
+
+- Descriptions
+- Fix release of worspace versions
+- Update derive_builder requirement from 0.11.2 to 0.12.0
+- Remove --locked when testing
+- Typos
+- Deps and check-code
+- Expose balance.encumbered
+- Clippy
+- Report original expression in CelError
+- Add ledger/sqlx-data.json
+- Implement Multiply op
+- Add settled to AccountBalance
+- Add From<string> for CelValue
+- Improve tracing
+- Add a bunch of tracing
+- Fix TxTemplateCore not being Send
+- Improve metadata handling
+- Expose AccountBalance
+- Fix timestamp TZ
+- Enable post_transaction in tx
+- Small fixes
+- Add From<Decimal> for CelValue
+- Better error output
+- Support DuplicateKey error
+- Add find_by_code to Accounts
+- Optional settes for tx_input
+- Make SqlxLedger Clone
+- Switch pg settings
+- Update sqlx-data
+- Add create_in_tx to account / journal
+- Add id to journal/account builder
+- Add update-account
+- Remove (n) constraint on columns
+- Rename tables with sqlx_ledger prefix
+- Remove unused make commands
+- Currency from CelValue
+- Clippy
+- OptimisticLockingError
+- Return StagedEntries
+- Persist entries
+- Add EntryInput
+- Validate params against defs
+- E2e post-transaction kind of working
+- Remove ledger/cel module
+- Interpreter can lookup values
+- Interpreter wip
+- Cleanup grammar
+- Workspace
+- Prep TxTemplate.prep_tx
+- Transaction wip
+- Params is optional
+- Tx_template pt 1
+- Cel wip
+- Some account scaffolding
+- Initial commit
+
+### Refactor
+
+- External_id is String
+- Expose BalanceDetails
+- Accept impl Into<TxParams> in post_transaction
+- &str for post_transaction tx_template_code
+- More efficient balance selection
+- Fix parser
+- Rename perm -> core
+- Remove current / history tables
+
 # [sqlx-ledger release v0.0.5](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.0.5)
 
 
