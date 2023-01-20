@@ -1,3 +1,14 @@
+# [sqlx-ledger release v0.0.4](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.0.4)
+
+
+### Bug Fixes
+
+- Referenced dev versions
+
+### Miscellaneous Tasks
+
+- Fix release of worspace versions
+
 # [sqlx-ledger release v0.0.3](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.0.3)
 
 

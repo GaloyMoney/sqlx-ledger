@@ -1,7 +1,7 @@
 [package]
 name = "sqlx-ledger"
 repository = "https://github.com/GaloyMoney/sqlx-ledger"
-version = "0.0.4-dev"
+version = "0.0.4"
 edition = "2021"
 license = "MIT"
 categories = ["accounting", "ledger"]
@@ -11,7 +11,7 @@ categories = ["accounting", "ledger"]
 fail-on-warnings = []
 
 [dependencies]
-cel-interpreter = { path = "../cel-interpreter", package = "sqlx-ledger-cel-interpreter", version = "0.0.4-dev" }
+cel-interpreter = { path = "../cel-interpreter", package = "sqlx-ledger-cel-interpreter", version = "0.0.4" }
 
 chrono = "0.4.22"
 rust_decimal = "1.26.1"
