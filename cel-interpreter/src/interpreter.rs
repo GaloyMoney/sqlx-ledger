@@ -182,6 +182,20 @@ fn evaluate_arithmetic(
                 "Invalid operands for multiplication".to_string(),
             )),
         },
+        ArithmeticOp::Add => match (left, right) {
+            (UInt(l), UInt(r)) => Ok(UInt(l + r)),
+            (UInt(l), Int(r)) => Ok(Int(l as i64 + r)),
+            (UInt(l), Double(r)) => Ok(Double(Decimal::from(l) + r)),
+            (Int(l), UInt(r)) => Ok(Int(l + r as i64)),
+            (Int(l), Int(r)) => Ok(Int(l + r)),
+            (Int(l), Double(r)) => Ok(Double(Decimal::from(l) + r)),
+            (Double(l), UInt(r)) => Ok(Double(l + Decimal::from(r))),
+            (Double(l), Int(r)) => Ok(Double(l + Decimal::from(r))),
+            (Double(l), Double(r)) => Ok(Double(l + r)),
+            _ => Err(CelError::Unexpected(
+                "Invalid operands for addition".to_string(),
+            )),
+        },
         _ => unimplemented!(),
     }
 }
