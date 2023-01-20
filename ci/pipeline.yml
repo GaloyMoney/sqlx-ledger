@@ -123,29 +123,6 @@ jobs:
       tag: artifacts/gh-release-tag
       body: artifacts/gh-release-notes.md
 
-- name: publish
-  public: true
-  plan:
-  - in_parallel:
-    - { get: repo, passed: [release] }
-    - { get: version, passed: [release], trigger: true }
-    - { get: pipeline-tasks }
-  - task: publish-to-crates
-    config:
-      image_resource: #@ rust_task_image_config()
-      platform: linux
-      inputs:
-      - name: version
-      - name: pipeline-tasks
-      - name: repo
-      params:
-        CRATES_API_TOKEN: #@ data.values.crates_api_token
-      caches:
-      - path: cargo-home
-      - path: cargo-target-dir
-      run:
-        path: pipeline-tasks/ci/tasks/publish-to-crates.sh
-
 - name: set-dev-version
   plan:
   - in_parallel:
