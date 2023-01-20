@@ -13,6 +13,7 @@ staging_ssh_pub_key: ((staging-ssh.ssh_public_key))
 git_version_branch: version
 gh_org: GaloyMoney
 gh_repository: sqlx-ledger
+crates_api_token: ((crates-api-token.token))
 
 slack_channel: sqlx-ledger-github
 slack_username: concourse
