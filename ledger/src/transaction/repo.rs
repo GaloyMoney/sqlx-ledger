@@ -1,4 +1,4 @@
-use sqlx::{Pool, Postgres, Transaction};
+use sqlx::{Pool, Postgres, Transaction as DbTransaction};
 use uuid::Uuid;
 
 use super::entity::*;
@@ -6,19 +6,17 @@ use crate::{error::*, primitives::*};
 
 #[derive(Debug, Clone)]
 pub struct Transactions {
-    _pool: Pool<Postgres>,
+    pool: Pool<Postgres>,
 }
 
 impl Transactions {
     pub fn new(pool: &Pool<Postgres>) -> Self {
-        Self {
-            _pool: pool.clone(),
-        }
+        Self { pool: pool.clone() }
     }
 
     pub(crate) async fn create_in_tx(
         &self,
-        tx: &mut Transaction<'_, Postgres>,
+        tx: &mut DbTransaction<'_, Postgres>,
         NewTransaction {
             journal_id,
             tx_template_id,
@@ -46,5 +44,35 @@ impl Transactions {
         .fetch_one(&mut *tx)
         .await?;
         Ok((journal_id, TransactionId::from(record.id)))
+    }
+
+    pub async fn list_by_external_ids(
+        &self,
+        ids: Vec<String>,
+    ) -> Result<Vec<Transaction>, SqlxLedgerError> {
+        let records = sqlx::query!(
+            r#"SELECT id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata, created_at, modified_at
+            FROM sqlx_ledger_transactions
+            WHERE external_id = ANY($1)"#,
+            &ids[..]
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(records
+            .into_iter()
+            .map(|row| Transaction {
+                id: TransactionId::from(row.id),
+                version: row.version as u32,
+                journal_id: JournalId::from(row.journal_id),
+                tx_template_id: TxTemplateId::from(row.tx_template_id),
+                effective: row.effective,
+                correlation_id: CorrelationId::from(row.correlation_id),
+                external_id: row.external_id,
+                description: row.description,
+                metadata: row.metadata,
+                created_at: row.created_at,
+                modified_at: row.modified_at,
+            })
+            .collect())
     }
 }

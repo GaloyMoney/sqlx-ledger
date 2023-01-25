@@ -52,6 +52,10 @@ impl SqlxLedger {
         &self.balances
     }
 
+    pub fn transactions(&self) -> &Transactions {
+        &self.transactions
+    }
+
     pub async fn post_transaction(
         &self,
         tx_template_code: &str,

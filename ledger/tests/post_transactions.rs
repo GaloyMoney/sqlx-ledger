@@ -46,6 +46,11 @@ async fn post_transaction() -> anyhow::Result<()> {
             .build()
             .unwrap(),
         ParamDefinition::builder()
+            .name("external_id")
+            .r#type(ParamDataType::STRING)
+            .build()
+            .unwrap(),
+        ParamDefinition::builder()
             .name("effective")
             .r#type(ParamDataType::DATE)
             .default_expr("date()")
@@ -79,6 +84,7 @@ async fn post_transaction() -> anyhow::Result<()> {
             TxInput::builder()
                 .effective("params.effective")
                 .journal_id("params.journal_id")
+                .external_id("params.external_id")
                 .build()
                 .unwrap(),
         )
@@ -86,13 +92,20 @@ async fn post_transaction() -> anyhow::Result<()> {
         .build()
         .unwrap();
     ledger.tx_templates().create(new_template).await.unwrap();
+    let external_id = uuid::Uuid::new_v4().to_string();
     let mut params = TxParams::new();
     params.insert("journal_id", journal_id);
     params.insert("sender", sender_account_id);
     params.insert("recipient", recipient_account_id);
+    params.insert("external_id", external_id.clone());
     ledger
         .post_transaction(&tx_code, Some(params))
         .await
         .unwrap();
+    let transactions = ledger
+        .transactions()
+        .list_by_external_ids(vec![external_id])
+        .await?;
+    assert_eq!(transactions.len(), 1);
     Ok(())
 }
