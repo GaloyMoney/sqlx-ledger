@@ -1,6 +1,7 @@
 use crate::primitives::*;
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
+use serde::de::DeserializeOwned;
 
 pub struct Transaction {
     pub id: TransactionId,
@@ -11,9 +12,18 @@ pub struct Transaction {
     pub correlation_id: CorrelationId,
     pub external_id: String,
     pub description: Option<String>,
-    pub metadata: Option<serde_json::Value>,
+    pub metadata_json: Option<serde_json::Value>,
     pub created_at: DateTime<Utc>,
     pub modified_at: DateTime<Utc>,
+}
+
+impl Transaction {
+    pub fn metadata<T: DeserializeOwned>(&self) -> Result<Option<T>, serde_json::Error> {
+        match self.metadata_json.as_ref() {
+            Some(json) => Ok(serde_json::from_value(json.clone())?),
+            None => Ok(None),
+        }
+    }
 }
 
 #[derive(Builder)]

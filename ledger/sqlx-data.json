@@ -362,6 +362,86 @@
     },
     "query": "INSERT INTO sqlx_ledger_accounts (id, code, name, normal_balance_type, description, status, metadata)\n            VALUES ($1, $2, $3, $4, $5, $6, $7)\n            RETURNING id, version, created_at"
   },
+  "d55823be440da6ca9e60d94299dfa3a4f1df8e71d1459e7889c5cc2450cec803": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "version",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "journal_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "tx_template_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "effective",
+          "ordinal": 4,
+          "type_info": "Date"
+        },
+        {
+          "name": "correlation_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "external_id",
+          "ordinal": 6,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "description",
+          "ordinal": 7,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "metadata",
+          "ordinal": 8,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "modified_at",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "TextArray"
+        ]
+      }
+    },
+    "query": "SELECT id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata, created_at, modified_at\n            FROM sqlx_ledger_transactions\n            WHERE external_id = ANY($1)"
+  },
   "d7e7415d2c9b59e503b1ac93de8bdfbe9083e1cf4a69d2ebe8636c92b882176a": {
     "describe": {
       "columns": [

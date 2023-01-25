@@ -69,7 +69,7 @@ impl Transactions {
                 correlation_id: CorrelationId::from(row.correlation_id),
                 external_id: row.external_id,
                 description: row.description,
-                metadata: row.metadata,
+                metadata_json: row.metadata,
                 created_at: row.created_at,
                 modified_at: row.modified_at,
             })
