@@ -1,3 +1,11 @@
+# [sqlx-ledger release v0.1.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.1.1)
+
+
+### Miscellaneous Tasks
+
+- Expose deserialized metadata on Transaction
+- List_by_external_tx_ids
+
 # [sqlx-ledger release v0.1.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.1.0)
 
 
