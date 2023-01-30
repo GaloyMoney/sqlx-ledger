@@ -56,7 +56,7 @@ pub(crate) enum ContextItem {
 impl std::fmt::Debug for ContextItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ContextItem::Value(val) => write!(f, "Value({:?})", val),
+            ContextItem::Value(val) => write!(f, "Value({val:?})"),
             ContextItem::Function(_) => write!(f, "Function"),
         }
     }

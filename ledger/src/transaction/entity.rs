@@ -1,8 +1,9 @@
 use crate::primitives::*;
 use chrono::{DateTime, NaiveDate, Utc};
 use derive_builder::Builder;
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Transaction {
     pub id: TransactionId,
     pub version: u32,
@@ -12,6 +13,7 @@ pub struct Transaction {
     pub correlation_id: CorrelationId,
     pub external_id: String,
     pub description: Option<String>,
+    #[serde(rename = "metadata")]
     pub metadata_json: Option<serde_json::Value>,
     pub created_at: DateTime<Utc>,
     pub modified_at: DateTime<Utc>,

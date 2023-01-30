@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
+use serde::{Deserialize, Serialize};
 
 use crate::entry::StagedEntry;
 use crate::primitives::*;
@@ -36,7 +37,7 @@ impl AccountBalance {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BalanceDetails {
     pub journal_id: JournalId,
     pub account_id: AccountId,

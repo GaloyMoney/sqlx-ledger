@@ -1,7 +1,7 @@
 mod helpers;
 
 use rand::distributions::{Alphanumeric, DistString};
-use sqlx_ledger::{account::*, journal::*, tx_template::*, *};
+use sqlx_ledger::{account::*, event::*, journal::*, tx_template::*, *};
 
 #[tokio::test]
 async fn post_transaction() -> anyhow::Result<()> {
@@ -12,6 +12,7 @@ async fn post_transaction() -> anyhow::Result<()> {
     let name = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
     let new_journal = NewJournal::builder().name(name).build().unwrap();
     let ledger = SqlxLedger::new(&pool);
+    let mut event_stream = ledger.event_stream().await?;
 
     let journal_id = ledger.journals().create(new_journal).await.unwrap();
     let code = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
@@ -85,6 +86,7 @@ async fn post_transaction() -> anyhow::Result<()> {
                 .effective("params.effective")
                 .journal_id("params.journal_id")
                 .external_id("params.external_id")
+                .metadata(r#"{"foo": "bar"}"#)
                 .build()
                 .unwrap(),
         )
@@ -107,5 +109,19 @@ async fn post_transaction() -> anyhow::Result<()> {
         .list_by_external_ids(vec![external_id])
         .await?;
     assert_eq!(transactions.len(), 1);
+
+    assert_eq!(
+        event_stream.recv().await.unwrap().r#type,
+        SqlxLedgerEventType::TransactionCreated
+    );
+    assert_eq!(
+        event_stream.recv().await.unwrap().r#type,
+        SqlxLedgerEventType::BalanceUpdated
+    );
+    assert_eq!(
+        event_stream.recv().await.unwrap().r#type,
+        SqlxLedgerEventType::BalanceUpdated
+    );
+
     Ok(())
 }

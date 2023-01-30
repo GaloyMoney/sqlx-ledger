@@ -38,8 +38,7 @@ impl ParamDefinitionBuilder {
             let specified_type = self.r#type.as_ref().unwrap();
             if &param_type != specified_type {
                 return Err(format!(
-                    "Default expression type {:?} does not match parameter type {:?}",
-                    param_type, specified_type
+                    "Default expression type {param_type:?} does not match parameter type {specified_type:?}"
                 ));
             }
         }
@@ -71,7 +70,7 @@ impl TryFrom<&CelValue> for ParamDataType {
             Date => Ok(ParamDataType::DATE),
             Uuid => Ok(ParamDataType::UUID),
             Double => Ok(ParamDataType::DECIMAL),
-            _ => Err(format!("Unsupported type: {:?}", value)),
+            _ => Err(format!("Unsupported type: {value:?}")),
         }
     }
 }

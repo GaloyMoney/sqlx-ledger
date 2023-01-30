@@ -4,6 +4,7 @@
 pub mod account;
 pub mod balance;
 pub mod entry;
+pub mod event;
 pub mod journal;
 pub mod transaction;
 pub mod tx_template;
