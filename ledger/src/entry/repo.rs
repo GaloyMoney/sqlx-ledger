@@ -101,23 +101,28 @@ impl Entries {
         Ok(ret)
     }
 
-    pub async fn list_by_transaction_id(
+    pub async fn list_by_transaction_ids(
         &self,
-        tx_id: TransactionId,
-    ) -> Result<Vec<Entry>, SqlxLedgerError> {
+        tx_ids: Vec<TransactionId>,
+    ) -> Result<HashMap<TransactionId, Vec<Entry>>, SqlxLedgerError> {
+        let tx_ids: Vec<Uuid> = tx_ids.into_iter().map(|id| Uuid::from(id)).collect();
         let records = sqlx::query!(
             r#"SELECT id, version, transaction_id, account_id, journal_id, entry_type, layer as "layer: Layer", units, currency, direction as "direction: DebitOrCredit", sequence, description, created_at, modified_at
             FROM sqlx_ledger_entries
-            WHERE transaction_id = $1"#,
-            Uuid::from(tx_id)
+            WHERE transaction_id = ANY($1)"#,
+            &tx_ids[..]
         ).fetch_all(&self.pool).await?;
 
-        Ok(records
-            .into_iter()
-            .map(|row| Entry {
+        let mut transactions: HashMap<TransactionId, Vec<Entry>> = HashMap::new();
+
+        for row in records {
+            let transaction_id = TransactionId::from(row.transaction_id);
+            let entry = transactions.entry(transaction_id).or_default();
+
+            entry.push(Entry {
                 id: EntryId::from(row.id),
+                transaction_id,
                 version: row.version as u32,
-                transaction_id: TransactionId::from(row.transaction_id),
                 account_id: AccountId::from(row.account_id),
                 journal_id: JournalId::from(row.journal_id),
                 entry_type: row.entry_type,
@@ -131,6 +136,8 @@ impl Entries {
                 created_at: row.created_at,
                 modified_at: row.modified_at,
             })
-            .collect())
+        }
+
+        Ok(transactions)
     }
 }
