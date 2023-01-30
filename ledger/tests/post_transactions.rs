@@ -112,7 +112,7 @@ async fn post_transaction() -> anyhow::Result<()> {
 
     let entries = ledger
         .entries()
-        .list_by_external_id(external_id.clone())
+        .list_by_transaction_id(transactions[0].id)
         .await?;
     assert_eq!(entries.len(), 2);
 

@@ -101,16 +101,15 @@ impl Entries {
         Ok(ret)
     }
 
-    pub async fn list_by_external_id(
+    pub async fn list_by_transaction_id(
         &self,
-        external_id: String,
+        tx_id: TransactionId,
     ) -> Result<Vec<Entry>, SqlxLedgerError> {
         let records = sqlx::query!(
-            r#"SELECT e.id, e.version, e.transaction_id, e.account_id, e.journal_id, e.entry_type, e.layer as "layer: Layer", e.units, e.currency, e.direction as "direction: DebitOrCredit", e.sequence, e.description, e.created_at, e.modified_at
-            FROM sqlx_ledger_entries e
-            JOIN sqlx_ledger_transactions t ON e.transaction_id = t.id
-            WHERE t.external_id = $1"#,
-            external_id
+            r#"SELECT id, version, transaction_id, account_id, journal_id, entry_type, layer as "layer: Layer", units, currency, direction as "direction: DebitOrCredit", sequence, description, created_at, modified_at
+            FROM sqlx_ledger_entries
+            WHERE transaction_id = $1"#,
+            Uuid::from(tx_id)
         ).fetch_all(&self.pool).await?;
 
         Ok(records
