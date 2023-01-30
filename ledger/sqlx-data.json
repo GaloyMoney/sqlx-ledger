@@ -305,6 +305,125 @@
     },
     "query": "INSERT INTO sqlx_ledger_tx_templates (id, code, description, params, tx_input, entries, metadata)\n            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)\n            RETURNING id, version, created_at"
   },
+  "b0c8cdc4866bee576bd760d04693a3e4cc83ddc151aab9f2eb1952bfa5e29cab": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "version",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "transaction_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "journal_id",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "entry_type",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "layer: Layer",
+          "ordinal": 6,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "settled",
+                  "pending",
+                  "encumbered"
+                ]
+              },
+              "name": "layer"
+            }
+          }
+        },
+        {
+          "name": "units",
+          "ordinal": 7,
+          "type_info": "Numeric"
+        },
+        {
+          "name": "currency",
+          "ordinal": 8,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "direction: DebitOrCredit",
+          "ordinal": 9,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "debit",
+                  "credit"
+                ]
+              },
+              "name": "debitorcredit"
+            }
+          }
+        },
+        {
+          "name": "sequence",
+          "ordinal": 10,
+          "type_info": "Int4"
+        },
+        {
+          "name": "description",
+          "ordinal": 11,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "modified_at",
+          "ordinal": 13,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "SELECT id, version, transaction_id, account_id, journal_id, entry_type, layer as \"layer: Layer\", units, currency, direction as \"direction: DebitOrCredit\", sequence, description, created_at, modified_at\n            FROM sqlx_ledger_entries\n            WHERE transaction_id = ANY($1) ORDER BY transaction_id ASC, sequence ASC, version DESC"
+  },
   "c7f4751f63df559566362c0d251f9833a1ce2fd44bad7e61ba04f8e4526e1e73": {
     "describe": {
       "columns": [
@@ -480,124 +599,5 @@
       }
     },
     "query": "INSERT INTO sqlx_ledger_transactions (id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata)\n            VALUES ($1, 1, (SELECT id FROM sqlx_ledger_journals WHERE id = $2 LIMIT 1), (SELECT id FROM sqlx_ledger_tx_templates WHERE id = $3 LIMIT 1), $4, $5, $6, $7, $8)\n            RETURNING id, version, created_at"
-  },
-  "e7614c0042dc5f7b3ac37c55ad8b4752c7d64a509c29e95f9d56db831602ff58": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "version",
-          "ordinal": 1,
-          "type_info": "Int4"
-        },
-        {
-          "name": "transaction_id",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "account_id",
-          "ordinal": 3,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "journal_id",
-          "ordinal": 4,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "entry_type",
-          "ordinal": 5,
-          "type_info": "Varchar"
-        },
-        {
-          "name": "layer: Layer",
-          "ordinal": 6,
-          "type_info": {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "settled",
-                  "pending",
-                  "encumbered"
-                ]
-              },
-              "name": "layer"
-            }
-          }
-        },
-        {
-          "name": "units",
-          "ordinal": 7,
-          "type_info": "Numeric"
-        },
-        {
-          "name": "currency",
-          "ordinal": 8,
-          "type_info": "Varchar"
-        },
-        {
-          "name": "direction: DebitOrCredit",
-          "ordinal": 9,
-          "type_info": {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "debit",
-                  "credit"
-                ]
-              },
-              "name": "debitorcredit"
-            }
-          }
-        },
-        {
-          "name": "sequence",
-          "ordinal": 10,
-          "type_info": "Int4"
-        },
-        {
-          "name": "description",
-          "ordinal": 11,
-          "type_info": "Varchar"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 12,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "modified_at",
-          "ordinal": 13,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "SELECT id, version, transaction_id, account_id, journal_id, entry_type, layer as \"layer: Layer\", units, currency, direction as \"direction: DebitOrCredit\", sequence, description, created_at, modified_at\n            FROM sqlx_ledger_entries\n            WHERE transaction_id = ANY($1)"
   }
 }

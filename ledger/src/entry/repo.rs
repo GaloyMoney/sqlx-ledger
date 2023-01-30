@@ -105,18 +105,27 @@ impl Entries {
         &self,
         tx_ids: Vec<TransactionId>,
     ) -> Result<HashMap<TransactionId, Vec<Entry>>, SqlxLedgerError> {
-        let tx_ids: Vec<Uuid> = tx_ids.into_iter().map(|id| Uuid::from(id)).collect();
+        let tx_ids: Vec<Uuid> = tx_ids.into_iter().map(Uuid::from).collect();
         let records = sqlx::query!(
             r#"SELECT id, version, transaction_id, account_id, journal_id, entry_type, layer as "layer: Layer", units, currency, direction as "direction: DebitOrCredit", sequence, description, created_at, modified_at
             FROM sqlx_ledger_entries
-            WHERE transaction_id = ANY($1)"#,
+            WHERE transaction_id = ANY($1) ORDER BY transaction_id ASC, sequence ASC, version DESC"#,
             &tx_ids[..]
         ).fetch_all(&self.pool).await?;
 
         let mut transactions: HashMap<TransactionId, Vec<Entry>> = HashMap::new();
 
+        let mut current_tx_id = TransactionId::new();
+        let mut last_sequence = 0;
         for row in records {
             let transaction_id = TransactionId::from(row.transaction_id);
+            // Skip old entry versions (description is mutable)
+            if last_sequence == row.sequence && transaction_id == current_tx_id {
+                continue;
+            }
+            current_tx_id = transaction_id;
+            last_sequence = row.sequence;
+
             let entry = transactions.entry(transaction_id).or_default();
 
             entry.push(Entry {
