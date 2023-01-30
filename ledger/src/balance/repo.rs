@@ -26,16 +26,16 @@ impl Balances {
     ) -> Result<Option<AccountBalance>, SqlxLedgerError> {
         let record = sqlx::query!(
             r#"SELECT
-              a.normal_balance_type as "normal_balance_type: DebitOrCredit", b.journal_id, b.account_id, entry_id, b.currency,
-              settled_dr_balance, settled_cr_balance, settled_entry_id, settled_modified_at,
-              pending_dr_balance, pending_cr_balance, pending_entry_id, pending_modified_at,
-              encumbered_dr_balance, encumbered_cr_balance, encumbered_entry_id, encumbered_modified_at,
-              c.version, modified_at, created_at
-                FROM sqlx_ledger_balances b JOIN (
-                  SELECT * FROM sqlx_ledger_current_balances WHERE journal_id = $1 AND account_id = $2 AND currency = $3 ) c
-                ON b.journal_id = c.journal_id AND b.account_id = c.account_id AND b.currency = c.currency AND b.version = c.version
-                JOIN ( SELECT id, normal_balance_type FROM sqlx_ledger_accounts WHERE id = $2 LIMIT 1 ) a
-                  ON a.id = b.account_id"#,
+                 a.normal_balance_type as "normal_balance_type: DebitOrCredit", b.journal_id, b.account_id, entry_id, b.currency,
+                 settled_dr_balance, settled_cr_balance, settled_entry_id, settled_modified_at,
+                 pending_dr_balance, pending_cr_balance, pending_entry_id, pending_modified_at,
+                 encumbered_dr_balance, encumbered_cr_balance, encumbered_entry_id, encumbered_modified_at,
+                 version, modified_at, created_at
+               FROM sqlx_ledger_balances b
+               JOIN ( SELECT id, normal_balance_type FROM sqlx_ledger_accounts WHERE id = $2 LIMIT 1 ) a
+                 ON a.id = b.account_id
+               WHERE journal_id = $1 AND account_id = $2 AND currency = $3
+               ORDER BY version DESC LIMIT 1"#,
             Uuid::from(journal_id),
             Uuid::from(account_id),
             currency.code()
