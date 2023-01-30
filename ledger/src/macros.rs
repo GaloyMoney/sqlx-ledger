@@ -1,7 +1,18 @@
 #[macro_export]
 macro_rules! entity_id {
     ($name:ident) => {
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Deserialize)]
+        #[derive(
+            Debug,
+            Clone,
+            Copy,
+            PartialEq,
+            Eq,
+            PartialOrd,
+            Ord,
+            Hash,
+            serde::Deserialize,
+            serde::Serialize,
+        )]
         #[serde(transparent)]
         pub struct $name(uuid::Uuid);
 

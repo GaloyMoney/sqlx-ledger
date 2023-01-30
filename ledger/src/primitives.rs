@@ -1,6 +1,8 @@
 use crate::error::*;
-use cel_interpreter::{CelResult, CelValue};
 use rusty_money::{crypto, iso};
+
+use cel_interpreter::{CelResult, CelValue};
+use serde::{Deserialize, Serialize};
 
 crate::entity_id! { AccountId }
 crate::entity_id! { JournalId }
@@ -67,7 +69,9 @@ impl Default for Status {
     }
 }
 
-#[derive(Debug, Clone, Copy, Eq)]
+#[derive(Debug, Clone, Copy, Eq, Serialize, Deserialize)]
+#[serde(try_from = "String")]
+#[serde(into = "&str")]
 pub enum Currency {
     Iso(&'static iso::Currency),
     Crypto(&'static crypto::Currency),
@@ -111,6 +115,20 @@ impl std::str::FromStr for Currency {
                 _ => Err(SqlxLedgerError::UnknownCurrency(s.to_string())),
             },
         }
+    }
+}
+
+impl<'a> TryFrom<String> for Currency {
+    type Error = SqlxLedgerError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        s.parse()
+    }
+}
+
+impl From<Currency> for &'static str {
+    fn from(c: Currency) -> Self {
+        c.code()
     }
 }
 

@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use cel_interpreter::CelError;
 
-use crate::{primitives::*, tx_template::ParamDataType};
+use crate::{event::SqlxLedgerEvent, primitives::*, tx_template::ParamDataType};
 
 #[derive(Error, Debug)]
 pub enum SqlxLedgerError {
@@ -14,6 +14,8 @@ pub enum SqlxLedgerError {
     DuplicateKey(Box<dyn DatabaseError>),
     #[error("SqlxLedgerError - SerdeJson: {0}")]
     SerdeJson(#[from] serde_json::Error),
+    #[error("SqlxLedgerError - SendEvent: {0}")]
+    SendEvent(#[from] tokio::sync::broadcast::error::SendError<SqlxLedgerEvent>),
     #[error("SqlxLedgerError - CelError: {0}")]
     CelError(#[from] CelError),
     #[error("SqlxLedgerError - TxParamTypeMismatch: expected {0:?}")]
