@@ -16,6 +16,7 @@ pub struct SqlxLedgerEvent {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(clippy::large_enum_variant)]
 pub enum SqlxLedgerEventData {
     BalanceUpdated(BalanceDetails),
     TransactionCreated(Transaction),

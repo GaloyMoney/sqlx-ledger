@@ -118,7 +118,7 @@ impl std::str::FromStr for Currency {
     }
 }
 
-impl<'a> TryFrom<String> for Currency {
+impl TryFrom<String> for Currency {
     type Error = SqlxLedgerError;
 
     fn try_from(s: String) -> Result<Self, Self::Error> {
