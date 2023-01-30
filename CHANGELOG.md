@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.2.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.2.1)
+
+
+### Features
+
+- Use entry entity outside of crate (#11)
+
 # [sqlx-ledger release v0.2.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.2.0)
 
 
