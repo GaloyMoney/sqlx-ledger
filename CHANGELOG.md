@@ -1,3 +1,17 @@
+# [sqlx-ledger release v0.2.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.2.0)
+
+
+### Features
+
+- List entries by external id (#9)
+- [**breaking**] Expose ledger.event_stream
+
+### Miscellaneous Tasks
+
+- Clippy
+- Use DESC LIMIT 1 to get current balance
+- Exclude CHANGELOG in typos
+
 # [sqlx-ledger release v0.1.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.1.1)
 
 
