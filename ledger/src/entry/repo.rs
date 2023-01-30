@@ -3,14 +3,14 @@ use rust_decimal::Decimal;
 use sqlx::{PgPool, Postgres, QueryBuilder, Row, Transaction};
 use uuid::Uuid;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 use super::entity::*;
 use crate::{error::*, primitives::*};
 
 #[derive(Debug, Clone)]
 pub struct Entries {
-    _pool: PgPool,
+    pool: PgPool,
 }
 
 #[derive(Debug)]
@@ -26,9 +26,7 @@ pub(crate) struct StagedEntry {
 
 impl Entries {
     pub fn new(pool: &PgPool) -> Self {
-        Self {
-            _pool: pool.clone(),
-        }
+        Self { pool: pool.clone() }
     }
 
     pub(crate) async fn create_all<'a>(
@@ -101,5 +99,39 @@ impl Entries {
         }
 
         Ok(ret)
+    }
+
+    pub async fn list_by_external_id(
+        &self,
+        external_id: String,
+    ) -> Result<Vec<Entry>, SqlxLedgerError> {
+        let records = sqlx::query!(
+            r#"SELECT e.id, e.version, e.transaction_id, e.account_id, e.journal_id, e.entry_type, e.layer as "layer: Layer", e.units, e.currency, e.direction as "direction: DebitOrCredit", e.sequence, e.description, e.created_at, e.modified_at
+            FROM sqlx_ledger_entries e
+            JOIN sqlx_ledger_transactions t ON e.transaction_id = t.id
+            WHERE t.external_id = $1"#,
+            external_id
+        ).fetch_all(&self.pool).await?;
+
+        Ok(records
+            .into_iter()
+            .map(|row| Entry {
+                id: EntryId::from(row.id),
+                version: row.version as u32,
+                transaction_id: TransactionId::from(row.transaction_id),
+                account_id: AccountId::from(row.account_id),
+                journal_id: JournalId::from(row.journal_id),
+                entry_type: row.entry_type,
+                layer: row.layer,
+                units: row.units,
+                currency: Currency::from_str(row.currency.as_str())
+                    .expect("Couldn't convert currency"),
+                direction: row.direction,
+                sequence: row.sequence as u32,
+                description: row.description,
+                created_at: row.created_at,
+                modified_at: row.modified_at,
+            })
+            .collect())
     }
 }
