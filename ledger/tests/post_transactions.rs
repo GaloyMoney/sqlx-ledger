@@ -106,9 +106,17 @@ async fn post_transaction() -> anyhow::Result<()> {
         .unwrap();
     let transactions = ledger
         .transactions()
-        .list_by_external_ids(vec![external_id])
+        .list_by_external_ids(vec![external_id.clone()])
         .await?;
     assert_eq!(transactions.len(), 1);
+
+    let entries = ledger
+        .entries()
+        .list_by_transaction_ids(vec![transactions[0].id])
+        .await?;
+
+    assert!(entries.get(&transactions[0].id).is_some());
+    assert_eq!(entries.get(&transactions[0].id).unwrap().len(), 2);
 
     assert_eq!(
         event_stream.recv().await.unwrap().r#type,

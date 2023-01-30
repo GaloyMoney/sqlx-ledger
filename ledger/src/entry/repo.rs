@@ -3,14 +3,14 @@ use rust_decimal::Decimal;
 use sqlx::{PgPool, Postgres, QueryBuilder, Row, Transaction};
 use uuid::Uuid;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 use super::entity::*;
 use crate::{error::*, primitives::*};
 
 #[derive(Debug, Clone)]
 pub struct Entries {
-    _pool: PgPool,
+    pool: PgPool,
 }
 
 #[derive(Debug)]
@@ -26,9 +26,7 @@ pub(crate) struct StagedEntry {
 
 impl Entries {
     pub fn new(pool: &PgPool) -> Self {
-        Self {
-            _pool: pool.clone(),
-        }
+        Self { pool: pool.clone() }
     }
 
     pub(crate) async fn create_all<'a>(
@@ -101,5 +99,54 @@ impl Entries {
         }
 
         Ok(ret)
+    }
+
+    pub async fn list_by_transaction_ids(
+        &self,
+        tx_ids: Vec<TransactionId>,
+    ) -> Result<HashMap<TransactionId, Vec<Entry>>, SqlxLedgerError> {
+        let tx_ids: Vec<Uuid> = tx_ids.into_iter().map(Uuid::from).collect();
+        let records = sqlx::query!(
+            r#"SELECT id, version, transaction_id, account_id, journal_id, entry_type, layer as "layer: Layer", units, currency, direction as "direction: DebitOrCredit", sequence, description, created_at, modified_at
+            FROM sqlx_ledger_entries
+            WHERE transaction_id = ANY($1) ORDER BY transaction_id ASC, sequence ASC, version DESC"#,
+            &tx_ids[..]
+        ).fetch_all(&self.pool).await?;
+
+        let mut transactions: HashMap<TransactionId, Vec<Entry>> = HashMap::new();
+
+        let mut current_tx_id = TransactionId::new();
+        let mut last_sequence = 0;
+        for row in records {
+            let transaction_id = TransactionId::from(row.transaction_id);
+            // Skip old entry versions (description is mutable)
+            if last_sequence == row.sequence && transaction_id == current_tx_id {
+                continue;
+            }
+            current_tx_id = transaction_id;
+            last_sequence = row.sequence;
+
+            let entry = transactions.entry(transaction_id).or_default();
+
+            entry.push(Entry {
+                id: EntryId::from(row.id),
+                transaction_id,
+                version: row.version as u32,
+                account_id: AccountId::from(row.account_id),
+                journal_id: JournalId::from(row.journal_id),
+                entry_type: row.entry_type,
+                layer: row.layer,
+                units: row.units,
+                currency: Currency::from_str(row.currency.as_str())
+                    .expect("Couldn't convert currency"),
+                direction: row.direction,
+                sequence: row.sequence as u32,
+                description: row.description,
+                created_at: row.created_at,
+                modified_at: row.modified_at,
+            })
+        }
+
+        Ok(transactions)
     }
 }
