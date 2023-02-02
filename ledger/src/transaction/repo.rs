@@ -17,6 +17,7 @@ impl Transactions {
     pub(crate) async fn create_in_tx(
         &self,
         tx: &mut DbTransaction<'_, Postgres>,
+        tx_id: TransactionId,
         NewTransaction {
             journal_id,
             tx_template_id,
@@ -27,7 +28,7 @@ impl Transactions {
             metadata,
         }: NewTransaction,
     ) -> Result<(JournalId, TransactionId), SqlxLedgerError> {
-        let id = Uuid::new_v4();
+        let id = Uuid::from(tx_id);
         let record = sqlx::query!(
             r#"INSERT INTO sqlx_ledger_transactions (id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata)
             VALUES ($1, 1, (SELECT id FROM sqlx_ledger_journals WHERE id = $2 LIMIT 1), (SELECT id FROM sqlx_ledger_tx_templates WHERE id = $3 LIMIT 1), $4, $5, $6, $7, $8)
