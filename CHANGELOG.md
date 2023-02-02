@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.3.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.3.0)
+
+
+### Features
+
+- [**breaking**] Post_transaction requires tx_id for idempotency
+
 # [sqlx-ledger release v0.2.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.2.1)
 
 
