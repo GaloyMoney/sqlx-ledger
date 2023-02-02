@@ -66,11 +66,12 @@ impl SqlxLedger {
 
     pub async fn post_transaction(
         &self,
+        tx_id: TransactionId,
         tx_template_code: &str,
         params: Option<impl Into<TxParams> + std::fmt::Debug>,
     ) -> Result<(), SqlxLedgerError> {
         let tx = self.pool.begin().await?;
-        self.post_transaction_in_tx(tx, tx_template_code, params)
+        self.post_transaction_in_tx(tx, tx_id, tx_template_code, params)
             .await?;
         Ok(())
     }
@@ -79,6 +80,7 @@ impl SqlxLedger {
     pub async fn post_transaction_in_tx(
         &self,
         mut tx: Transaction<'_, Postgres>,
+        tx_id: TransactionId,
         tx_template_code: &str,
         params: Option<impl Into<TxParams> + std::fmt::Debug>,
     ) -> Result<(), SqlxLedgerError> {
@@ -88,7 +90,10 @@ impl SqlxLedger {
             // so we need to drop it before the next await
             tx_template.prep_tx(params.map(|p| p.into()).unwrap_or_else(TxParams::new))?
         };
-        let (journal_id, tx_id) = self.transactions.create_in_tx(&mut tx, new_tx).await?;
+        let (journal_id, tx_id) = self
+            .transactions
+            .create_in_tx(&mut tx, tx_id, new_tx)
+            .await?;
         let entries = self
             .entries
             .create_all(journal_id, tx_id, new_entries, &mut tx)

@@ -101,7 +101,7 @@ async fn post_transaction() -> anyhow::Result<()> {
     params.insert("recipient", recipient_account_id);
     params.insert("external_id", external_id.clone());
     ledger
-        .post_transaction(&tx_code, Some(params))
+        .post_transaction(TransactionId::new(), &tx_code, Some(params))
         .await
         .unwrap();
     let transactions = ledger
