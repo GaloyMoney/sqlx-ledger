@@ -1,3 +1,14 @@
+# [sqlx-ledger release v0.4.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.4.0)
+
+
+### Features
+
+- [**breaking**] Better event interface
+
+### Miscellaneous Tasks
+
+- Derive Clone for EventSubscriber
+
 # [sqlx-ledger release v0.3.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.3.0)
 
 
