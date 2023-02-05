@@ -12,7 +12,6 @@ async fn post_transaction() -> anyhow::Result<()> {
     let name = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
     let new_journal = NewJournal::builder().name(name).build().unwrap();
     let ledger = SqlxLedger::new(&pool);
-    let mut event_stream = ledger.event_stream().await?;
 
     let journal_id = ledger.journals().create(new_journal).await.unwrap();
     let code = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
@@ -94,12 +93,20 @@ async fn post_transaction() -> anyhow::Result<()> {
         .build()
         .unwrap();
     ledger.tx_templates().create(new_template).await.unwrap();
+
+    let events = ledger.events(10).await?;
+    let mut sender_account_balance_events =
+        events.account_balance(journal_id, sender_account_id).await;
+    let mut all_events = events.all();
+    let mut journal_events = events.journal(journal_id).await;
+
     let external_id = uuid::Uuid::new_v4().to_string();
     let mut params = TxParams::new();
     params.insert("journal_id", journal_id);
     params.insert("sender", sender_account_id);
     params.insert("recipient", recipient_account_id);
     params.insert("external_id", external_id.clone());
+
     ledger
         .post_transaction(TransactionId::new(), &tx_code, Some(params))
         .await
@@ -119,15 +126,31 @@ async fn post_transaction() -> anyhow::Result<()> {
     assert_eq!(entries.get(&transactions[0].id).unwrap().len(), 2);
 
     assert_eq!(
-        event_stream.recv().await.unwrap().r#type,
-        SqlxLedgerEventType::TransactionCreated
-    );
-    assert_eq!(
-        event_stream.recv().await.unwrap().r#type,
+        sender_account_balance_events.recv().await.unwrap().r#type,
         SqlxLedgerEventType::BalanceUpdated
     );
     assert_eq!(
-        event_stream.recv().await.unwrap().r#type,
+        all_events.recv().await.unwrap().r#type,
+        SqlxLedgerEventType::TransactionCreated
+    );
+    assert_eq!(
+        all_events.recv().await.unwrap().r#type,
+        SqlxLedgerEventType::BalanceUpdated
+    );
+    assert_eq!(
+        all_events.recv().await.unwrap().r#type,
+        SqlxLedgerEventType::BalanceUpdated
+    );
+    assert_eq!(
+        journal_events.recv().await.unwrap().r#type,
+        SqlxLedgerEventType::TransactionCreated
+    );
+    assert_eq!(
+        journal_events.recv().await.unwrap().r#type,
+        SqlxLedgerEventType::BalanceUpdated
+    );
+    assert_eq!(
+        journal_events.recv().await.unwrap().r#type,
         SqlxLedgerEventType::BalanceUpdated
     );
 

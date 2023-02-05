@@ -119,8 +119,7 @@ mod tests {
                 Add,
                 Literal(Int(1)).into(),
                 Arithmetic(Multiply, Literal(Int(2)).into(), Literal(Int(3)).into()).into(),
-            )
-            .into(),
+            ),
         );
         assert_parse_eq(
             "1 * 2 + 3",
@@ -128,8 +127,7 @@ mod tests {
                 Add,
                 Arithmetic(Multiply, Literal(Int(1)).into(), Literal(Int(2)).into()).into(),
                 Literal(Int(3)).into(),
-            )
-            .into(),
+            ),
         );
         assert_parse_eq(
             "1 * (2 + 3)",
@@ -137,8 +135,7 @@ mod tests {
                 Multiply,
                 Literal(Int(1)).into(),
                 Arithmetic(Add, Literal(Int(2)).into(), Literal(Int(3)).into()).into(),
-            )
-            .into(),
+            ),
         )
     }
 
@@ -174,8 +171,7 @@ mod tests {
                 )
                 .into(),
                 Index(Literal(Int(1)).into()).into(),
-            )
-            .into(),
+            ),
         )
     }
 }
