@@ -170,7 +170,7 @@ mod tests {
             .tx_input(
                 TxInput::builder()
                     .effective("date('2022-11-01')")
-                    .journal_id(format!("'{}'", journal_id))
+                    .journal_id(format!("'{journal_id}'"))
                     .build()
                     .unwrap(),
             )

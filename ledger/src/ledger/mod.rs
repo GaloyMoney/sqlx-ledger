@@ -1,19 +1,11 @@
 use sqlx::{Acquire, PgPool, Postgres, Transaction};
-use tokio::sync::broadcast;
 use tracing::instrument;
 
 use std::collections::HashMap;
 
 use crate::{
-    account::Accounts,
-    balance::*,
-    entry::*,
-    error::*,
-    event::{self, SqlxLedgerEvent},
-    journal::*,
-    primitives::*,
-    transaction::*,
-    tx_template::*,
+    account::Accounts, balance::*, entry::*, error::*, event::EventSubscriber, journal::*,
+    primitives::*, transaction::*, tx_template::*,
 };
 
 #[derive(Debug, Clone)]
@@ -140,9 +132,7 @@ impl SqlxLedger {
         Ok(())
     }
 
-    pub async fn event_stream(
-        &self,
-    ) -> Result<broadcast::Receiver<SqlxLedgerEvent>, SqlxLedgerError> {
-        event::subscribe(&self.pool).await
+    pub async fn events(&self, buffer: usize) -> Result<EventSubscriber, SqlxLedgerError> {
+        EventSubscriber::connect(&self.pool, buffer).await
     }
 }
