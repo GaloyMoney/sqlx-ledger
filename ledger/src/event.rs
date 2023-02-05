@@ -16,6 +16,7 @@ use crate::{
     balance::BalanceDetails, transaction::Transaction, AccountId, JournalId, SqlxLedgerError,
 };
 
+#[derive(Debug, Clone)]
 pub struct EventSubscriber {
     buffer: usize,
     #[allow(clippy::type_complexity)]
