@@ -175,7 +175,7 @@ pub(crate) async fn subscribe(
     Ok(recv)
 }
 
-#[instrument(skip(sender), err)]
+#[instrument(name = "sqlx_ledger.notification_received", skip(sender), err)]
 fn sqlx_ledger_notification_received(
     payload: &str,
     sender: &broadcast::Sender<SqlxLedgerEvent>,
