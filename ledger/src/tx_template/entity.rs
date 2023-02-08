@@ -4,9 +4,12 @@ use serde::Serialize;
 use cel_interpreter::CelExpression;
 
 use super::param_definition::*;
+use crate::primitives::*;
 
 #[derive(Builder)]
 pub struct NewTxTemplate {
+    #[builder(setter(into))]
+    pub(super) id: TxTemplateId,
     #[builder(setter(into))]
     pub(super) code: String,
     #[builder(setter(strip_option, into), default)]
@@ -21,7 +24,9 @@ pub struct NewTxTemplate {
 
 impl NewTxTemplate {
     pub fn builder() -> NewTxTemplateBuilder {
-        NewTxTemplateBuilder::default()
+        let mut builder = NewTxTemplateBuilder::default();
+        builder.id(TxTemplateId::new());
+        builder
     }
 }
 

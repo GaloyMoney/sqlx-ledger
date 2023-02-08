@@ -14,6 +14,44 @@
     },
     "query": "INSERT INTO sqlx_ledger_accounts\n  (id, version, code, name, normal_balance_type, description, status, metadata, created_at)\n(\n SELECT id, version + 1, code, name, normal_balance_type, COALESCE($2, description), status, COALESCE($3, metadata), created_at\n FROM sqlx_ledger_accounts WHERE id = $1 ORDER BY version DESC LIMIT 1\n)\n"
   },
+  "63b1b637705d0ab703a902f275e3c01adc9b097941da3f02d0ba077c8401658b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "version",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Jsonb",
+          "Jsonb",
+          "Jsonb",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "INSERT INTO sqlx_ledger_tx_templates (id, code, description, params, tx_input, entries, metadata)\n            VALUES ($1, $2, $3, $4, $5, $6, $7)\n            RETURNING id, version, created_at"
+  },
   "6e82fe7ca0798715e4316b5acf6a3ccfbe0326ce3f5f3cd238ccad0f641cbe4e": {
     "describe": {
       "columns": [
@@ -267,43 +305,6 @@
       }
     },
     "query": "SELECT id FROM sqlx_ledger_accounts WHERE code = $1 LIMIT 1"
-  },
-  "ae0ae8a503de15ea5928c3c097c8265609c6f6bbf8dce888e392e853e1fdbb1f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "version",
-          "ordinal": 1,
-          "type_info": "Int4"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Varchar",
-          "Varchar",
-          "Jsonb",
-          "Jsonb",
-          "Jsonb",
-          "Jsonb"
-        ]
-      }
-    },
-    "query": "INSERT INTO sqlx_ledger_tx_templates (id, code, description, params, tx_input, entries, metadata)\n            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)\n            RETURNING id, version, created_at"
   },
   "b0c8cdc4866bee576bd760d04693a3e4cc83ddc151aab9f2eb1952bfa5e29cab": {
     "describe": {

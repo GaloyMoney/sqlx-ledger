@@ -18,6 +18,7 @@ impl TxTemplates {
     pub async fn create(
         &self,
         NewTxTemplate {
+            id,
             code,
             description,
             params,
@@ -31,8 +32,9 @@ impl TxTemplates {
         let entries_json = serde_json::to_value(&entries)?;
         let record = sqlx::query!(
             r#"INSERT INTO sqlx_ledger_tx_templates (id, code, description, params, tx_input, entries, metadata)
-            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id, version, created_at"#,
+            uuid::Uuid::from(id),
             code,
             description,
             params_json,
