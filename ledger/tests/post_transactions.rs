@@ -16,6 +16,7 @@ async fn post_transaction() -> anyhow::Result<()> {
     let journal_id = ledger.journals().create(new_journal).await.unwrap();
     let code = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
     let new_account = NewAccount::builder()
+        .id(uuid::Uuid::new_v4())
         .name(format!("Test Sender Account {code}"))
         .code(code)
         .build()
@@ -23,6 +24,7 @@ async fn post_transaction() -> anyhow::Result<()> {
     let sender_account_id = ledger.accounts().create(new_account).await.unwrap();
     let code = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
     let new_account = NewAccount::builder()
+        .id(uuid::Uuid::new_v4())
         .name(format!("Test Recipient Account {code}"))
         .code(code)
         .build()
@@ -78,6 +80,7 @@ async fn post_transaction() -> anyhow::Result<()> {
             .unwrap(),
     ];
     let new_template = NewTxTemplate::builder()
+        .id(uuid::Uuid::new_v4())
         .code(&tx_code)
         .params(params)
         .tx_input(

@@ -24,9 +24,7 @@ pub struct NewTxTemplate {
 
 impl NewTxTemplate {
     pub fn builder() -> NewTxTemplateBuilder {
-        let mut builder = NewTxTemplateBuilder::default();
-        builder.id(TxTemplateId::new());
-        builder
+        NewTxTemplateBuilder::default()
     }
 }
 
@@ -171,6 +169,7 @@ mod tests {
             .build()
             .unwrap()];
         let new_journal = NewTxTemplate::builder()
+            .id(Uuid::new_v4())
             .code("CODE")
             .tx_input(
                 TxInput::builder()

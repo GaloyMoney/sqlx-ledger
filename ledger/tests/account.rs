@@ -10,6 +10,7 @@ async fn test_account() -> anyhow::Result<()> {
     let code = Alphanumeric.sample_string(&mut rand::thread_rng(), 32);
 
     let new_account = NewAccount::builder()
+        .id(uuid::Uuid::new_v4())
         .name(format!("Test Account {code}"))
         .code(code)
         .build()

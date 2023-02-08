@@ -30,6 +30,7 @@ async fn test_tx_template() -> anyhow::Result<()> {
         .build()
         .unwrap()];
     let new_template = NewTxTemplate::builder()
+        .id(uuid::Uuid::new_v4())
         .code(code)
         .params(params)
         .tx_input(tx_input)
