@@ -1,3 +1,18 @@
+# [sqlx-ledger release v0.5.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.0)
+
+
+### Bug Fixes
+
+- Sqlx_ledger.notification_received tracing name
+
+### Miscellaneous Tasks
+
+- [**breaking**] Make ids mandatory in tx_template + account
+
+### Testing
+
+- Remove bitfinex from hedging test
+
 # [sqlx-ledger release v0.4.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.4.0)
 
 
