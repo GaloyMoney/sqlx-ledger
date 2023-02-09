@@ -10,7 +10,7 @@ use cel_interpreter::{CelContext, CelExpression};
 
 use super::{param_definition::ParamDefinition, tx_params::TxParams};
 
-#[derive(Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub(crate) struct TxInputCel {
     effective: CelExpression,
     journal_id: CelExpression,
@@ -20,7 +20,7 @@ pub(crate) struct TxInputCel {
     metadata: Option<CelExpression>,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub(crate) struct EntryCel {
     entry_type: CelExpression,
     account_id: CelExpression,
@@ -31,6 +31,7 @@ pub(crate) struct EntryCel {
     description: Option<CelExpression>,
 }
 
+#[derive(Debug, Clone)]
 pub(crate) struct TxTemplateCore {
     pub(super) id: TxTemplateId,
     pub(super) _code: String,

@@ -1,5 +1,5 @@
 use crate::{LeftRightOp, LogicOp, RelationOp, ArithmeticOp, Expression, UnaryOp, Member, Literal};
-use std::rc::Rc;
+use std::sync::Arc;
 
 grammar;
 
@@ -55,7 +55,7 @@ Primary: Expression = {
     Literal => Expression::Literal(<>)
 }
 
-FieldInits: (Rc<String>, Expression) = {
+FieldInits: (Arc<String>, Expression) = {
     <Ident> ":" <Expression>
 }
 
@@ -136,6 +136,6 @@ Literal: Literal = {
     "null" => Literal::Null,
 };
 
-Ident: Rc<String> = {
+Ident: Arc<String> = {
     r"[_a-zA-Z][_a-zA-Z0-9]*" => <>.to_string().into()
 }

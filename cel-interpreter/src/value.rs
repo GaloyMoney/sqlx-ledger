@@ -3,7 +3,7 @@ use chrono::NaiveDate;
 use rust_decimal::Decimal;
 use uuid::Uuid;
 
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{cel_type::*, error::*};
 
@@ -14,12 +14,12 @@ pub struct CelResult<'a> {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CelValue {
-    Map(Rc<CelMap>),
+    Map(Arc<CelMap>),
     Int(i64),
     UInt(u64),
     Double(Decimal),
-    String(Rc<String>),
-    Bytes(Rc<Vec<u8>>),
+    String(Arc<String>),
+    Bytes(Arc<Vec<u8>>),
     Bool(bool),
     Null,
 
@@ -71,7 +71,7 @@ impl From<HashMap<String, CelValue>> for CelMap {
     fn from(map: HashMap<String, CelValue>) -> Self {
         let mut res = CelMap::new();
         for (k, v) in map {
-            res.insert(CelKey::String(Rc::from(k)), v);
+            res.insert(CelKey::String(Arc::from(k)), v);
         }
         res
     }
@@ -79,7 +79,7 @@ impl From<HashMap<String, CelValue>> for CelMap {
 
 impl From<CelMap> for CelValue {
     fn from(m: CelMap) -> Self {
-        CelValue::Map(Rc::from(m))
+        CelValue::Map(Arc::from(m))
     }
 }
 
@@ -97,7 +97,7 @@ impl From<Decimal> for CelValue {
 
 impl From<String> for CelValue {
     fn from(s: String) -> Self {
-        CelValue::String(Rc::from(s))
+        CelValue::String(Arc::from(s))
     }
 }
 
@@ -115,7 +115,7 @@ impl From<Uuid> for CelValue {
 
 impl From<&str> for CelValue {
     fn from(s: &str) -> Self {
-        CelValue::String(Rc::from(s.to_string()))
+        CelValue::String(Arc::from(s.to_string()))
     }
 }
 
@@ -134,13 +134,13 @@ impl From<serde_json::Value> for CelValue {
                     unimplemented!()
                 }
             }
-            String(s) => CelValue::String(Rc::from(s)),
+            String(s) => CelValue::String(Arc::from(s)),
             Object(o) => {
                 let mut map = CelMap::new();
                 for (k, v) in o.into_iter() {
-                    map.insert(CelKey::String(Rc::from(k)), CelValue::from(v));
+                    map.insert(CelKey::String(Arc::from(k)), CelValue::from(v));
                 }
-                CelValue::Map(Rc::from(map))
+                CelValue::Map(Arc::from(map))
             }
             _ => unimplemented!(),
         }
@@ -152,23 +152,23 @@ pub enum CelKey {
     Int(i64),
     UInt(u64),
     Bool(bool),
-    String(Rc<String>),
+    String(Arc<String>),
 }
 
 impl From<&str> for CelKey {
     fn from(s: &str) -> Self {
-        CelKey::String(Rc::from(s.to_string()))
+        CelKey::String(Arc::from(s.to_string()))
     }
 }
 
 impl From<String> for CelKey {
     fn from(s: String) -> Self {
-        CelKey::String(Rc::from(s))
+        CelKey::String(Arc::from(s))
     }
 }
 
-impl From<&Rc<String>> for CelKey {
-    fn from(s: &Rc<String>) -> Self {
+impl From<&Arc<String>> for CelKey {
+    fn from(s: &Arc<String>) -> Self {
         CelKey::String(s.clone())
     }
 }
@@ -206,7 +206,7 @@ impl From<&Literal> for CelValue {
     }
 }
 
-impl TryFrom<&CelValue> for Rc<String> {
+impl TryFrom<&CelValue> for Arc<String> {
     type Error = CelError;
 
     fn try_from(v: &CelValue) -> Result<Self, Self::Error> {

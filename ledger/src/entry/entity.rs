@@ -21,7 +21,7 @@ pub struct Entry {
     pub modified_at: DateTime<Utc>,
 }
 
-#[derive(Builder)]
+#[derive(Debug, Builder)]
 pub(crate) struct NewEntry {
     pub(super) account_id: AccountId,
     pub(super) entry_type: String,

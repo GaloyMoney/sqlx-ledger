@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub enum LogicOp {
@@ -52,10 +52,10 @@ pub enum Expression {
 
     List(Vec<Expression>),
     Map(Vec<(Expression, Expression)>),
-    Struct(Vec<Rc<String>>, Vec<(Rc<String>, Expression)>),
+    Struct(Vec<Arc<String>>, Vec<(Arc<String>, Expression)>),
 
     Literal(Literal),
-    Ident(Rc<String>),
+    Ident(Arc<String>),
 }
 
 impl Expression {
@@ -80,7 +80,7 @@ impl Expression {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Member {
-    Attribute(Rc<String>),
+    Attribute(Arc<String>),
     FunctionCall(Vec<Expression>),
     Index(Box<Expression>),
 }
@@ -89,9 +89,9 @@ pub enum Member {
 pub enum Literal {
     Int(i64),
     UInt(u64),
-    Double(Rc<String>),
-    String(Rc<String>),
-    Bytes(Rc<Vec<u8>>),
+    Double(Arc<String>),
+    String(Arc<String>),
+    Bytes(Arc<Vec<u8>>),
     Bool(bool),
     Null,
 }

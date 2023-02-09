@@ -1,6 +1,6 @@
 use chrono::{NaiveDate, Utc};
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use super::value::*;
 use crate::error::*;
@@ -10,12 +10,12 @@ pub(crate) fn date(args: Vec<CelValue>) -> Result<CelValue, CelError> {
         return Ok(CelValue::Date(Utc::now().date_naive()));
     }
 
-    let s: Rc<String> = assert_arg(args.get(0))?;
+    let s: Arc<String> = assert_arg(args.get(0))?;
     Ok(CelValue::Date(NaiveDate::parse_from_str(&s, "%Y-%m-%d")?))
 }
 
 pub(crate) fn uuid(args: Vec<CelValue>) -> Result<CelValue, CelError> {
-    let s: Rc<String> = assert_arg(args.get(0))?;
+    let s: Arc<String> = assert_arg(args.get(0))?;
     Ok(CelValue::Uuid(
         s.parse()
             .map_err(|e| CelError::UuidError(format!("{e:?}")))?,

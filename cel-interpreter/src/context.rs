@@ -1,4 +1,4 @@
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{builtins, error::*, value::*};
 
@@ -21,23 +21,23 @@ impl CelContext {
         );
         idents.insert(
             "SETTLED".to_string(),
-            ContextItem::Value(CelValue::String(Rc::from("SETTLED".to_string()))),
+            ContextItem::Value(CelValue::String(Arc::from("SETTLED".to_string()))),
         );
         idents.insert(
             "PENDING".to_string(),
-            ContextItem::Value(CelValue::String(Rc::from("PENDING".to_string()))),
+            ContextItem::Value(CelValue::String(Arc::from("PENDING".to_string()))),
         );
         idents.insert(
             "ENCUMBERED".to_string(),
-            ContextItem::Value(CelValue::String(Rc::from("ENCUMBERED".to_string()))),
+            ContextItem::Value(CelValue::String(Arc::from("ENCUMBERED".to_string()))),
         );
         idents.insert(
             "DEBIT".to_string(),
-            ContextItem::Value(CelValue::String(Rc::from("DEBIT".to_string()))),
+            ContextItem::Value(CelValue::String(Arc::from("DEBIT".to_string()))),
         );
         idents.insert(
             "CREDIT".to_string(),
-            ContextItem::Value(CelValue::String(Rc::from("CREDIT".to_string()))),
+            ContextItem::Value(CelValue::String(Arc::from("CREDIT".to_string()))),
         );
         Self { idents }
     }
@@ -63,7 +63,7 @@ impl std::fmt::Debug for ContextItem {
 }
 
 impl CelContext {
-    pub(crate) fn lookup(&self, name: Rc<String>) -> Result<&ContextItem, CelError> {
+    pub(crate) fn lookup(&self, name: Arc<String>) -> Result<&ContextItem, CelError> {
         self.idents
             .get(name.as_ref())
             .ok_or_else(|| CelError::UnknownIdent(name.to_string()))

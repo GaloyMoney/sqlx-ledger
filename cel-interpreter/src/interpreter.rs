@@ -6,7 +6,7 @@ use cel_parser::{
     parser::ExpressionParser,
 };
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::{context::*, error::*, value::*};
 
@@ -119,7 +119,7 @@ fn evaluate_expression_inner<'a>(
             }
             Ok(EvalType::Value(CelValue::from(map)))
         }
-        Ident(name) => Ok(EvalType::ContextItem(ctx.lookup(Rc::clone(name))?)),
+        Ident(name) => Ok(EvalType::ContextItem(ctx.lookup(Arc::clone(name))?)),
         Literal(val) => Ok(EvalType::Value(CelValue::from(val))),
         Arithmetic(op, left, right) => {
             let left = evaluate_expression(left, ctx)?;
