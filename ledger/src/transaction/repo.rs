@@ -1,4 +1,5 @@
 use sqlx::{Pool, Postgres, Transaction as DbTransaction};
+use tracing::instrument;
 use uuid::Uuid;
 
 use super::entity::*;
@@ -14,6 +15,7 @@ impl Transactions {
         Self { pool: pool.clone() }
     }
 
+    #[instrument(level = "trace", name = "sqlx_ledger.transactions.create_in_tx")]
     pub(crate) async fn create_in_tx(
         &self,
         tx: &mut DbTransaction<'_, Postgres>,

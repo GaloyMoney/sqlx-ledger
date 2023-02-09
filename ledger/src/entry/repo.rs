@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use sqlx::{PgPool, Postgres, QueryBuilder, Row, Transaction};
+use tracing::instrument;
 use uuid::Uuid;
 
 use std::{collections::HashMap, str::FromStr};
@@ -29,6 +30,11 @@ impl Entries {
         Self { pool: pool.clone() }
     }
 
+    #[instrument(
+        level = "trace",
+        name = "sqlx_ledger.entries.create_all",
+        skip(self, tx)
+    )]
     pub(crate) async fn create_all<'a>(
         &self,
         journal_id: JournalId,

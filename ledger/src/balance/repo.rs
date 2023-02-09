@@ -67,6 +67,12 @@ impl Balances {
             },
         }))
     }
+
+    #[instrument(
+        level = "trace",
+        name = "sqlx_ledger.balances.find_for_update",
+        skip(self, tx)
+    )]
     pub(crate) async fn find_for_update<'a>(
         &self,
         journal_id: JournalId,
@@ -127,6 +133,11 @@ impl Balances {
         Ok(ret)
     }
 
+    #[instrument(
+        level = "trace",
+        name = "sqlx_ledger.balances.update_balances",
+        skip(self, tx)
+    )]
     pub(crate) async fn update_balances<'a>(
         &self,
         journal_id: JournalId,

@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use rust_decimal::Decimal;
 use serde::Deserialize;
+use tracing::instrument;
 use uuid::Uuid;
 
 use std::collections::HashMap;
@@ -41,6 +42,7 @@ pub(crate) struct TxTemplateCore {
 }
 
 impl TxTemplateCore {
+    #[instrument(level = "trace", name = "sqlx_ledger.tx_template_core.prep_tx")]
     pub(crate) fn prep_tx(
         mut self,
         params: TxParams,
