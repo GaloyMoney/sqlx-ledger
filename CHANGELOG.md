@@ -1,3 +1,12 @@
+# [sqlx-ledger release v0.5.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.1)
+
+
+### Miscellaneous Tasks
+
+- Add some trace spans
+- Cache tx_templates.find_core
+- Include current span in SqlxLedgerEvent
+
 # [sqlx-ledger release v0.5.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.0)
 
 
