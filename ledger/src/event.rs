@@ -106,13 +106,14 @@ impl EventSubscriber {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(try_from = "EventRaw")]
 pub struct SqlxLedgerEvent {
     pub id: i64,
     pub data: SqlxLedgerEventData,
     pub r#type: SqlxLedgerEventType,
     pub recorded_at: DateTime<Utc>,
+    pub span: tracing::Span,
 }
 
 impl SqlxLedgerEvent {
@@ -214,6 +215,7 @@ impl TryFrom<EventRaw> for SqlxLedgerEvent {
             data,
             r#type: value.r#type,
             recorded_at: value.recorded_at,
+            span: tracing::Span::current(),
         })
     }
 }
