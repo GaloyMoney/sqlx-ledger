@@ -76,12 +76,9 @@ impl SqlxLedger {
         tx_template_code: &str,
         params: Option<impl Into<TxParams> + std::fmt::Debug>,
     ) -> Result<(), SqlxLedgerError> {
-        let (new_tx, new_entries) = {
-            let tx_template = self.tx_templates.find_core(tx_template_code).await?;
-            // tx_template is not Send (Rc<String> nested in CelExpression)
-            // so we need to drop it before the next await
-            tx_template.prep_tx(params.map(|p| p.into()).unwrap_or_else(TxParams::new))?
-        };
+        let tx_template = self.tx_templates.find_core(tx_template_code).await?;
+        let (new_tx, new_entries) =
+            tx_template.prep_tx(params.map(|p| p.into()).unwrap_or_else(TxParams::new))?;
         let (journal_id, tx_id) = self
             .transactions
             .create_in_tx(&mut tx, tx_id, new_tx)
