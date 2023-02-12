@@ -1,5 +1,6 @@
 use cached::proc_macro::cached;
 use sqlx::{Pool, Postgres};
+use std::sync::Arc;
 use tracing::instrument;
 
 use super::{core::*, entity::*};
@@ -49,7 +50,10 @@ impl TxTemplates {
     }
 
     #[instrument(level = "trace", name = "sqlx_ledger.tx_templates.find_core", skip_all)]
-    pub(crate) async fn find_core(&self, code: &str) -> Result<TxTemplateCore, SqlxLedgerError> {
+    pub(crate) async fn find_core(
+        &self,
+        code: &str,
+    ) -> Result<Arc<TxTemplateCore>, SqlxLedgerError> {
         cached_find_core(&self.pool, code).await
     }
 }
@@ -63,7 +67,7 @@ impl TxTemplates {
 async fn cached_find_core(
     pool: &Pool<Postgres>,
     code: &str,
-) -> Result<TxTemplateCore, SqlxLedgerError> {
+) -> Result<Arc<TxTemplateCore>, SqlxLedgerError> {
     let record = sqlx::query!(
             r#"SELECT id, code, params, tx_input, entries FROM sqlx_ledger_tx_templates WHERE code = $1 LIMIT 1"#,
             code
@@ -76,11 +80,11 @@ async fn cached_find_core(
         None => None,
     };
     let tx_input = serde_json::from_value(record.tx_input)?;
-    Ok(TxTemplateCore {
+    Ok(Arc::new(TxTemplateCore {
         id: TxTemplateId::from(record.id),
         _code: record.code,
         params,
         entries: serde_json::from_value(record.entries)?,
         tx_input,
-    })
+    }))
 }

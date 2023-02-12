@@ -44,13 +44,13 @@ pub(crate) struct TxTemplateCore {
 impl TxTemplateCore {
     #[instrument(level = "trace", name = "sqlx_ledger.tx_template_core.prep_tx")]
     pub(crate) fn prep_tx(
-        mut self,
+        &self,
         params: TxParams,
     ) -> Result<(NewTransaction, Vec<NewEntry>), SqlxLedgerError> {
         let mut tx_builder = NewTransaction::builder();
         tx_builder.tx_template_id(self.id);
 
-        let ctx = params.to_context(self.params.take())?;
+        let ctx = params.to_context(self.params.as_ref())?;
 
         let journal_id: Uuid = self.tx_input.journal_id.try_evaluate(&ctx)?;
         tx_builder.journal_id(journal_id);
@@ -84,10 +84,10 @@ impl TxTemplateCore {
         Ok((tx, entries))
     }
 
-    fn prep_entries(mut self, ctx: CelContext) -> Result<Vec<NewEntry>, SqlxLedgerError> {
+    fn prep_entries(&self, ctx: CelContext) -> Result<Vec<NewEntry>, SqlxLedgerError> {
         let mut new_entries = Vec::new();
         let mut totals = HashMap::new();
-        for entry in self.entries.drain(..) {
+        for entry in self.entries.iter() {
             let mut builder = NewEntry::builder();
             let account_id: Uuid = entry.account_id.try_evaluate(&ctx)?;
             builder.account_id(account_id.into());
