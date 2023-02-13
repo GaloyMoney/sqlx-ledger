@@ -1,3 +1,15 @@
+# [sqlx-ledger release v0.5.2](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.2)
+
+
+### Features
+
+- Add balances.find_all
+
+### Miscellaneous Tasks
+
+- Simplify as TxTemplateCore is now Send
+- Less cloning within TxTemplateCore
+
 # [sqlx-ledger release v0.5.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.1)
 
 
