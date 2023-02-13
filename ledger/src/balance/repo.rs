@@ -68,6 +68,65 @@ impl Balances {
         }))
     }
 
+    #[instrument(name = "sqlx_ledger.balances.find_all", skip(self, accounts))]
+    pub async fn find_all(
+        &self,
+        journal_id: JournalId,
+        accounts: impl IntoIterator<Item = AccountId>,
+    ) -> Result<HashMap<AccountId, HashMap<Currency, AccountBalance>>, SqlxLedgerError> {
+        let account_ids: Vec<Uuid> = accounts.into_iter().map(Uuid::from).collect();
+        let rows = sqlx::query!(
+            r#"SELECT
+              a.normal_balance_type as "normal_balance_type: DebitOrCredit", b.journal_id, b.account_id, entry_id, b.currency,
+              settled_dr_balance, settled_cr_balance, settled_entry_id, settled_modified_at,
+              pending_dr_balance, pending_cr_balance, pending_entry_id, pending_modified_at,
+              encumbered_dr_balance, encumbered_cr_balance, encumbered_entry_id, encumbered_modified_at,
+              c.version, modified_at, created_at
+                FROM sqlx_ledger_balances b JOIN (
+                  SELECT * FROM sqlx_ledger_current_balances WHERE journal_id = $1 AND account_id = ANY($2)) c
+                ON b.journal_id = c.journal_id AND b.account_id = c.account_id AND b.currency = c.currency AND b.version = c.version
+                JOIN ( SELECT DISTINCT(id), normal_balance_type FROM sqlx_ledger_accounts WHERE id = ANY($2)) a
+                  ON a.id = b.account_id"#,
+            Uuid::from(journal_id),
+            &account_ids[..]
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        let mut ret = HashMap::new();
+        for row in rows {
+            ret.entry(AccountId::from(row.account_id))
+                .or_insert_with(HashMap::new)
+                .insert(
+                    row.currency.parse().expect("Currency code is invalid"),
+                    AccountBalance {
+                        balance_type: row.normal_balance_type,
+                        details: BalanceDetails {
+                            journal_id,
+                            account_id: AccountId::from(row.account_id),
+                            entry_id: EntryId::from(row.entry_id),
+                            currency: row.currency.parse().unwrap(),
+                            settled_dr_balance: row.settled_dr_balance,
+                            settled_cr_balance: row.settled_cr_balance,
+                            settled_entry_id: EntryId::from(row.settled_entry_id),
+                            settled_modified_at: row.settled_modified_at,
+                            pending_dr_balance: row.pending_dr_balance,
+                            pending_cr_balance: row.pending_cr_balance,
+                            pending_entry_id: EntryId::from(row.pending_entry_id),
+                            pending_modified_at: row.pending_modified_at,
+                            encumbered_dr_balance: row.encumbered_dr_balance,
+                            encumbered_cr_balance: row.encumbered_cr_balance,
+                            encumbered_entry_id: EntryId::from(row.encumbered_entry_id),
+                            encumbered_modified_at: row.encumbered_modified_at,
+                            version: row.version,
+                            modified_at: row.modified_at,
+                            created_at: row.created_at,
+                        },
+                    },
+                );
+        }
+        Ok(ret)
+    }
+
     #[instrument(
         level = "trace",
         name = "sqlx_ledger.balances.find_for_update",
