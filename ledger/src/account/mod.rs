@@ -1,3 +1,4 @@
+//! Repository for working with `Account` entities.
 mod entity;
 mod repo;
 

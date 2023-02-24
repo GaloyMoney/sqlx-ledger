@@ -3,6 +3,7 @@ use derive_builder::Builder;
 
 use crate::primitives::*;
 
+/// Representation of a ledger account entity.
 pub struct Account<M> {
     pub id: AccountId,
     pub code: String,
@@ -16,6 +17,7 @@ pub struct Account<M> {
     pub created_at: DateTime<Utc>,
 }
 
+/// Representation of a ***new*** ledger account entity with required/optional properties and a builder.
 #[derive(Builder, Debug)]
 pub struct NewAccount {
     #[builder(setter(into))]
