@@ -1,3 +1,7 @@
+//! Set of structs and methods for handling ledger events.
+//!
+//! It defines the various types of ledger events and contains event subscribers
+//! for each of them.
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgListener, PgPool};
@@ -16,6 +20,7 @@ use crate::{
     balance::BalanceDetails, transaction::Transaction, AccountId, JournalId, SqlxLedgerError,
 };
 
+/// Contains fields to store & manage various ledger-related `SqlxLedgerEvent` event receivers.
 #[derive(Debug, Clone)]
 pub struct EventSubscriber {
     buffer: usize,
@@ -106,6 +111,7 @@ impl EventSubscriber {
     }
 }
 
+/// Representation of a ledger event.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(try_from = "EventRaw")]
 pub struct SqlxLedgerEvent {
@@ -133,6 +139,7 @@ impl SqlxLedgerEvent {
     }
 }
 
+/// Represents the different kinds of data that can be included in an `SqlxLedgerEvent` event.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[allow(clippy::large_enum_variant)]
 pub enum SqlxLedgerEventData {
@@ -141,6 +148,7 @@ pub enum SqlxLedgerEventData {
     TransactionUpdated(Transaction),
 }
 
+/// Defines possible event types for `SqlxLedgerEvent`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SqlxLedgerEventType {
     BalanceUpdated,
