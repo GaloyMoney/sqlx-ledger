@@ -1,3 +1,4 @@
+//! Repository for working with `Transaction` entities.
 mod entity;
 mod repo;
 
