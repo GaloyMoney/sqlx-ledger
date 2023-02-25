@@ -1,3 +1,4 @@
+//! Repository for working with `AccountBalance` entities.
 mod entity;
 mod repo;
 
