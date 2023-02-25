@@ -4,6 +4,7 @@ use rust_decimal::Decimal;
 
 use crate::primitives::*;
 
+/// Representation of a ledger transaction entry entity.
 pub struct Entry {
     pub id: EntryId,
     pub version: u32,

@@ -9,6 +9,7 @@ use std::{collections::HashMap, str::FromStr};
 use super::entity::*;
 use crate::{error::*, primitives::*};
 
+/// Provides methods to interact with `Entry` entities.
 #[derive(Debug, Clone)]
 pub struct Entries {
     pool: PgPool,
