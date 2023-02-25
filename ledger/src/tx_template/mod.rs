@@ -1,3 +1,4 @@
+//! Repository for working with `TxTemplateCore` entities.
 mod core;
 mod entity;
 mod param_definition;

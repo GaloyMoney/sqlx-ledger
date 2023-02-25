@@ -6,6 +6,11 @@ use cel_interpreter::CelExpression;
 use super::param_definition::*;
 use crate::primitives::*;
 
+/// Representation of a new TxTemplateCore created via a builder.
+///
+/// TxTemplateCore is an entity that takes a set of params including
+/// a `TxInput` entity and a set of `EntryInput` entities. It can
+/// later be used to create a `Transaction`.
 #[derive(Builder)]
 pub struct NewTxTemplate {
     #[builder(setter(into))]
@@ -38,6 +43,7 @@ impl NewTxTemplateBuilder {
     }
 }
 
+/// Contains the transaction-level details needed to create a `Transaction`.
 #[derive(Clone, Serialize, Builder)]
 #[builder(build_fn(validate = "Self::validate"))]
 pub struct TxInput {
@@ -80,6 +86,7 @@ impl TxInputBuilder {
     }
 }
 
+/// Contains the details for each accounting entry in a `Transaction`.
 #[derive(Clone, Serialize, Builder)]
 #[builder(build_fn(validate = "Self::validate"))]
 pub struct EntryInput {

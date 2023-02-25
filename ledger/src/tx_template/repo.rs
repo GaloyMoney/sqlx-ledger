@@ -6,6 +6,7 @@ use tracing::instrument;
 use super::{core::*, entity::*};
 use crate::{error::*, primitives::*};
 
+/// Provides methods to interact with `TxTemplateCore` entities.
 #[derive(Debug, Clone)]
 pub struct TxTemplates {
     pool: Pool<Postgres>,
