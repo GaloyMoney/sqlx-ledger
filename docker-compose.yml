@@ -17,6 +17,7 @@ services:
     command: ["make", "test-in-ci"]
     environment:
     - PG_HOST=postgres
+    - PG_CON=postgres://user:password@postgres:5432/pg
     working_dir: /repo
     volumes:
       - ./:/repo
