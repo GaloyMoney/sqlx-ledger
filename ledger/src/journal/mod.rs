@@ -1,4 +1,3 @@
-//! Repository for working with `Journal` entities.
 mod entity;
 mod repo;
 

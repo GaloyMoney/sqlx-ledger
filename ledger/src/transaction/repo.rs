@@ -5,7 +5,7 @@ use uuid::Uuid;
 use super::entity::*;
 use crate::{error::*, primitives::*};
 
-/// Provides methods to interact with `Transaction` entities.
+/// Repository for working with `TxTemplate` entities.
 #[derive(Debug, Clone)]
 pub struct Transactions {
     pool: Pool<Postgres>,

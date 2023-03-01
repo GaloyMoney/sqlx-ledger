@@ -6,7 +6,7 @@ use uuid::Uuid;
 use super::entity::*;
 use crate::{error::*, primitives::*};
 
-/// Provides methods to interact with `Account` entities.
+/// Repository for working with `Account` entities.
 #[derive(Debug, Clone)]
 pub struct Accounts {
     pool: Pool<Postgres>,

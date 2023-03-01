@@ -5,7 +5,7 @@ use uuid::Uuid;
 use super::entity::*;
 use crate::{error::*, primitives::*};
 
-/// Provides methods to interact with `Journal` entities.
+/// Repository for working with `Journal` entities.
 #[derive(Debug, Clone)]
 pub struct Journals {
     pool: Pool<Postgres>,
