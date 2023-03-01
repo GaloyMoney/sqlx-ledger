@@ -2,6 +2,7 @@ use cel_interpreter::{CelContext, CelExpression, CelType, CelValue};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
+/// Contains the parameters used to create a new `TxTemplate`
 #[derive(Clone, Debug, Deserialize, Serialize, Builder)]
 #[builder(build_fn(validate = "Self::validate"))]
 pub struct ParamDefinition {

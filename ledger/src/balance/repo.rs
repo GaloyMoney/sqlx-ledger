@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use super::entity::*;
 use crate::{error::*, primitives::*};
 
+/// Provides methods to interact with `AccountBalance` entities.
 #[derive(Debug, Clone)]
 pub struct Balances {
     pool: PgPool,

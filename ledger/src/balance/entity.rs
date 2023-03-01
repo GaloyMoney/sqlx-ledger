@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::entry::StagedEntry;
 use crate::primitives::*;
 
+/// Representation of account's balance tracked in 3 distinct layers.
 #[derive(Debug, Clone)]
 pub struct AccountBalance {
     pub(super) balance_type: DebitOrCredit,
@@ -37,6 +38,8 @@ impl AccountBalance {
     }
 }
 
+/// Contains the details of the balance and methods to update from new
+/// entries.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BalanceDetails {
     pub journal_id: JournalId,

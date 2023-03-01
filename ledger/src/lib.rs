@@ -1,3 +1,10 @@
+//! # sqlx-ledger
+//!
+//! This crate builds on the sqlx crate to provide a set of primitives for
+//! implementing an SQL-compatible double-entry accounting system. This system
+//! is engineered specifically for dealing with money and building financial
+//! products.
+
 #![cfg_attr(feature = "fail-on-warnings", deny(warnings))]
 #![cfg_attr(feature = "fail-on-warnings", deny(clippy::all))]
 

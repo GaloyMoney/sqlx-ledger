@@ -3,6 +3,7 @@ use derive_builder::Builder;
 
 use crate::primitives::*;
 
+/// Representation of a ledger journal entity.
 pub struct Journal {
     pub id: AccountId,
     pub name: String,
@@ -13,6 +14,8 @@ pub struct Journal {
     pub created_at: DateTime<Utc>,
 }
 
+/// Representation of a new ledger journal entity
+/// with required/optional properties and a builder.
 #[derive(Debug, Builder)]
 pub struct NewJournal {
     #[builder(setter(into))]
