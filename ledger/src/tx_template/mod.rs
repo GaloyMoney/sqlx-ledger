@@ -1,3 +1,4 @@
+//! All [Transactions](crate::transaction::Transaction) are created via templates to ensure consistency.
 mod core;
 mod entity;
 mod param_definition;

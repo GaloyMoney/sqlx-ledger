@@ -1,3 +1,4 @@
+//! [AccountBalance] and [BalanceDetails] are segregated per journal and currency.
 mod entity;
 mod repo;
 

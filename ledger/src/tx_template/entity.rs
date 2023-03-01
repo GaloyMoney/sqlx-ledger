@@ -6,9 +6,9 @@ use cel_interpreter::CelExpression;
 use super::param_definition::*;
 use crate::primitives::*;
 
-/// Representation of a new TxTemplateCore created via a builder.
+/// Representation of a new TxTemplate created via a builder.
 ///
-/// TxTemplateCore is an entity that takes a set of params including
+/// TxTemplate is an entity that takes a set of params including
 /// a `TxInput` entity and a set of `EntryInput` entities. It can
 /// later be used to create a `Transaction`.
 #[derive(Builder)]

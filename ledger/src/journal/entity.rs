@@ -5,7 +5,7 @@ use crate::primitives::*;
 
 /// Representation of a ledger journal entity.
 pub struct Journal {
-    pub id: AccountId,
+    pub id: JournalId,
     pub name: String,
     pub description: Option<String>,
     pub status: Status,

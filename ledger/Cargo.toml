@@ -32,3 +32,4 @@ cached = "0.42.0"
 [dev-dependencies]
 anyhow = "1.0.66"
 rand = "0.8.5"
+tokio-test = "0.4.2"

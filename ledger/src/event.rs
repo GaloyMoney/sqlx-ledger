@@ -1,7 +1,4 @@
-//! Set of structs and methods for handling ledger events.
-//!
-//! It defines the various types of ledger events and contains event subscribers
-//! for each of them.
+//! Use [ledger.events()](crate::SqlxLedger::events()) to subscribe to events triggered by changes to the ledger.
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgListener, PgPool};
