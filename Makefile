@@ -15,13 +15,11 @@ check-code:
 test-in-ci:
 	DATABASE_URL=postgres://user:password@postgres:5432/pg cargo sqlx migrate run
 	SQLX_OFFLINE=true cargo nextest run --verbose
+	SQLX_OFFLINE=true cargo doc --no-deps
 	SQLX_OFFLINE=true cargo test --doc
-	SQLX_OFFLINE=true cargo doc
 
 open-docs:
-	SQLX_OFFLINE=true cargo doc
-	SQLX_OFFLINE=true cargo doc --open
-
+	SQLX_OFFLINE=true cargo doc --open --no-deps
 
 clean-deps:
 	docker compose down
