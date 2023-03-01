@@ -1,3 +1,20 @@
+# [sqlx-ledger release v0.5.3](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.3)
+
+
+### Documentation
+
+- No-deps to cargo doc
+- Add quick-start section
+- Move module docs to repos
+- 1st attempt at documenting tx_template module
+- Adds documentation for 'transaction' module
+- Adds documentation for 'journal' module
+- Adds documentation for 'entry' module
+- Adds documentation for 'balance' module
+- Adds documentation for 'account' module
+- Adds documentation for events module
+- Adds documentation for sqlx-ledger crate
+
 # [sqlx-ledger release v0.5.2](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.2)
 
 
