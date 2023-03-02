@@ -6,6 +6,14 @@
 //! products.
 //!
 //! ## Quick Start
+//!
+//! Add and execute the migrations from the migrations directory before usage.
+//! ```bash,ignore
+//! cp ./migrations/* <path/to/your/projects/migrations>
+//! # in your project
+//! cargo sqlx migrate
+//! ```
+//!
 //! Here is how to initialize a ledger create a primitive template and post a transaction.
 //! This is a toy example that brings all pieces together end-to-end.
 //! Not recommended for real use.
@@ -15,7 +23,8 @@
 //! use sqlx_ledger::{*, journal::*, account::*, tx_template::*};
 //!
 //! async fn init_ledger(journal_id: JournalId) -> SqlxLedger {
-//!     let pg_con = std::env::var("PG_CON").unwrap_or(format!("postgres://user:password@localhost:5432/pg"));
+//!     let pg_con =
+//!         std::env::var("PG_CON").unwrap_or(format!("postgres://user:password@localhost:5432/pg"));
 //!     let pool = sqlx::PgPool::connect(&pg_con).await.unwrap();
 //!     let ledger = SqlxLedger::new(&pool);
 //!
@@ -27,7 +36,7 @@
 //!         .build()
 //!         .expect("Couldn't build NewJournal");
 //!
-//!     let _ = ledger.journals().create(new_journal).await; // Ignore error for repeated run
+//!     let _ = ledger.journals().create(new_journal).await;
 //!
 //!     // Initialize an income omnibus account
 //!     let main_account_id = uuid!("00000000-0000-0000-0000-000000000001");
@@ -38,9 +47,11 @@
 //!         .build()
 //!         .unwrap();
 //!
-//!     let _ = ledger.accounts().create(new_account).await; // Ignore error for repeated run
+//!     let _ = ledger.accounts().create(new_account).await;
 //!
 //!     // Create the trivial 'income' template
+//!     //
+//!     // Here are the 'parameters' that the template will require as inputs.
 //!     let params = vec![
 //!         ParamDefinition::builder()
 //!             .name("sender_account_id")
@@ -53,43 +64,47 @@
 //!             .build()
 //!             .unwrap()
 //!     ];
-//!      let entries = vec![
-//!          EntryInput::builder()
-//!              .entry_type("'INCOME_DR'")
-//!              .account_id("params.sender_account_id")
-//!              .layer("SETTLED")
-//!              .direction("DEBIT")
-//!              .units("params.units")
-//!              .currency("'BTC'")
-//!              .build()
-//!              .unwrap(),
-//!          EntryInput::builder()
-//!              .entry_type("'INCOME_CR'")
-//!              .account_id("uuid('00000000-0000-0000-0000-000000000001')")
-//!              .layer("SETTLED")
-//!              .direction("CREDIT")
-//!              .units("params.units")
-//!              .currency("'BTC'")
-//!              .build()
-//!              .unwrap(),
-//!      ];
-//!      let tx_code = "GENERAL_INCOME";
-//!      let new_template = NewTxTemplate::builder()
-//!          .id(uuid::Uuid::new_v4())
-//!          .code(tx_code)
-//!          .params(params)
-//!          .tx_input(
-//!              TxInput::builder()
-//!                  .effective("date()")
-//!                  .journal_id(format!("uuid('{journal_id}')"))
-//!                  .build()
-//!                  .unwrap(),
-//!          )
-//!          .entries(entries)
-//!          .build()
-//!          .unwrap();
 //!
-//!     let _ = ledger.tx_templates().create(new_template).await; // Ignore error for repeated run
+//!     // The templates for the Entries that will be created as part of the transaction.
+//!     let entries = vec![
+//!         EntryInput::builder()
+//!             .entry_type("'INCOME_DR'")
+//!             // Reference the input parameters via CEL syntax
+//!             .account_id("params.sender_account_id")
+//!             .layer("SETTLED")
+//!             .direction("DEBIT")
+//!             .units("params.units")
+//!             .currency("'BTC'")
+//!             .build()
+//!             .unwrap(),
+//!         EntryInput::builder()
+//!             .entry_type("'INCOME_CR'")
+//!             .account_id(format!("uuid('{main_account_id}')"))
+//!             .layer("SETTLED")
+//!             .direction("CREDIT")
+//!             .units("params.units")
+//!             .currency("'BTC'")
+//!             .build()
+//!             .unwrap(),
+//!     ];
+//!     let tx_code = "GENERAL_INCOME";
+//!     let new_template = NewTxTemplate::builder()
+//!         .id(uuid::Uuid::new_v4())
+//!         .code(tx_code)
+//!         .params(params)
+//!         .tx_input(
+//!             // Template for the Transaction metadata.
+//!             TxInput::builder()
+//!                 .effective("date()")
+//!                 .journal_id(format!("uuid('{journal_id}')"))
+//!                 .build()
+//!                 .unwrap(),
+//!         )
+//!         .entries(entries)
+//!         .build()
+//!         .unwrap();
+//!
+//!     let _ = ledger.tx_templates().create(new_template).await;
 //!
 //!     ledger
 //! }
