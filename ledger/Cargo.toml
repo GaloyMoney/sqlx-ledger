@@ -2,11 +2,12 @@
 name = "sqlx-ledger"
 description = "An embeddable double sided accounting ledger built on PG/SQLx"
 repository = "https://github.com/GaloyMoney/sqlx-ledger"
+documentation = "https://docs.rs/sqlx-ledger"
+readme = "../README.md"
 version = "0.5.5-dev"
 edition = "2021"
 license = "MIT"
 categories = ["accounting", "ledger"]
-documentation = "https://docs.rs/sqlx-ledger"
 
 [features]
 
