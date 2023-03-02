@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.5.5](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.5)
+
+
+### Documentation
+
+- Link to readme in ledger/Cargo.toml
+
 # [sqlx-ledger release v0.5.4](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.4)
 
 
