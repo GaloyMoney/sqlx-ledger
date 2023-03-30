@@ -1,3 +1,7 @@
+# [sqlx-ledger release v0.5.7](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.7)
+
+
+
 # [sqlx-ledger release v0.5.5](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.5)
 
 
