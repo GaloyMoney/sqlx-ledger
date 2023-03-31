@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.5.8](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.8)
+
+
+### Features
+
+- Transactions.list_by_ids
+
 # [sqlx-ledger release v0.5.7](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.7)
 
 
