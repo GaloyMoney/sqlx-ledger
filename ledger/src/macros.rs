@@ -35,6 +35,12 @@ macro_rules! entity_id {
             }
         }
 
+        impl From<&$name> for uuid::Uuid {
+            fn from(id: &$name) -> Self {
+                id.0
+            }
+        }
+
         impl From<$name> for cel_interpreter::CelValue {
             fn from(id: $name) -> Self {
                 cel_interpreter::CelValue::Uuid(id.0)
