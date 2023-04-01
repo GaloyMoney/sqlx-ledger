@@ -240,9 +240,7 @@ fn evaluate_relation(
             (Double(l), UInt(r)) => Ok(Bool(l < Decimal::from(r))),
             (Double(l), Int(r)) => Ok(Bool(l < Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l < r)),
-            _ => Err(CelError::Unexpected(
-                "Invalid operands for lees than".to_string(),
-            )),
+            _ => Err(CelError::Unexpected("Invalid operands for '<'".to_string())),
         },
         RelationOp::LessThanEq => match (left, right) {
             (UInt(l), UInt(r)) => Ok(Bool(l <= r)),
@@ -255,7 +253,7 @@ fn evaluate_relation(
             (Double(l), Int(r)) => Ok(Bool(l <= Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l <= r)),
             _ => Err(CelError::Unexpected(
-                "Invalid operands for lees than".to_string(),
+                "Invalid operands for '<='".to_string(),
             )),
         },
         RelationOp::GreaterThan => match (left, right) {
@@ -268,9 +266,7 @@ fn evaluate_relation(
             (Double(l), UInt(r)) => Ok(Bool(l > Decimal::from(r))),
             (Double(l), Int(r)) => Ok(Bool(l > Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l > r)),
-            _ => Err(CelError::Unexpected(
-                "Invalid operands for lees than".to_string(),
-            )),
+            _ => Err(CelError::Unexpected("Invalid operands for '>'".to_string())),
         },
         RelationOp::GreaterThanEq => match (left, right) {
             (UInt(l), UInt(r)) => Ok(Bool(l >= r)),
@@ -283,7 +279,7 @@ fn evaluate_relation(
             (Double(l), Int(r)) => Ok(Bool(l >= Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l >= r)),
             _ => Err(CelError::Unexpected(
-                "Invalid operands for lees than".to_string(),
+                "Invalid operands for '>='".to_string(),
             )),
         },
         RelationOp::Equals => match (left, right) {
@@ -297,7 +293,7 @@ fn evaluate_relation(
             (Double(l), Int(r)) => Ok(Bool(l == Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l == r)),
             _ => Err(CelError::Unexpected(
-                "Invalid operands for lees than".to_string(),
+                "Invalid operands for '=='".to_string(),
             )),
         },
         RelationOp::NotEquals => match (left, right) {
@@ -311,7 +307,7 @@ fn evaluate_relation(
             (Double(l), Int(r)) => Ok(Bool(l != Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l != r)),
             _ => Err(CelError::Unexpected(
-                "Invalid operands for lees than".to_string(),
+                "Invalid operands for '!='".to_string(),
             )),
         },
         _ => unimplemented!(),
