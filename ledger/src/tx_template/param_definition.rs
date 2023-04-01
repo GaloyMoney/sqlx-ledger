@@ -71,6 +71,7 @@ impl TryFrom<&CelValue> for ParamDataType {
             Date => Ok(ParamDataType::DATE),
             Uuid => Ok(ParamDataType::UUID),
             Double => Ok(ParamDataType::DECIMAL),
+            Bool => Ok(ParamDataType::BOOLEAN),
             _ => Err(format!("Unsupported type: {value:?}")),
         }
     }

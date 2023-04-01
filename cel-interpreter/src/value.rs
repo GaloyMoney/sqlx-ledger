@@ -95,6 +95,12 @@ impl From<Decimal> for CelValue {
     }
 }
 
+impl From<bool> for CelValue {
+    fn from(b: bool) -> Self {
+        CelValue::Bool(b)
+    }
+}
+
 impl From<String> for CelValue {
     fn from(s: String) -> Self {
         CelValue::String(Arc::from(s))
