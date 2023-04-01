@@ -1,3 +1,14 @@
+# [sqlx-ledger release v0.5.10](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.10)
+
+
+### Bug Fixes
+
+- Error output in relation
+
+### Miscellaneous Tasks
+
+- Implement interpretation of some Relations
+
 # [sqlx-ledger release v0.5.9](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.9)
 
 
