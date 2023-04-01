@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.5.9](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.9)
+
+
+### Miscellaneous Tasks
+
+- Better bool handling
+
 # [sqlx-ledger release v0.5.8](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.8)
 
 
