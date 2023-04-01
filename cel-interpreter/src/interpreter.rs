@@ -2,7 +2,7 @@ use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use cel_parser::{
-    ast::{self, ArithmeticOp, Expression},
+    ast::{self, ArithmeticOp, Expression, RelationOp},
     parser::ExpressionParser,
 };
 
@@ -130,6 +130,15 @@ fn evaluate_expression_inner<'a>(
                 right.try_value()?,
             )?))
         }
+        Relation(op, left, right) => {
+            let left = evaluate_expression(left, ctx)?;
+            let right = evaluate_expression(right, ctx)?;
+            Ok(EvalType::Value(evaluate_relation(
+                *op,
+                left.try_value()?,
+                right.try_value()?,
+            )?))
+        }
         e => Err(CelError::Unexpected(format!("unimplemented {e:?}"))),
     }
 }
@@ -208,6 +217,101 @@ fn evaluate_arithmetic(
             (Double(l), Double(r)) => Ok(Double(l - r)),
             _ => Err(CelError::Unexpected(
                 "Invalid operands for subtraction".to_string(),
+            )),
+        },
+        _ => unimplemented!(),
+    }
+}
+
+fn evaluate_relation(
+    op: RelationOp,
+    left: CelValue,
+    right: CelValue,
+) -> Result<CelValue, CelError> {
+    use CelValue::*;
+    match op {
+        RelationOp::LessThan => match (left, right) {
+            (UInt(l), UInt(r)) => Ok(Bool(l < r)),
+            (UInt(l), Int(r)) => Ok(Bool(l < r as u64)),
+            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) < r)),
+            (Int(l), UInt(r)) => Ok(Bool(l < r as i64)),
+            (Int(l), Int(r)) => Ok(Bool(l < r)),
+            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) < r)),
+            (Double(l), UInt(r)) => Ok(Bool(l < Decimal::from(r))),
+            (Double(l), Int(r)) => Ok(Bool(l < Decimal::from(r))),
+            (Double(l), Double(r)) => Ok(Bool(l < r)),
+            _ => Err(CelError::Unexpected(
+                "Invalid operands for lees than".to_string(),
+            )),
+        },
+        RelationOp::LessThanEq => match (left, right) {
+            (UInt(l), UInt(r)) => Ok(Bool(l <= r)),
+            (UInt(l), Int(r)) => Ok(Bool(l <= r as u64)),
+            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) <= r)),
+            (Int(l), UInt(r)) => Ok(Bool(l <= r as i64)),
+            (Int(l), Int(r)) => Ok(Bool(l <= r)),
+            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) <= r)),
+            (Double(l), UInt(r)) => Ok(Bool(l <= Decimal::from(r))),
+            (Double(l), Int(r)) => Ok(Bool(l <= Decimal::from(r))),
+            (Double(l), Double(r)) => Ok(Bool(l <= r)),
+            _ => Err(CelError::Unexpected(
+                "Invalid operands for lees than".to_string(),
+            )),
+        },
+        RelationOp::GreaterThan => match (left, right) {
+            (UInt(l), UInt(r)) => Ok(Bool(l > r)),
+            (UInt(l), Int(r)) => Ok(Bool(l > r as u64)),
+            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) > r)),
+            (Int(l), UInt(r)) => Ok(Bool(l > r as i64)),
+            (Int(l), Int(r)) => Ok(Bool(l > r)),
+            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) > r)),
+            (Double(l), UInt(r)) => Ok(Bool(l > Decimal::from(r))),
+            (Double(l), Int(r)) => Ok(Bool(l > Decimal::from(r))),
+            (Double(l), Double(r)) => Ok(Bool(l > r)),
+            _ => Err(CelError::Unexpected(
+                "Invalid operands for lees than".to_string(),
+            )),
+        },
+        RelationOp::GreaterThanEq => match (left, right) {
+            (UInt(l), UInt(r)) => Ok(Bool(l >= r)),
+            (UInt(l), Int(r)) => Ok(Bool(l >= r as u64)),
+            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) >= r)),
+            (Int(l), UInt(r)) => Ok(Bool(l >= r as i64)),
+            (Int(l), Int(r)) => Ok(Bool(l >= r)),
+            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) >= r)),
+            (Double(l), UInt(r)) => Ok(Bool(l >= Decimal::from(r))),
+            (Double(l), Int(r)) => Ok(Bool(l >= Decimal::from(r))),
+            (Double(l), Double(r)) => Ok(Bool(l >= r)),
+            _ => Err(CelError::Unexpected(
+                "Invalid operands for lees than".to_string(),
+            )),
+        },
+        RelationOp::Equals => match (left, right) {
+            (UInt(l), UInt(r)) => Ok(Bool(l == r)),
+            (UInt(l), Int(r)) => Ok(Bool(l == r as u64)),
+            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) == r)),
+            (Int(l), UInt(r)) => Ok(Bool(l == r as i64)),
+            (Int(l), Int(r)) => Ok(Bool(l == r)),
+            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) == r)),
+            (Double(l), UInt(r)) => Ok(Bool(l == Decimal::from(r))),
+            (Double(l), Int(r)) => Ok(Bool(l == Decimal::from(r))),
+            (Double(l), Double(r)) => Ok(Bool(l == r)),
+            _ => Err(CelError::Unexpected(
+                "Invalid operands for lees than".to_string(),
+            )),
+        },
+        RelationOp::NotEquals => match (left, right) {
+            (UInt(l), UInt(r)) => Ok(Bool(l != r)),
+            (UInt(l), Int(r)) => Ok(Bool(l != r as u64)),
+            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) != r)),
+            (Int(l), UInt(r)) => Ok(Bool(l != r as i64)),
+            (Int(l), Int(r)) => Ok(Bool(l != r)),
+            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) != r)),
+            (Double(l), UInt(r)) => Ok(Bool(l != Decimal::from(r))),
+            (Double(l), Int(r)) => Ok(Bool(l != Decimal::from(r))),
+            (Double(l), Double(r)) => Ok(Bool(l != r)),
+            _ => Err(CelError::Unexpected(
+                "Invalid operands for lees than".to_string(),
             )),
         },
         _ => unimplemented!(),

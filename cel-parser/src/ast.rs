@@ -6,7 +6,7 @@ pub enum LogicOp {
     Or,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum RelationOp {
     LessThan,
     LessThanEq,
