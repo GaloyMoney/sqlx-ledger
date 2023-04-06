@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.5.11](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.11)
+
+
+### Miscellaneous Tasks
+
+- Include dec in builtins
+
 # [sqlx-ledger release v0.5.10](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.10)
 
 
