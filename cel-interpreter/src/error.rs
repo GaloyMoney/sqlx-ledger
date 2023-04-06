@@ -21,6 +21,8 @@ pub enum CelError {
     ChronoParseError(#[from] ParseError),
     #[error("CelError - UuidError: {0}")]
     UuidError(String),
+    #[error("CelError - DecimalError: {0}")]
+    DecimalError(String),
     #[error("CelError - Unexpected: {0}")]
     Unexpected(String),
 

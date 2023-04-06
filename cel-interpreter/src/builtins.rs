@@ -22,6 +22,14 @@ pub(crate) fn uuid(args: Vec<CelValue>) -> Result<CelValue, CelError> {
     ))
 }
 
+pub(crate) fn dec(args: Vec<CelValue>) -> Result<CelValue, CelError> {
+    let s: Arc<String> = assert_arg(args.get(0))?;
+    Ok(CelValue::Double(
+        s.parse()
+            .map_err(|e| CelError::DecimalError(format!("{e:?}")))?,
+    ))
+}
+
 fn assert_arg<'a, T: TryFrom<&'a CelValue, Error = CelError>>(
     arg: Option<&'a CelValue>,
 ) -> Result<T, CelError> {

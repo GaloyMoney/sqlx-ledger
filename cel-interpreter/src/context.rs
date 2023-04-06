@@ -20,6 +20,10 @@ impl CelContext {
             ContextItem::Function(Box::new(builtins::uuid)),
         );
         idents.insert(
+            "dec".to_string(),
+            ContextItem::Function(Box::new(builtins::dec)),
+        );
+        idents.insert(
             "SETTLED".to_string(),
             ContextItem::Value(CelValue::String(Arc::from("SETTLED".to_string()))),
         );
