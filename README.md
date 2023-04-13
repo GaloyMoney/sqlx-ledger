@@ -1,6 +1,6 @@
 # Sqlx-Ledger
 
-This crate provides primitives for double sided accounting built on top of the [sqlx](https://github.com/launchbadge/sqlx) Postgres intergation.
+This crate provides primitives for double sided accounting built on top of the [sqlx](https://github.com/launchbadge/sqlx) Postgres integration.
 
 It features:
 * Accounts can have balances on multiple journals
