@@ -1,3 +1,14 @@
+# [sqlx-ledger release v0.5.12](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.12)
+
+
+### Bug Fixes
+
+- Spelling
+
+### Miscellaneous Tasks
+
+- Bump cached crate
+
 # [sqlx-ledger release v0.5.11](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.11)
 
 
