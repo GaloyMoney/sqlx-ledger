@@ -2,14 +2,14 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - git:
-      commitTitle: 'chore: bump actoins/checkout in rust-audit'
-      sha: 9bf3ef380e5c258dfc5d13a136e5bad15c76d4da
+      commitTitle: 'chore: pipeline fragments file names'
+      sha: 0a916f2074c900552639e84e379a2deb90b416db
     path: .
   path: ../.github/workflows/vendor
 - contents:
   - git:
-      commitTitle: 'chore: bump actoins/checkout in rust-audit'
-      sha: 9bf3ef380e5c258dfc5d13a136e5bad15c76d4da
+      commitTitle: 'chore: pipeline fragments file names'
+      sha: 0a916f2074c900552639e84e379a2deb90b416db
     path: .
   path: ./vendor
 kind: LockConfig
