@@ -1,3 +1,16 @@
+# [sqlx-ledger release v0.6.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.6.0)
+
+
+### Features
+
+- [**breaking**] EventSubscriberOpts to configure event listening
+
+### Miscellaneous Tasks
+
+- Try to use working lalrpop
+- Attempt to pin lalrpop to a ref
+- Temporarily pin lalrpop
+
 # [sqlx-ledger release v0.5.12](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.5.12)
 
 
