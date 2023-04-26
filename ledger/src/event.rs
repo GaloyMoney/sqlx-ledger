@@ -11,16 +11,39 @@ use tokio::{
 };
 use tracing::instrument;
 
-use std::{collections::HashMap, sync::Arc};
+use std::{
+    collections::HashMap,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+};
 
 use crate::{
     balance::BalanceDetails, transaction::Transaction, AccountId, JournalId, SqlxLedgerError,
 };
 
+/// Options when initializing the EventSubscriber
+pub struct EventSubscriberOpts {
+    pub close_on_lag: bool,
+    pub buffer: usize,
+    pub after_idx: Option<u64>,
+}
+impl Default for EventSubscriberOpts {
+    fn default() -> Self {
+        Self {
+            close_on_lag: false,
+            buffer: 100,
+            after_idx: None,
+        }
+    }
+}
+
 /// Contains fields to store & manage various ledger-related `SqlxLedgerEvent` event receivers.
 #[derive(Debug, Clone)]
 pub struct EventSubscriber {
     buffer: usize,
+    closed: Arc<AtomicBool>,
     #[allow(clippy::type_complexity)]
     balance_receivers:
         Arc<RwLock<HashMap<(JournalId, AccountId), broadcast::Sender<SqlxLedgerEvent>>>>,
@@ -29,8 +52,16 @@ pub struct EventSubscriber {
 }
 
 impl EventSubscriber {
-    pub(crate) async fn connect(pool: &PgPool, buffer: usize) -> Result<Self, SqlxLedgerError> {
-        let mut incoming = subscribe(pool, buffer).await?;
+    pub(crate) async fn connect(
+        pool: &PgPool,
+        EventSubscriberOpts {
+            close_on_lag,
+            buffer,
+            after_idx: start_idx,
+        }: EventSubscriberOpts,
+    ) -> Result<Self, SqlxLedgerError> {
+        let closed = Arc::new(AtomicBool::new(false));
+        let mut incoming = subscribe(pool.clone(), Arc::clone(&closed), buffer, start_idx).await?;
         let all = Arc::new(incoming.resubscribe());
         let balance_receivers = Arc::new(RwLock::new(HashMap::<
             (JournalId, AccountId),
@@ -42,6 +73,7 @@ impl EventSubscriber {
         >::new()));
         let inner_balance_receivers = Arc::clone(&balance_receivers);
         let inner_journal_receivers = Arc::clone(&journal_receivers);
+        let inner_closed = Arc::clone(&closed);
         tokio::spawn(async move {
             loop {
                 match incoming.recv().await {
@@ -59,9 +91,18 @@ impl EventSubscriber {
                             }
                         }
                     }
-                    Err(RecvError::Lagged(_)) => (),
+                    Err(RecvError::Lagged(_)) => {
+                        if close_on_lag {
+                            inner_closed.store(true, Ordering::SeqCst);
+                            inner_balance_receivers.write().await.clear();
+                            inner_journal_receivers.write().await.clear();
+                        }
+                    }
                     Err(RecvError::Closed) => {
                         tracing::warn!("Event subscriber closed");
+                        inner_closed.store(true, Ordering::SeqCst);
+                        inner_balance_receivers.write().await.clear();
+                        inner_journal_receivers.write().await.clear();
                         break;
                     }
                 }
@@ -69,21 +110,26 @@ impl EventSubscriber {
         });
         Ok(Self {
             buffer,
+            closed,
             balance_receivers,
             journal_receivers,
             all,
         })
     }
 
-    pub fn all(&self) -> broadcast::Receiver<SqlxLedgerEvent> {
-        self.all.resubscribe()
+    pub fn all(&self) -> Result<broadcast::Receiver<SqlxLedgerEvent>, SqlxLedgerError> {
+        let recv = self.all.resubscribe();
+        if self.closed.load(Ordering::SeqCst) {
+            return Err(SqlxLedgerError::EventSubscriberClosed);
+        }
+        Ok(recv)
     }
 
     pub async fn account_balance(
         &self,
         journal_id: JournalId,
         account_id: AccountId,
-    ) -> broadcast::Receiver<SqlxLedgerEvent> {
+    ) -> Result<broadcast::Receiver<SqlxLedgerEvent>, SqlxLedgerError> {
         let mut listeners = self.balance_receivers.write().await;
         let mut ret = None;
         let sender = listeners
@@ -93,10 +139,18 @@ impl EventSubscriber {
                 ret = Some(recv);
                 sender
             });
-        ret.unwrap_or_else(|| sender.subscribe())
+        let ret = ret.unwrap_or_else(|| sender.subscribe());
+        if self.closed.load(Ordering::SeqCst) {
+            listeners.remove(&(journal_id, account_id));
+            return Err(SqlxLedgerError::EventSubscriberClosed);
+        }
+        Ok(ret)
     }
 
-    pub async fn journal(&self, journal_id: JournalId) -> broadcast::Receiver<SqlxLedgerEvent> {
+    pub async fn journal(
+        &self,
+        journal_id: JournalId,
+    ) -> Result<broadcast::Receiver<SqlxLedgerEvent>, SqlxLedgerError> {
         let mut listeners = self.journal_receivers.write().await;
         let mut ret = None;
         let sender = listeners.entry(journal_id).or_insert_with(|| {
@@ -104,7 +158,12 @@ impl EventSubscriber {
             ret = Some(recv);
             sender
         });
-        ret.unwrap_or_else(|| sender.subscribe())
+        let ret = ret.unwrap_or_else(|| sender.subscribe());
+        if self.closed.load(Ordering::SeqCst) {
+            listeners.remove(&journal_id);
+            return Err(SqlxLedgerError::EventSubscriberClosed);
+        }
+        Ok(ret)
     }
 }
 
@@ -112,7 +171,7 @@ impl EventSubscriber {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(try_from = "EventRaw")]
 pub struct SqlxLedgerEvent {
-    pub id: i64,
+    pub idx: u64,
     pub data: SqlxLedgerEventData,
     pub r#type: SqlxLedgerEventType,
     pub recorded_at: DateTime<Utc>,
@@ -154,26 +213,65 @@ pub enum SqlxLedgerEventType {
 }
 
 pub(crate) async fn subscribe(
-    pool: &PgPool,
+    pool: PgPool,
+    closed: Arc<AtomicBool>,
     buffer: usize,
+    after_idx: Option<u64>,
 ) -> Result<broadcast::Receiver<SqlxLedgerEvent>, SqlxLedgerError> {
-    let mut listener = PgListener::connect_with(pool).await?;
+    let mut listener = PgListener::connect_with(&pool).await?;
     listener.listen("sqlx_ledger_events").await?;
     let (snd, recv) = broadcast::channel(buffer);
     task::spawn(async move {
         let mut num_errors = 0;
+        let mut last_idx = after_idx.unwrap_or(0);
         loop {
-            match listener.recv().await {
-                Ok(notification) => {
+            match sqlx::query!(
+                r#"SELECT json_build_object(
+                      'id', id,
+                      'type', type,
+                      'data', data,
+                      'recorded_at', recorded_at
+                    ) AS "payload!" FROM sqlx_ledger_events WHERE id > $1 ORDER BY id"#,
+                last_idx as i64
+            )
+            .fetch_all(&pool)
+            .await
+            {
+                Ok(rows) => {
                     num_errors = 0;
-                    let _ = sqlx_ledger_notification_received(notification.payload(), &snd);
+                    for row in rows {
+                        let event: Result<SqlxLedgerEvent, _> = serde_json::from_value(row.payload);
+                        if sqlx_ledger_notification_received(event, &snd, &mut last_idx, true)
+                            .is_err()
+                        {
+                            closed.store(true, Ordering::SeqCst);
+                            break;
+                        }
+                    }
                 }
-                _ if num_errors > 0 => {
-                    num_errors = 0;
-                }
-                _ => {
+                Err(e) if num_errors == 0 => {
+                    tracing::error!("Error fetching events: {}", e);
                     tokio::time::sleep(std::time::Duration::from_secs(1 << num_errors)).await;
                     num_errors += 1;
+                    continue;
+                }
+                _ => {
+                    num_errors = 0;
+                    continue;
+                }
+            }
+            if closed.load(Ordering::Relaxed) {
+                break;
+            }
+            while let Ok(notification) = listener.recv().await {
+                let event: Result<SqlxLedgerEvent, _> =
+                    serde_json::from_str(notification.payload());
+                match sqlx_ledger_notification_received(event, &snd, &mut last_idx, false) {
+                    Ok(false) => break,
+                    Ok(_) => num_errors = 0,
+                    Err(_) => {
+                        closed.store(true, Ordering::SeqCst);
+                    }
                 }
             }
         }
@@ -183,17 +281,27 @@ pub(crate) async fn subscribe(
 
 #[instrument(name = "sqlx_ledger.notification_received", skip(sender), err)]
 fn sqlx_ledger_notification_received(
-    payload: &str,
+    event: Result<SqlxLedgerEvent, serde_json::Error>,
     sender: &broadcast::Sender<SqlxLedgerEvent>,
-) -> Result<(), SqlxLedgerError> {
-    let event: SqlxLedgerEvent = serde_json::from_str(payload)?;
+    last_idx: &mut u64,
+    ignore_gap: bool,
+) -> Result<bool, SqlxLedgerError> {
+    let event = event?;
+    let idx = event.idx;
+    if idx <= *last_idx {
+        return Ok(true);
+    }
+    if !ignore_gap && *last_idx + 1 != idx {
+        return Ok(false);
+    }
     sender.send(event)?;
-    Ok(())
+    *last_idx = idx;
+    Ok(true)
 }
 
 #[derive(Deserialize)]
 struct EventRaw {
-    id: i64,
+    id: u64,
     data: serde_json::Value,
     r#type: SqlxLedgerEventType,
     recorded_at: DateTime<Utc>,
@@ -216,7 +324,7 @@ impl TryFrom<EventRaw> for SqlxLedgerEvent {
         };
 
         Ok(SqlxLedgerEvent {
-            id: value.id,
+            idx: value.id,
             data,
             r#type: value.r#type,
             recorded_at: value.recorded_at,

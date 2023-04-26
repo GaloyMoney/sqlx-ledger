@@ -13,8 +13,8 @@ categories = ["parsing", "cel"]
 fail-on-warnings = []
 
 [dependencies]
-lalrpop-util = { version = "0.19", features = ["lexer"] }
+lalrpop-util = { git = "https://github.com/lalrpop/lalrpop.git", ref = "f7dd39d8c736c969f90c431a2eebb07383fe3a30", features = ["lexer"] }
 regex = "1.4"
 
 [build-dependencies]
-lalrpop = { version = "0.19", features = ["lexer"] }
+lalrpop = { git = "https://github.com/lalrpop/lalrpop.git", ref = "f7dd39d8c736c969f90c431a2eebb07383fe3a30", features = ["lexer"] }
