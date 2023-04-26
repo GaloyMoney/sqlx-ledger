@@ -825,5 +825,25 @@
       }
     },
     "query": "INSERT INTO sqlx_ledger_transactions (id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata)\n            VALUES ($1, 1, (SELECT id FROM sqlx_ledger_journals WHERE id = $2 LIMIT 1), (SELECT id FROM sqlx_ledger_tx_templates WHERE id = $3 LIMIT 1), $4, $5, $6, $7, $8)\n            RETURNING id, version, created_at"
+  },
+  "e30944a079312588707e4c6c3df485baf1435b1306562058c570ad5acc277d42": {
+    "describe": {
+      "columns": [
+        {
+          "name": "payload!",
+          "ordinal": 0,
+          "type_info": "Json"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT json_build_object(\n                      'id', id,\n                      'type', type,\n                      'data', data,\n                      'recorded_at', recorded_at\n                    ) AS \"payload!\" FROM sqlx_ledger_events WHERE id > $1 ORDER BY id"
   }
 }

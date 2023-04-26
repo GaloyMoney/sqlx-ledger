@@ -4,8 +4,8 @@ use tracing::instrument;
 use std::collections::HashMap;
 
 use crate::{
-    account::Accounts, balance::*, entry::*, error::*, event::EventSubscriber, journal::*,
-    primitives::*, transaction::*, tx_template::*,
+    account::Accounts, balance::*, entry::*, error::*, event::*, journal::*, primitives::*,
+    transaction::*, tx_template::*,
 };
 
 #[derive(Debug, Clone)]
@@ -129,7 +129,10 @@ impl SqlxLedger {
         Ok(())
     }
 
-    pub async fn events(&self, buffer: usize) -> Result<EventSubscriber, SqlxLedgerError> {
-        EventSubscriber::connect(&self.pool, buffer).await
+    pub async fn events(
+        &self,
+        opts: EventSubscriberOpts,
+    ) -> Result<EventSubscriber, SqlxLedgerError> {
+        EventSubscriber::connect(&self.pool, opts).await
     }
 }

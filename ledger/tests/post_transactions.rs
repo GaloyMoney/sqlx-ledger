@@ -97,11 +97,16 @@ async fn post_transaction() -> anyhow::Result<()> {
         .unwrap();
     ledger.tx_templates().create(new_template).await.unwrap();
 
-    let events = ledger.events(10).await?;
-    let mut sender_account_balance_events =
-        events.account_balance(journal_id, sender_account_id).await;
-    let mut all_events = events.all();
-    let mut journal_events = events.journal(journal_id).await;
+    let events = ledger.events(Default::default()).await?;
+    let mut sender_account_balance_events = events
+        .account_balance(journal_id, sender_account_id)
+        .await
+        .expect("event subscriber closed");
+    let mut all_events = events.all().expect("event subscriber closed");
+    let mut journal_events = events
+        .journal(journal_id)
+        .await
+        .expect("event subscriber closed");
 
     let external_id = uuid::Uuid::new_v4().to_string();
     let mut params = TxParams::new();
@@ -138,6 +143,16 @@ async fn post_transaction() -> anyhow::Result<()> {
     );
     assert_eq!(
         all_events.recv().await.unwrap().r#type,
+        SqlxLedgerEventType::BalanceUpdated
+    );
+    let after_events = ledger
+        .events(EventSubscriberOpts {
+            after_idx: Some(1),
+            ..Default::default()
+        })
+        .await?;
+    assert_eq!(
+        after_events.all().unwrap().recv().await.unwrap().r#type,
         SqlxLedgerEventType::BalanceUpdated
     );
     assert_eq!(

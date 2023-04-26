@@ -32,6 +32,8 @@ pub enum SqlxLedgerError {
     UnbalancedTransaction(Currency, Decimal),
     #[error("SqlxLedgerError - OptimisticLockingError")]
     OptimisticLockingError,
+    #[error("SqlxLedgerError - EventSubscriberClosed")]
+    EventSubscriberClosed,
 }
 
 impl From<sqlx::Error> for SqlxLedgerError {
