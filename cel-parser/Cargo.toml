@@ -17,4 +17,4 @@ lalrpop-util = { version = "=0.19.9", features = ["lexer"] }
 regex = "=1.7.3"
 
 [build-dependencies]
-lalrpop = { version = "=0.19.9", features = ["lexer"] }
+lalrpop = { version = "=0.19.10", features = ["lexer"] }
