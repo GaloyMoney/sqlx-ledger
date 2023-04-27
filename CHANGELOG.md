@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.7.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.7.1)
+
+
+### Miscellaneous Tasks
+
+- Type safe SqlxLedgerEventId
+
 # [sqlx-ledger release v0.7.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.7.0)
 
 
