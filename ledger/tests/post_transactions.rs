@@ -137,17 +137,15 @@ async fn post_transaction() -> anyhow::Result<()> {
         sender_account_balance_events.recv().await.unwrap().r#type,
         SqlxLedgerEventType::BalanceUpdated
     );
-    assert_eq!(
-        all_events.recv().await.unwrap().r#type,
-        SqlxLedgerEventType::TransactionCreated
-    );
+    let next_event = all_events.recv().await.unwrap();
+    assert_eq!(next_event.r#type, SqlxLedgerEventType::TransactionCreated);
     assert_eq!(
         all_events.recv().await.unwrap().r#type,
         SqlxLedgerEventType::BalanceUpdated
     );
     let after_events = ledger
         .events(EventSubscriberOpts {
-            after_id: Some(1),
+            after_id: Some(next_event.id),
             ..Default::default()
         })
         .await?;

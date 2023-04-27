@@ -29,7 +29,7 @@ use crate::{
 pub struct EventSubscriberOpts {
     pub close_on_lag: bool,
     pub buffer: usize,
-    pub after_id: Option<u64>,
+    pub after_id: Option<SqlxLedgerEventId>,
 }
 impl Default for EventSubscriberOpts {
     fn default() -> Self {
@@ -169,11 +169,18 @@ impl EventSubscriber {
     }
 }
 
+#[derive(
+    sqlx::Type, Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd, Eq, Hash, Copy,
+)]
+#[serde(transparent)]
+#[sqlx(transparent)]
+pub struct SqlxLedgerEventId(i64);
+
 /// Representation of a ledger event.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(try_from = "EventRaw")]
 pub struct SqlxLedgerEvent {
-    pub id: u64,
+    pub id: SqlxLedgerEventId,
     pub data: SqlxLedgerEventData,
     pub r#type: SqlxLedgerEventType,
     pub recorded_at: DateTime<Utc>,
@@ -229,14 +236,14 @@ pub(crate) async fn subscribe(
     pool: PgPool,
     closed: Arc<AtomicBool>,
     buffer: usize,
-    after_id: Option<u64>,
+    after_id: Option<SqlxLedgerEventId>,
 ) -> Result<broadcast::Receiver<SqlxLedgerEvent>, SqlxLedgerError> {
     let mut listener = PgListener::connect_with(&pool).await?;
     listener.listen("sqlx_ledger_events").await?;
     let (snd, recv) = broadcast::channel(buffer);
     task::spawn(async move {
         let mut num_errors = 0;
-        let mut last_id = after_id.unwrap_or(0);
+        let mut last_id = after_id.unwrap_or(SqlxLedgerEventId(0));
         loop {
             match sqlx::query!(
                 r#"SELECT json_build_object(
@@ -245,7 +252,7 @@ pub(crate) async fn subscribe(
                       'data', data,
                       'recorded_at', recorded_at
                     ) AS "payload!" FROM sqlx_ledger_events WHERE id > $1 ORDER BY id"#,
-                last_id as i64
+                last_id.0
             )
             .fetch_all(&pool)
             .await
@@ -296,7 +303,7 @@ pub(crate) async fn subscribe(
 fn sqlx_ledger_notification_received(
     event: Result<SqlxLedgerEvent, serde_json::Error>,
     sender: &broadcast::Sender<SqlxLedgerEvent>,
-    last_id: &mut u64,
+    last_id: &mut SqlxLedgerEventId,
     ignore_gap: bool,
 ) -> Result<bool, SqlxLedgerError> {
     let mut event = event?;
@@ -305,7 +312,7 @@ fn sqlx_ledger_notification_received(
     if id <= *last_id {
         return Ok(true);
     }
-    if !ignore_gap && *last_id + 1 != id {
+    if !ignore_gap && last_id.0 + 1 != id.0 {
         return Ok(false);
     }
     sender.send(event)?;
@@ -315,7 +322,7 @@ fn sqlx_ledger_notification_received(
 
 #[derive(Deserialize)]
 struct EventRaw {
-    id: u64,
+    id: SqlxLedgerEventId,
     data: serde_json::Value,
     r#type: SqlxLedgerEventType,
     recorded_at: DateTime<Utc>,
