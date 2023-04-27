@@ -286,8 +286,6 @@ pub(crate) async fn subscribe(
                         continue;
                     }
                 }
-            } else {
-                reload = true;
             }
             if closed.load(Ordering::Relaxed) {
                 break;
@@ -295,13 +293,14 @@ pub(crate) async fn subscribe(
             while let Ok(notification) = listener.recv().await {
                 let event: Result<SqlxLedgerEvent, _> =
                     serde_json::from_str(notification.payload());
-                match sqlx_ledger_notification_received(event, &snd, &mut last_id, false) {
+                match sqlx_ledger_notification_received(event, &snd, &mut last_id, !reload) {
                     Ok(false) => break,
                     Ok(_) => num_errors = 0,
                     Err(_) => {
                         closed.store(true, Ordering::SeqCst);
                     }
                 }
+                reload = true;
             }
         }
     });
