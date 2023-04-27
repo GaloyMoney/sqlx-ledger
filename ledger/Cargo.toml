@@ -12,6 +12,7 @@ categories = ["accounting", "ledger"]
 [features]
 
 fail-on-warnings = []
+otel = ["opentelemetry", "tracing-opentelemetry"]
 
 [dependencies]
 cel-interpreter = { path = "../cel-interpreter", package = "sqlx-ledger-cel-interpreter", version = "0.6.2-dev" }
@@ -27,6 +28,8 @@ tokio = { version = "1.24", features = ["macros"] }
 uuid = { version = "1.2.1", features = ["serde", "v4"] }
 rusty-money = { version = "0.4.1", features = ["iso", "crypto"] }
 tracing = "0.1.37"
+opentelemetry = { version =  "0.18.0", optional = true }
+tracing-opentelemetry = { version = "0.18.0", optional = true }
 cached = "0.43.0"
 
 

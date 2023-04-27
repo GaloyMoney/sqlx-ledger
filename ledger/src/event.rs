@@ -10,6 +10,8 @@ use tokio::{
     task,
 };
 use tracing::instrument;
+#[cfg(feature = "otel")]
+use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use std::{
     collections::HashMap,
@@ -175,7 +177,18 @@ pub struct SqlxLedgerEvent {
     pub data: SqlxLedgerEventData,
     pub r#type: SqlxLedgerEventType,
     pub recorded_at: DateTime<Utc>,
-    pub span: tracing::Span,
+    #[cfg(feature = "otel")]
+    pub otel_context: opentelemetry::Context,
+}
+
+impl SqlxLedgerEvent {
+    #[cfg(feature = "otel")]
+    fn record_otel_context(&mut self) {
+        self.otel_context = tracing::Span::current().context();
+    }
+
+    #[cfg(not(feature = "otel"))]
+    fn record_otel_context(&mut self) {}
 }
 
 impl SqlxLedgerEvent {
@@ -286,7 +299,8 @@ fn sqlx_ledger_notification_received(
     last_id: &mut u64,
     ignore_gap: bool,
 ) -> Result<bool, SqlxLedgerError> {
-    let event = event?;
+    let mut event = event?;
+    event.record_otel_context();
     let id = event.id;
     if id <= *last_id {
         return Ok(true);
@@ -328,7 +342,8 @@ impl TryFrom<EventRaw> for SqlxLedgerEvent {
             data,
             r#type: value.r#type,
             recorded_at: value.recorded_at,
-            span: tracing::Span::current(),
+            #[cfg(feature = "otel")]
+            otel_context: tracing::Span::current().context(),
         })
     }
 }
