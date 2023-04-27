@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.7.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.7.0)
+
+
+### Miscellaneous Tasks
+
+- Add otel feature
+
 # [sqlx-ledger release v0.6.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.6.1)
 
 
