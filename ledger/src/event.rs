@@ -175,6 +175,9 @@ impl EventSubscriber {
 #[serde(transparent)]
 #[sqlx(transparent)]
 pub struct SqlxLedgerEventId(i64);
+impl SqlxLedgerEventId {
+    pub const BEGIN: Self = Self(0);
+}
 
 /// Representation of a ledger event.
 #[derive(Debug, Clone, Deserialize)]
