@@ -27,14 +27,14 @@ use crate::{
 pub struct EventSubscriberOpts {
     pub close_on_lag: bool,
     pub buffer: usize,
-    pub after_idx: Option<u64>,
+    pub after_id: Option<u64>,
 }
 impl Default for EventSubscriberOpts {
     fn default() -> Self {
         Self {
             close_on_lag: false,
             buffer: 100,
-            after_idx: None,
+            after_id: None,
         }
     }
 }
@@ -57,11 +57,11 @@ impl EventSubscriber {
         EventSubscriberOpts {
             close_on_lag,
             buffer,
-            after_idx: start_idx,
+            after_id: start_id,
         }: EventSubscriberOpts,
     ) -> Result<Self, SqlxLedgerError> {
         let closed = Arc::new(AtomicBool::new(false));
-        let mut incoming = subscribe(pool.clone(), Arc::clone(&closed), buffer, start_idx).await?;
+        let mut incoming = subscribe(pool.clone(), Arc::clone(&closed), buffer, start_id).await?;
         let all = Arc::new(incoming.resubscribe());
         let balance_receivers = Arc::new(RwLock::new(HashMap::<
             (JournalId, AccountId),
@@ -171,7 +171,7 @@ impl EventSubscriber {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(try_from = "EventRaw")]
 pub struct SqlxLedgerEvent {
-    pub idx: u64,
+    pub id: u64,
     pub data: SqlxLedgerEventData,
     pub r#type: SqlxLedgerEventType,
     pub recorded_at: DateTime<Utc>,
@@ -216,14 +216,14 @@ pub(crate) async fn subscribe(
     pool: PgPool,
     closed: Arc<AtomicBool>,
     buffer: usize,
-    after_idx: Option<u64>,
+    after_id: Option<u64>,
 ) -> Result<broadcast::Receiver<SqlxLedgerEvent>, SqlxLedgerError> {
     let mut listener = PgListener::connect_with(&pool).await?;
     listener.listen("sqlx_ledger_events").await?;
     let (snd, recv) = broadcast::channel(buffer);
     task::spawn(async move {
         let mut num_errors = 0;
-        let mut last_idx = after_idx.unwrap_or(0);
+        let mut last_id = after_id.unwrap_or(0);
         loop {
             match sqlx::query!(
                 r#"SELECT json_build_object(
@@ -232,7 +232,7 @@ pub(crate) async fn subscribe(
                       'data', data,
                       'recorded_at', recorded_at
                     ) AS "payload!" FROM sqlx_ledger_events WHERE id > $1 ORDER BY id"#,
-                last_idx as i64
+                last_id as i64
             )
             .fetch_all(&pool)
             .await
@@ -241,7 +241,7 @@ pub(crate) async fn subscribe(
                     num_errors = 0;
                     for row in rows {
                         let event: Result<SqlxLedgerEvent, _> = serde_json::from_value(row.payload);
-                        if sqlx_ledger_notification_received(event, &snd, &mut last_idx, true)
+                        if sqlx_ledger_notification_received(event, &snd, &mut last_id, true)
                             .is_err()
                         {
                             closed.store(true, Ordering::SeqCst);
@@ -266,7 +266,7 @@ pub(crate) async fn subscribe(
             while let Ok(notification) = listener.recv().await {
                 let event: Result<SqlxLedgerEvent, _> =
                     serde_json::from_str(notification.payload());
-                match sqlx_ledger_notification_received(event, &snd, &mut last_idx, false) {
+                match sqlx_ledger_notification_received(event, &snd, &mut last_id, false) {
                     Ok(false) => break,
                     Ok(_) => num_errors = 0,
                     Err(_) => {
@@ -283,19 +283,19 @@ pub(crate) async fn subscribe(
 fn sqlx_ledger_notification_received(
     event: Result<SqlxLedgerEvent, serde_json::Error>,
     sender: &broadcast::Sender<SqlxLedgerEvent>,
-    last_idx: &mut u64,
+    last_id: &mut u64,
     ignore_gap: bool,
 ) -> Result<bool, SqlxLedgerError> {
     let event = event?;
-    let idx = event.idx;
-    if idx <= *last_idx {
+    let id = event.id;
+    if id <= *last_id {
         return Ok(true);
     }
-    if !ignore_gap && *last_idx + 1 != idx {
+    if !ignore_gap && *last_id + 1 != id {
         return Ok(false);
     }
     sender.send(event)?;
-    *last_idx = idx;
+    *last_id = id;
     Ok(true)
 }
 
@@ -324,7 +324,7 @@ impl TryFrom<EventRaw> for SqlxLedgerEvent {
         };
 
         Ok(SqlxLedgerEvent {
-            idx: value.id,
+            id: value.id,
             data,
             r#type: value.r#type,
             recorded_at: value.recorded_at,

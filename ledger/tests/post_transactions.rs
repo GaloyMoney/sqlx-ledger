@@ -147,7 +147,7 @@ async fn post_transaction() -> anyhow::Result<()> {
     );
     let after_events = ledger
         .events(EventSubscriberOpts {
-            after_idx: Some(1),
+            after_id: Some(1),
             ..Default::default()
         })
         .await?;
