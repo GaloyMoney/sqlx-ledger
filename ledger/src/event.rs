@@ -241,44 +241,50 @@ pub(crate) async fn subscribe(
     let mut listener = PgListener::connect_with(&pool).await?;
     listener.listen("sqlx_ledger_events").await?;
     let (snd, recv) = broadcast::channel(buffer);
+    let mut reload = after_id.is_some();
     task::spawn(async move {
         let mut num_errors = 0;
         let mut last_id = after_id.unwrap_or(SqlxLedgerEventId(0));
         loop {
-            match sqlx::query!(
-                r#"SELECT json_build_object(
+            if reload {
+                match sqlx::query!(
+                    r#"SELECT json_build_object(
                       'id', id,
                       'type', type,
                       'data', data,
                       'recorded_at', recorded_at
                     ) AS "payload!" FROM sqlx_ledger_events WHERE id > $1 ORDER BY id"#,
-                last_id.0
-            )
-            .fetch_all(&pool)
-            .await
-            {
-                Ok(rows) => {
-                    num_errors = 0;
-                    for row in rows {
-                        let event: Result<SqlxLedgerEvent, _> = serde_json::from_value(row.payload);
-                        if sqlx_ledger_notification_received(event, &snd, &mut last_id, true)
-                            .is_err()
-                        {
-                            closed.store(true, Ordering::SeqCst);
-                            break;
+                    last_id.0
+                )
+                .fetch_all(&pool)
+                .await
+                {
+                    Ok(rows) => {
+                        num_errors = 0;
+                        for row in rows {
+                            let event: Result<SqlxLedgerEvent, _> =
+                                serde_json::from_value(row.payload);
+                            if sqlx_ledger_notification_received(event, &snd, &mut last_id, true)
+                                .is_err()
+                            {
+                                closed.store(true, Ordering::SeqCst);
+                                break;
+                            }
                         }
                     }
+                    Err(e) if num_errors == 0 => {
+                        tracing::error!("Error fetching events: {}", e);
+                        tokio::time::sleep(std::time::Duration::from_secs(1 << num_errors)).await;
+                        num_errors += 1;
+                        continue;
+                    }
+                    _ => {
+                        num_errors = 0;
+                        continue;
+                    }
                 }
-                Err(e) if num_errors == 0 => {
-                    tracing::error!("Error fetching events: {}", e);
-                    tokio::time::sleep(std::time::Duration::from_secs(1 << num_errors)).await;
-                    num_errors += 1;
-                    continue;
-                }
-                _ => {
-                    num_errors = 0;
-                    continue;
-                }
+            } else {
+                reload = true;
             }
             if closed.load(Ordering::Relaxed) {
                 break;
