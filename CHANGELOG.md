@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.7.2](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.7.2)
+
+
+### Bug Fixes
+
+- Only reload if after_id is set
+
 # [sqlx-ledger release v0.7.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.7.1)
 
 
