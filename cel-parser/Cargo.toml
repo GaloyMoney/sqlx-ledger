@@ -14,7 +14,7 @@ fail-on-warnings = []
 
 [dependencies]
 lalrpop-util = { version = "=0.19.9", features = ["lexer"] }
-regex = "=1.7.3"
+regex = "=1.8.1"
 
 [build-dependencies]
 lalrpop = { version = "=0.19.9", features = ["lexer"] }
