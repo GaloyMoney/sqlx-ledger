@@ -1,6 +1,5 @@
 use sqlx::{Pool, Postgres, Transaction};
 use tracing::instrument;
-use uuid::Uuid;
 
 use super::entity::*;
 use crate::{error::*, primitives::*};
@@ -39,7 +38,7 @@ impl Journals {
             r#"INSERT INTO sqlx_ledger_journals (id, name, description, status)
             VALUES ($1, $2, $3, $4)
             RETURNING id, version, created_at"#,
-            Uuid::from(id),
+            id as JournalId,
             name,
             description,
             status as Status,

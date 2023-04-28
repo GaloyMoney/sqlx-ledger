@@ -37,8 +37,8 @@ impl Balances {
                 ON b.journal_id = c.journal_id AND b.account_id = c.account_id AND b.currency = c.currency AND b.version = c.version
                 JOIN ( SELECT id, normal_balance_type FROM sqlx_ledger_accounts WHERE id = $2 LIMIT 1 ) a
                   ON a.id = b.account_id"#,
-            Uuid::from(journal_id),
-            Uuid::from(account_id),
+            journal_id as JournalId,
+            account_id as AccountId,
             currency.code()
         )
         .fetch_optional(&self.pool)
@@ -88,7 +88,7 @@ impl Balances {
                 ON b.journal_id = c.journal_id AND b.account_id = c.account_id AND b.currency = c.currency AND b.version = c.version
                 JOIN ( SELECT DISTINCT(id), normal_balance_type FROM sqlx_ledger_accounts WHERE id = ANY($2)) a
                   ON a.id = b.account_id"#,
-            Uuid::from(journal_id),
+            journal_id as JournalId,
             &account_ids[..]
         )
         .fetch_all(&self.pool)
@@ -149,10 +149,10 @@ impl Balances {
                 FROM sqlx_ledger_balances b JOIN (
                     SELECT * FROM sqlx_ledger_current_balances WHERE journal_id = "#,
         );
-        query_builder.push_bind(Uuid::from(journal_id));
+        query_builder.push_bind(journal_id);
         query_builder.push(r#" AND (account_id, currency) IN"#);
         query_builder.push_tuples(ids, |mut builder, (id, currency)| {
-            builder.push_bind(Uuid::from(id));
+            builder.push_bind(id);
             builder.push_bind(currency.code());
         });
         query_builder.push(
@@ -229,8 +229,8 @@ impl Balances {
             previous_versions.iter().filter(|(_, v)| **v == 0),
             |mut builder, ((account_id, currency), version)| {
                 any_new = true;
-                builder.push_bind(Uuid::from(journal_id));
-                builder.push_bind(Uuid::from(**account_id));
+                builder.push_bind(journal_id);
+                builder.push_bind(**account_id);
                 builder.push_bind(currency.code());
                 builder.push_bind(version);
             },
@@ -246,14 +246,14 @@ impl Balances {
             bind_numbers.insert((account_id, currency), next_bind_number);
             next_bind_number += 3;
             query_builder.push(" WHEN account_id = ");
-            query_builder.push_bind(Uuid::from(*account_id));
+            query_builder.push_bind(*account_id);
             query_builder.push(" AND currency = ");
             query_builder.push_bind(currency.code());
             query_builder.push(" THEN ");
             query_builder.push_bind(version);
         }
         query_builder.push(" END WHERE journal_id = ");
-        query_builder.push_bind(Uuid::from(journal_id));
+        query_builder.push_bind(journal_id);
         query_builder.push(" AND (account_id, currency, version) IN");
         query_builder.push_tuples(
             previous_versions,
@@ -278,21 +278,21 @@ impl Balances {
             "#,
         );
         query_builder.push_values(new_balances, |mut builder, b| {
-            builder.push_bind(Uuid::from(b.journal_id));
-            builder.push_bind(Uuid::from(b.account_id));
-            builder.push_bind(Uuid::from(b.entry_id));
+            builder.push_bind(b.journal_id);
+            builder.push_bind(b.account_id);
+            builder.push_bind(b.entry_id);
             builder.push_bind(b.currency.code());
             builder.push_bind(b.settled_dr_balance);
             builder.push_bind(b.settled_cr_balance);
-            builder.push_bind(Uuid::from(b.settled_entry_id));
+            builder.push_bind(b.settled_entry_id);
             builder.push_bind(b.settled_modified_at);
             builder.push_bind(b.pending_dr_balance);
             builder.push_bind(b.pending_cr_balance);
-            builder.push_bind(Uuid::from(b.pending_entry_id));
+            builder.push_bind(b.pending_entry_id);
             builder.push_bind(b.pending_modified_at);
             builder.push_bind(b.encumbered_dr_balance);
             builder.push_bind(b.encumbered_cr_balance);
-            builder.push_bind(Uuid::from(b.encumbered_entry_id));
+            builder.push_bind(b.encumbered_entry_id);
             builder.push_bind(b.encumbered_modified_at);
             builder.push_bind(b.version);
             builder.push_bind(b.modified_at);

@@ -2,6 +2,7 @@
 macro_rules! entity_id {
     ($name:ident) => {
         #[derive(
+            sqlx::Type,
             Debug,
             Clone,
             Copy,
@@ -14,6 +15,7 @@ macro_rules! entity_id {
             serde::Serialize,
         )]
         #[serde(transparent)]
+        #[sqlx(transparent)]
         pub struct $name(uuid::Uuid);
 
         impl $name {

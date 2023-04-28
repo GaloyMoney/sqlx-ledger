@@ -64,8 +64,8 @@ impl Entries {
                  description,
              }: NewEntry| {
                 builder.push("gen_random_uuid()");
-                builder.push_bind(Uuid::from(transaction_id));
-                builder.push_bind(Uuid::from(journal_id));
+                builder.push_bind(transaction_id);
+                builder.push_bind(journal_id);
                 builder.push_bind(entry_type);
                 builder.push_bind(layer);
                 builder.push_bind(units);
@@ -74,7 +74,7 @@ impl Entries {
                 builder.push_bind(description);
                 builder.push_bind(sequence);
                 builder.push("(SELECT id FROM sqlx_ledger_accounts WHERE id = ");
-                builder.push_bind_unseparated(Uuid::from(account_id));
+                builder.push_bind_unseparated(account_id);
                 builder.push_unseparated(")");
                 partial_ret.insert(sequence, (account_id, units, currency, layer, direction));
                 sequence += 1;

@@ -1,7 +1,6 @@
 use serde::Serialize;
 use sqlx::{Pool, Postgres, Transaction};
 use tracing::instrument;
-use uuid::Uuid;
 
 use super::entity::*;
 use crate::{error::*, primitives::*};
@@ -43,7 +42,7 @@ impl Accounts {
             r#"INSERT INTO sqlx_ledger_accounts (id, code, name, normal_balance_type, description, status, metadata)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id, version, created_at"#,
-            Uuid::from(id),
+            id as AccountId,
             code,
             name,
             normal_balance_type as DebitOrCredit,
@@ -69,7 +68,7 @@ impl Accounts {
         };
         sqlx::query_file!(
             "src/account/sql/update-account.sql",
-            Uuid::from(id),
+            id as AccountId,
             description,
             metadata_json
         )

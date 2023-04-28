@@ -31,17 +31,16 @@ impl Transactions {
             metadata,
         }: NewTransaction,
     ) -> Result<(JournalId, TransactionId), SqlxLedgerError> {
-        let id = Uuid::from(tx_id);
         let record = sqlx::query!(
             r#"INSERT INTO sqlx_ledger_transactions (id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata)
             VALUES ($1, 1, (SELECT id FROM sqlx_ledger_journals WHERE id = $2 LIMIT 1), (SELECT id FROM sqlx_ledger_tx_templates WHERE id = $3 LIMIT 1), $4, $5, $6, $7, $8)
             RETURNING id, version, created_at"#,
-            id,
-            Uuid::from(journal_id),
-            Uuid::from(tx_template_id),
+            tx_id as TransactionId,
+            journal_id as JournalId,
+            tx_template_id as TxTemplateId,
             effective,
-            correlation_id.map(Uuid::from).unwrap_or(id),
-            external_id.unwrap_or_else(|| id.to_string()),
+            correlation_id.map(Uuid::from).unwrap_or(Uuid::from(tx_id)),
+            external_id.unwrap_or_else(|| tx_id.to_string()),
             description,
             metadata
         )

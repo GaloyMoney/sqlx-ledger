@@ -37,7 +37,7 @@ impl TxTemplates {
             r#"INSERT INTO sqlx_ledger_tx_templates (id, code, description, params, tx_input, entries, metadata)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id, version, created_at"#,
-            uuid::Uuid::from(id),
+            id as TxTemplateId,
             code,
             description,
             params_json,
