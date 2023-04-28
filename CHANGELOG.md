@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.7.5](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.7.5)
+
+
+### Miscellaneous Tasks
+
+- Impl Type on entity ids
+
 # [sqlx-ledger release v0.7.4](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.7.4)
 
 
