@@ -15,6 +15,7 @@ pub struct CelResult<'a> {
 #[derive(Debug, Clone, PartialEq)]
 pub enum CelValue {
     Map(Arc<CelMap>),
+    Array(Arc<CelArray>),
     Int(i64),
     UInt(u64),
     Double(Decimal),
@@ -40,6 +41,21 @@ impl CelValue {
 #[derive(Debug, PartialEq)]
 pub struct CelMap {
     inner: HashMap<CelKey, CelValue>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct CelArray {
+    inner: Vec<CelValue>,
+}
+
+impl CelArray {
+    pub fn new() -> Self {
+        Self { inner: Vec::new() }
+    }
+
+    pub fn push(&mut self, elem: impl Into<CelValue>) {
+        self.inner.push(elem.into());
+    }
 }
 
 impl CelMap {
@@ -148,7 +164,13 @@ impl From<serde_json::Value> for CelValue {
                 }
                 CelValue::Map(Arc::from(map))
             }
-            _ => unimplemented!(),
+            Array(a) => {
+                let mut ar = CelArray::new();
+                for v in a.into_iter() {
+                    ar.push(CelValue::from(v));
+                }
+                CelValue::Array(Arc::from(ar))
+            }
         }
     }
 }
@@ -183,6 +205,7 @@ impl From<&CelValue> for CelType {
     fn from(v: &CelValue) -> Self {
         match v {
             CelValue::Map(_) => CelType::Map,
+            CelValue::Array(_) => CelType::Array,
             CelValue::Int(_) => CelType::Int,
             CelValue::UInt(_) => CelType::UInt,
             CelValue::Double(_) => CelType::Double,
@@ -331,6 +354,16 @@ impl<'a> TryFrom<CelResult<'a>> for serde_json::Value {
                         val: v.clone(),
                     })?;
                     res.insert(key, value);
+                }
+                Value::from(res)
+            }
+            CelValue::Array(a) => {
+                let mut res = Vec::new();
+                for v in a.inner.iter() {
+                    res.push(Self::try_from(CelResult {
+                        expr,
+                        val: v.clone(),
+                    })?);
                 }
                 Value::from(res)
             }
