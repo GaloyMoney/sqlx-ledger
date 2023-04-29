@@ -58,6 +58,12 @@ impl CelArray {
     }
 }
 
+impl Default for CelArray {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CelMap {
     pub fn new() -> Self {
         Self {
