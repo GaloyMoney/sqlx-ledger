@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.7.7](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.7.7)
+
+
+### Miscellaneous Tasks
+
+- Bump lalrpop
+
 # [sqlx-ledger release v0.7.6](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.7.6)
 
 
