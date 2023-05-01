@@ -13,8 +13,7 @@ categories = ["parsing", "cel"]
 fail-on-warnings = []
 
 [dependencies]
-lalrpop-util = { version = "=0.19.9", features = ["lexer"] }
-regex = "=1.7.3"
+lalrpop-util = { version = "0.19.12", features = ["lexer"] }
 
 [build-dependencies]
-lalrpop = { version = "=0.19.9", features = ["lexer"] }
+lalrpop = { version = "0.19.12", features = ["lexer"] }
