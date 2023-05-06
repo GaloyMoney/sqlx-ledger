@@ -23,26 +23,6 @@ impl CelContext {
             "dec".to_string(),
             ContextItem::Function(Box::new(builtins::dec)),
         );
-        idents.insert(
-            "SETTLED".to_string(),
-            ContextItem::Value(CelValue::String(Arc::from("SETTLED".to_string()))),
-        );
-        idents.insert(
-            "PENDING".to_string(),
-            ContextItem::Value(CelValue::String(Arc::from("PENDING".to_string()))),
-        );
-        idents.insert(
-            "ENCUMBERED".to_string(),
-            ContextItem::Value(CelValue::String(Arc::from("ENCUMBERED".to_string()))),
-        );
-        idents.insert(
-            "DEBIT".to_string(),
-            ContextItem::Value(CelValue::String(Arc::from("DEBIT".to_string()))),
-        );
-        idents.insert(
-            "CREDIT".to_string(),
-            ContextItem::Value(CelValue::String(Arc::from("CREDIT".to_string()))),
-        );
         Self { idents }
     }
 }

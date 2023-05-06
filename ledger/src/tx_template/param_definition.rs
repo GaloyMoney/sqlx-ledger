@@ -1,4 +1,4 @@
-use cel_interpreter::{CelContext, CelExpression, CelType, CelValue};
+use cel_interpreter::{CelExpression, CelType, CelValue};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
@@ -33,7 +33,7 @@ impl ParamDefinitionBuilder {
             let expr = CelExpression::try_from(expr.as_str()).map_err(|e| e.to_string())?;
             let param_type = ParamDataType::try_from(
                 &expr
-                    .evaluate(&CelContext::new())
+                    .evaluate(&super::cel_context::initialize())
                     .map_err(|e| format!("{e}"))?,
             )?;
             let specified_type = self.r#type.as_ref().unwrap();

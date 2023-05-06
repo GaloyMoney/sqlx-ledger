@@ -24,7 +24,7 @@ impl TxParams {
         mut self,
         defs: Option<&Vec<ParamDefinition>>,
     ) -> Result<CelContext, SqlxLedgerError> {
-        let mut ctx = CelContext::new();
+        let mut ctx = super::cel_context::initialize();
         if let Some(defs) = defs {
             let mut cel_map = CelMap::new();
             for d in defs {
