@@ -70,7 +70,7 @@ impl TryFrom<&CelValue> for ParamDataType {
             Map => Ok(ParamDataType::JSON),
             Date => Ok(ParamDataType::DATE),
             Uuid => Ok(ParamDataType::UUID),
-            Double => Ok(ParamDataType::DECIMAL),
+            Decimal => Ok(ParamDataType::DECIMAL),
             Bool => Ok(ParamDataType::BOOLEAN),
             _ => Err(format!("Unsupported type: {value:?}")),
         }
