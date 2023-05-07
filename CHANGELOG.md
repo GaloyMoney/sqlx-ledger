@@ -1,3 +1,16 @@
+# [sqlx-ledger release v0.8.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.8.0)
+
+
+### Bug Fixes
+
+- Line up ParamDataType with new Decimal
+- [**breaking**] Correct numeric types
+
+### Refactor
+
+- Array->List
+- Remove ledger specific literals from cel-interpreter
+
 # [sqlx-ledger release v0.7.7](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.7.7)
 
 
