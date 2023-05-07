@@ -16,7 +16,7 @@ pub struct CelResult<'a> {
 pub enum CelValue {
     // Builtins
     Map(Arc<CelMap>),
-    Array(Arc<CelArray>),
+    List(Arc<CelArray>),
     Int(i64),
     UInt(u64),
     Double(f64),
@@ -178,7 +178,7 @@ impl From<serde_json::Value> for CelValue {
                 for v in a.into_iter() {
                     ar.push(CelValue::from(v));
                 }
-                CelValue::Array(Arc::from(ar))
+                CelValue::List(Arc::from(ar))
             }
         }
     }
@@ -214,7 +214,7 @@ impl From<&CelValue> for CelType {
     fn from(v: &CelValue) -> Self {
         match v {
             CelValue::Map(_) => CelType::Map,
-            CelValue::Array(_) => CelType::Array,
+            CelValue::List(_) => CelType::List,
             CelValue::Int(_) => CelType::Int,
             CelValue::UInt(_) => CelType::UInt,
             CelValue::Double(_) => CelType::Double,
@@ -365,7 +365,7 @@ impl<'a> TryFrom<CelResult<'a>> for serde_json::Value {
                 }
                 Value::from(res)
             }
-            CelValue::Array(a) => {
+            CelValue::List(a) => {
                 let mut res = Vec::new();
                 for v in a.inner.iter() {
                     res.push(Self::try_from(CelResult {

@@ -2,7 +2,7 @@
 pub enum CelType {
     // Builtins
     Map,
-    Array,
+    List,
     Int,
     UInt,
     Double,
