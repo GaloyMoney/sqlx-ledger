@@ -22,9 +22,9 @@ pub(crate) fn uuid(args: Vec<CelValue>) -> Result<CelValue, CelError> {
     ))
 }
 
-pub(crate) fn dec(args: Vec<CelValue>) -> Result<CelValue, CelError> {
+pub(crate) fn decimal(args: Vec<CelValue>) -> Result<CelValue, CelError> {
     let s: Arc<String> = assert_arg(args.get(0))?;
-    Ok(CelValue::Double(
+    Ok(CelValue::Decimal(
         s.parse()
             .map_err(|e| CelError::DecimalError(format!("{e:?}")))?,
     ))

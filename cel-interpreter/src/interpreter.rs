@@ -1,4 +1,3 @@
-use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use cel_parser::{
@@ -8,7 +7,7 @@ use cel_parser::{
 
 use std::sync::Arc;
 
-use crate::{context::*, error::*, value::*};
+use crate::{cel_type::*, context::*, error::*, value::*};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(try_from = "String")]
@@ -177,47 +176,38 @@ fn evaluate_arithmetic(
 ) -> Result<CelValue, CelError> {
     use CelValue::*;
     match op {
-        ArithmeticOp::Multiply => match (left, right) {
+        ArithmeticOp::Multiply => match (&left, &right) {
             (UInt(l), UInt(r)) => Ok(UInt(l * r)),
-            (UInt(l), Int(r)) => Ok(Int(l as i64 * r)),
-            (UInt(l), Double(r)) => Ok(Double(Decimal::from(l) * r)),
-            (Int(l), UInt(r)) => Ok(Int(l * r as i64)),
             (Int(l), Int(r)) => Ok(Int(l * r)),
-            (Int(l), Double(r)) => Ok(Double(Decimal::from(l) * r)),
-            (Double(l), UInt(r)) => Ok(Double(l * Decimal::from(r))),
-            (Double(l), Int(r)) => Ok(Double(l * Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Double(l * r)),
-            _ => Err(CelError::Unexpected(
-                "Invalid operands for multiplication".to_string(),
-            )),
+            (Decimal(l), Decimal(r)) => Ok(Decimal(l * r)),
+            _ => Err(CelError::NoMatchingOverload(format!(
+                "Cannot apply '*' to {:?} and {:?}",
+                CelType::from(&left),
+                CelType::from(&right)
+            ))),
         },
-        ArithmeticOp::Add => match (left, right) {
+        ArithmeticOp::Add => match (&left, &right) {
             (UInt(l), UInt(r)) => Ok(UInt(l + r)),
-            (UInt(l), Int(r)) => Ok(Int(l as i64 + r)),
-            (UInt(l), Double(r)) => Ok(Double(Decimal::from(l) + r)),
-            (Int(l), UInt(r)) => Ok(Int(l + r as i64)),
             (Int(l), Int(r)) => Ok(Int(l + r)),
-            (Int(l), Double(r)) => Ok(Double(Decimal::from(l) + r)),
-            (Double(l), UInt(r)) => Ok(Double(l + Decimal::from(r))),
-            (Double(l), Int(r)) => Ok(Double(l + Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Double(l + r)),
-            _ => Err(CelError::Unexpected(
-                "Invalid operands for addition".to_string(),
-            )),
+            (Decimal(l), Decimal(r)) => Ok(Decimal(l + r)),
+            _ => Err(CelError::NoMatchingOverload(format!(
+                "Cannot apply '+' to {:?} and {:?}",
+                CelType::from(&left),
+                CelType::from(&right)
+            ))),
         },
-        ArithmeticOp::Subtract => match (left, right) {
+        ArithmeticOp::Subtract => match (&left, &right) {
             (UInt(l), UInt(r)) => Ok(UInt(l - r)),
-            (UInt(l), Int(r)) => Ok(Int(l as i64 - r)),
-            (UInt(l), Double(r)) => Ok(Double(Decimal::from(l) - r)),
-            (Int(l), UInt(r)) => Ok(Int(l - r as i64)),
             (Int(l), Int(r)) => Ok(Int(l - r)),
-            (Int(l), Double(r)) => Ok(Double(Decimal::from(l) - r)),
-            (Double(l), UInt(r)) => Ok(Double(l - Decimal::from(r))),
-            (Double(l), Int(r)) => Ok(Double(l - Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Double(l - r)),
-            _ => Err(CelError::Unexpected(
-                "Invalid operands for subtraction".to_string(),
-            )),
+            (Decimal(l), Decimal(r)) => Ok(Decimal(l - r)),
+            _ => Err(CelError::NoMatchingOverload(format!(
+                "Cannot apply '-' to {:?} and {:?}",
+                CelType::from(&left),
+                CelType::from(&right)
+            ))),
         },
         _ => unimplemented!(),
     }
@@ -230,85 +220,71 @@ fn evaluate_relation(
 ) -> Result<CelValue, CelError> {
     use CelValue::*;
     match op {
-        RelationOp::LessThan => match (left, right) {
+        RelationOp::LessThan => match (&left, &right) {
             (UInt(l), UInt(r)) => Ok(Bool(l < r)),
-            (UInt(l), Int(r)) => Ok(Bool(l < r as u64)),
-            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) < r)),
-            (Int(l), UInt(r)) => Ok(Bool(l < r as i64)),
             (Int(l), Int(r)) => Ok(Bool(l < r)),
-            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) < r)),
-            (Double(l), UInt(r)) => Ok(Bool(l < Decimal::from(r))),
-            (Double(l), Int(r)) => Ok(Bool(l < Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l < r)),
-            _ => Err(CelError::Unexpected("Invalid operands for '<'".to_string())),
+            (Decimal(l), Decimal(r)) => Ok(Bool(l < r)),
+            _ => Err(CelError::NoMatchingOverload(format!(
+                "Cannot apply '<' to {:?} and {:?}",
+                CelType::from(&left),
+                CelType::from(&right)
+            ))),
         },
-        RelationOp::LessThanEq => match (left, right) {
+        RelationOp::LessThanEq => match (&left, &right) {
             (UInt(l), UInt(r)) => Ok(Bool(l <= r)),
-            (UInt(l), Int(r)) => Ok(Bool(l <= r as u64)),
-            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) <= r)),
-            (Int(l), UInt(r)) => Ok(Bool(l <= r as i64)),
             (Int(l), Int(r)) => Ok(Bool(l <= r)),
-            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) <= r)),
-            (Double(l), UInt(r)) => Ok(Bool(l <= Decimal::from(r))),
-            (Double(l), Int(r)) => Ok(Bool(l <= Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l <= r)),
-            _ => Err(CelError::Unexpected(
-                "Invalid operands for '<='".to_string(),
-            )),
+            (Decimal(l), Decimal(r)) => Ok(Bool(l <= r)),
+            _ => Err(CelError::NoMatchingOverload(format!(
+                "Cannot apply '<=' to {:?} and {:?}",
+                CelType::from(&left),
+                CelType::from(&right)
+            ))),
         },
-        RelationOp::GreaterThan => match (left, right) {
+        RelationOp::GreaterThan => match (&left, &right) {
             (UInt(l), UInt(r)) => Ok(Bool(l > r)),
-            (UInt(l), Int(r)) => Ok(Bool(l > r as u64)),
-            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) > r)),
-            (Int(l), UInt(r)) => Ok(Bool(l > r as i64)),
             (Int(l), Int(r)) => Ok(Bool(l > r)),
-            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) > r)),
-            (Double(l), UInt(r)) => Ok(Bool(l > Decimal::from(r))),
-            (Double(l), Int(r)) => Ok(Bool(l > Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l > r)),
-            _ => Err(CelError::Unexpected("Invalid operands for '>'".to_string())),
+            (Decimal(l), Decimal(r)) => Ok(Bool(l > r)),
+            _ => Err(CelError::NoMatchingOverload(format!(
+                "Cannot apply '>' to {:?} and {:?}",
+                CelType::from(&left),
+                CelType::from(&right)
+            ))),
         },
-        RelationOp::GreaterThanEq => match (left, right) {
+        RelationOp::GreaterThanEq => match (&left, &right) {
             (UInt(l), UInt(r)) => Ok(Bool(l >= r)),
-            (UInt(l), Int(r)) => Ok(Bool(l >= r as u64)),
-            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) >= r)),
-            (Int(l), UInt(r)) => Ok(Bool(l >= r as i64)),
             (Int(l), Int(r)) => Ok(Bool(l >= r)),
-            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) >= r)),
-            (Double(l), UInt(r)) => Ok(Bool(l >= Decimal::from(r))),
-            (Double(l), Int(r)) => Ok(Bool(l >= Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l >= r)),
-            _ => Err(CelError::Unexpected(
-                "Invalid operands for '>='".to_string(),
-            )),
+            (Decimal(l), Decimal(r)) => Ok(Bool(l >= r)),
+            _ => Err(CelError::NoMatchingOverload(format!(
+                "Cannot apply '>=' to {:?} and {:?}",
+                CelType::from(&left),
+                CelType::from(&right)
+            ))),
         },
-        RelationOp::Equals => match (left, right) {
+        RelationOp::Equals => match (&left, &right) {
             (UInt(l), UInt(r)) => Ok(Bool(l == r)),
-            (UInt(l), Int(r)) => Ok(Bool(l == r as u64)),
-            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) == r)),
-            (Int(l), UInt(r)) => Ok(Bool(l == r as i64)),
             (Int(l), Int(r)) => Ok(Bool(l == r)),
-            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) == r)),
-            (Double(l), UInt(r)) => Ok(Bool(l == Decimal::from(r))),
-            (Double(l), Int(r)) => Ok(Bool(l == Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l == r)),
-            _ => Err(CelError::Unexpected(
-                "Invalid operands for '=='".to_string(),
-            )),
+            (Decimal(l), Decimal(r)) => Ok(Bool(l == r)),
+            _ => Err(CelError::NoMatchingOverload(format!(
+                "Cannot apply '==' to {:?} and {:?}",
+                CelType::from(&left),
+                CelType::from(&right)
+            ))),
         },
-        RelationOp::NotEquals => match (left, right) {
+        RelationOp::NotEquals => match (&left, &right) {
             (UInt(l), UInt(r)) => Ok(Bool(l != r)),
-            (UInt(l), Int(r)) => Ok(Bool(l != r as u64)),
-            (UInt(l), Double(r)) => Ok(Bool(Decimal::from(l) != r)),
-            (Int(l), UInt(r)) => Ok(Bool(l != r as i64)),
             (Int(l), Int(r)) => Ok(Bool(l != r)),
-            (Int(l), Double(r)) => Ok(Bool(Decimal::from(l) != r)),
-            (Double(l), UInt(r)) => Ok(Bool(l != Decimal::from(r))),
-            (Double(l), Int(r)) => Ok(Bool(l != Decimal::from(r))),
             (Double(l), Double(r)) => Ok(Bool(l != r)),
-            _ => Err(CelError::Unexpected(
-                "Invalid operands for '!='".to_string(),
-            )),
+            (Decimal(l), Decimal(r)) => Ok(Bool(l != r)),
+            _ => Err(CelError::NoMatchingOverload(format!(
+                "Cannot apply '!=' to {:?} and {:?}",
+                CelType::from(&left),
+                CelType::from(&right)
+            ))),
         },
         _ => unimplemented!(),
     }

@@ -20,8 +20,8 @@ impl CelContext {
             ContextItem::Function(Box::new(builtins::uuid)),
         );
         idents.insert(
-            "dec".to_string(),
-            ContextItem::Function(Box::new(builtins::dec)),
+            "decimal".to_string(),
+            ContextItem::Function(Box::new(builtins::decimal)),
         );
         Self { idents }
     }

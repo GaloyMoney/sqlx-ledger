@@ -14,16 +14,19 @@ pub struct CelResult<'a> {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CelValue {
+    // Builtins
     Map(Arc<CelMap>),
     Array(Arc<CelArray>),
     Int(i64),
     UInt(u64),
-    Double(Decimal),
+    Double(f64),
     String(Arc<String>),
     Bytes(Arc<Vec<u8>>),
     Bool(bool),
     Null,
 
+    // Addons
+    Decimal(Decimal),
     Date(NaiveDate),
     Uuid(Uuid),
 }
@@ -113,7 +116,7 @@ impl From<i64> for CelValue {
 
 impl From<Decimal> for CelValue {
     fn from(d: Decimal) -> Self {
-        CelValue::Double(d)
+        CelValue::Decimal(d)
     }
 }
 
@@ -220,6 +223,7 @@ impl From<&CelValue> for CelType {
             CelValue::Bool(_) => CelType::Bool,
             CelValue::Null => CelType::Null,
 
+            CelValue::Decimal(_) => CelType::Decimal,
             CelValue::Date(_) => CelType::Date,
             CelValue::Uuid(_) => CelType::Uuid,
         }
@@ -303,12 +307,10 @@ impl<'a> TryFrom<CelResult<'a>> for Decimal {
 
     fn try_from(CelResult { expr, val }: CelResult) -> Result<Self, Self::Error> {
         match val {
-            CelValue::Double(n) => Ok(n),
-            CelValue::Int(n) => Ok(Decimal::from(n)),
-            CelValue::UInt(n) => Ok(Decimal::from(n)),
+            CelValue::Decimal(n) => Ok(n),
             _ => Err(CelError::EvaluationError(
                 format!("{expr:?}"),
-                Box::new(CelError::BadType(CelType::Double, CelType::from(&val))),
+                Box::new(CelError::BadType(CelType::Decimal, CelType::from(&val))),
             )),
         }
     }

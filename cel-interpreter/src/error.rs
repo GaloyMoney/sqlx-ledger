@@ -23,6 +23,8 @@ pub enum CelError {
     UuidError(String),
     #[error("CelError - DecimalError: {0}")]
     DecimalError(String),
+    #[error("CelError - NoMatchingOverload: {0}")]
+    NoMatchingOverload(String),
     #[error("CelError - Unexpected: {0}")]
     Unexpected(String),
 

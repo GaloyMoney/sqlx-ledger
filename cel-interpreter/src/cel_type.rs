@@ -1,5 +1,6 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CelType {
+    // Builtins
     Map,
     Array,
     Int,
@@ -10,6 +11,8 @@ pub enum CelType {
     Bool,
     Null,
 
+    // Addons
     Date,
     Uuid,
+    Decimal,
 }

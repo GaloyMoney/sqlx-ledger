@@ -65,7 +65,7 @@ async fn post_transaction() -> anyhow::Result<()> {
             .account_id("params.sender")
             .layer("SETTLED")
             .direction("DEBIT")
-            .units("1290")
+            .units("decimal('1290')")
             .currency("'BTC'")
             .build()
             .unwrap(),
@@ -74,7 +74,7 @@ async fn post_transaction() -> anyhow::Result<()> {
             .account_id("params.recipient")
             .layer("SETTLED")
             .direction("CREDIT")
-            .units("1290")
+            .units("decimal('1290')")
             .currency("'BTC'")
             .build()
             .unwrap(),
