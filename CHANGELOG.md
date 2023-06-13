@@ -1,3 +1,15 @@
+# [sqlx-ledger release v0.8.2](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.8.2)
+
+
+### Bug Fixes
+
+- Typo in error.rs
+
+### Miscellaneous Tasks
+
+- Bump lalrpop
+- Update cached requirement from 0.43.0 to 0.44.0
+
 # [sqlx-ledger release v0.8.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.8.1)
 
 
