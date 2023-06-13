@@ -9,7 +9,7 @@ use crate::{event::SqlxLedgerEvent, primitives::*, tx_template::ParamDataType};
 #[derive(Error, Debug)]
 pub enum SqlxLedgerError {
     #[error("SqlxLedgerError - Sqlx: {0}")]
-    UnknwownSqlx(sqlx::Error),
+    Sqlx(sqlx::Error),
     #[error("SqlxLedgerError - DuplicateKey: {0}")]
     DuplicateKey(Box<dyn DatabaseError>),
     #[error("SqlxLedgerError - SerdeJson: {0}")]
@@ -42,7 +42,7 @@ impl From<sqlx::Error> for SqlxLedgerError {
             sqlx::Error::Database(err) if err.message().contains("duplicate key") => {
                 SqlxLedgerError::DuplicateKey(err)
             }
-            e => SqlxLedgerError::UnknwownSqlx(e),
+            e => SqlxLedgerError::Sqlx(e),
         }
     }
 }
