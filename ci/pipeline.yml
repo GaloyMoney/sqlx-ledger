@@ -4,7 +4,8 @@
 #@   "build_edge_image",
 #@   "public_docker_registry",
 #@   "rust_check_code",
-#@   "rust_integration_test",
+#@   "test_on_docker_host",
+#@   "docker_host_pool",
 #@   "repo_resource",
 #@   "edge_image_resource",
 #@   "version_resource",
@@ -23,40 +24,13 @@ groups:
 - name: sqlx-ledger
   jobs:
     - check-code
-    - test-integration
+    - integration-tests
     - release
     - set-dev-version
 
 jobs:
 - #@ rust_check_code()
-- name: test-integration
-  serial: true
-  plan:
-  - in_parallel:
-    - { get: repo, trigger: true }
-    - { get: pipeline-tasks }
-  - task: test-integration
-    timeout: 12m
-    tags: ["galoy-staging"]
-    config:
-      platform: linux
-      image_resource: #@ rust_task_image_config()
-      inputs:
-      - name: pipeline-tasks
-      - name: repo
-        path: #@ data.values.gh_repository + "-integration"
-      caches:
-      - path: cargo-home
-      - path: cargo-target-dir
-      params:
-        REPO_PATH: #@ data.values.gh_repository + "-integration"
-        DOCKER_HOST_IP: ((staging-ssh.docker_host_ip))
-        GOOGLE_CREDENTIALS: ((staging-gcp-creds.creds_json))
-        SSH_PRIVATE_KEY: ((staging-ssh.ssh_private_key))
-        SSH_PUB_KEY: ((staging-ssh.ssh_public_key))
-      run:
-        path: pipeline-tasks/ci/tasks/test-integration.sh
-  on_failure: #@ slack_failure_notification()
+- #@ test_on_docker_host("integration-tests")
 
 - name: release
   serial: true
@@ -64,7 +38,7 @@ jobs:
   - in_parallel:
     - get: repo
       passed:
-      - test-integration
+      - integration-tests
       - check-code
     - get: pipeline-tasks
     - get: version
@@ -157,6 +131,7 @@ resources:
 - #@ slack_resource()
 - #@ version_resource()
 - #@ gh_release_resource()
+- #@ docker_host_pool()
 
 resource_types:
 - #@ slack_resource_type()
