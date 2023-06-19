@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.8.3](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.8.3)
+
+
+### Miscellaneous Tasks
+
+- Bump dependencies
+
 # [sqlx-ledger release v0.8.2](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.8.2)
 
 
