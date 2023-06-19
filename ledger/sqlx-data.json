@@ -14,6 +14,86 @@
     },
     "query": "INSERT INTO sqlx_ledger_accounts\n  (id, version, code, name, normal_balance_type, description, status, metadata, created_at)\n(\n SELECT id, version + 1, code, name, normal_balance_type, COALESCE($2, description), status, COALESCE($3, metadata), created_at\n FROM sqlx_ledger_accounts WHERE id = $1 ORDER BY version DESC LIMIT 1\n)\n"
   },
+  "28b2079d3422953e6dc7cf7c3a1ab1e304568264e004dec9b8b8cc306dfaee66": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "version",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "journal_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "tx_template_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "effective",
+          "ordinal": 4,
+          "type_info": "Date"
+        },
+        {
+          "name": "correlation_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "external_id",
+          "ordinal": 6,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "description",
+          "ordinal": 7,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "metadata",
+          "ordinal": 8,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "modified_at",
+          "ordinal": 10,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata, created_at, modified_at\n            FROM sqlx_ledger_transactions\n            WHERE tx_template_id = $1"
+  },
   "63b1b637705d0ab703a902f275e3c01adc9b097941da3f02d0ba077c8401658b": {
     "describe": {
       "columns": [

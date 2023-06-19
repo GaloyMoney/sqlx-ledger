@@ -109,4 +109,34 @@ impl Transactions {
             })
             .collect())
     }
+
+    pub async fn list_by_template_id(
+        &self,
+        id: TxTemplateId,
+    ) -> Result<Vec<Transaction>, SqlxLedgerError> {
+        let records = sqlx::query!(
+            r#"SELECT id, version, journal_id, tx_template_id, effective, correlation_id, external_id, description, metadata, created_at, modified_at
+            FROM sqlx_ledger_transactions
+            WHERE tx_template_id = $1"#,
+            id as TxTemplateId
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(records
+            .into_iter()
+            .map(|row| Transaction {
+                id: TransactionId::from(row.id),
+                version: row.version as u32,
+                journal_id: JournalId::from(row.journal_id),
+                tx_template_id: TxTemplateId::from(row.tx_template_id),
+                effective: row.effective,
+                correlation_id: CorrelationId::from(row.correlation_id),
+                external_id: row.external_id,
+                description: row.description,
+                metadata_json: row.metadata,
+                created_at: row.created_at,
+                modified_at: row.modified_at,
+            })
+            .collect())
+    }
 }
