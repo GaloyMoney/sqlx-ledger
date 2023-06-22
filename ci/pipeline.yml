@@ -126,7 +126,7 @@ jobs:
       rebase: true
 
 resources:
-- #@ repo_resource()
+- #@ repo_resource(True)
 - #@ pipeline_tasks_resource()
 - #@ slack_resource()
 - #@ version_resource()
