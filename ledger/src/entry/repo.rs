@@ -110,9 +110,12 @@ impl Entries {
 
     pub async fn list_by_transaction_ids(
         &self,
-        tx_ids: Vec<TransactionId>,
+        tx_ids: impl IntoIterator<Item = impl std::borrow::Borrow<TransactionId>>,
     ) -> Result<HashMap<TransactionId, Vec<Entry>>, SqlxLedgerError> {
-        let tx_ids: Vec<Uuid> = tx_ids.into_iter().map(Uuid::from).collect();
+        let tx_ids: Vec<Uuid> = tx_ids
+            .into_iter()
+            .map(|id| Uuid::from(id.borrow()))
+            .collect();
         let records = sqlx::query!(
             r#"SELECT id, version, transaction_id, account_id, journal_id, entry_type, layer as "layer: Layer", units, currency, direction as "direction: DebitOrCredit", sequence, description, created_at, modified_at
             FROM sqlx_ledger_entries
