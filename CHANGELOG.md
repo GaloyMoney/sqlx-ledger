@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.8.5](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.8.5)
+
+
+### Features
+
+- Accept IntoIterator for tx_ids
+
 # [sqlx-ledger release v0.8.4](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.8.4)
 
 
