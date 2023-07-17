@@ -161,7 +161,7 @@ impl Balances {
         );
 
         let query = query_builder.build();
-        let records = query.fetch_all(&mut *tx).await?;
+        let records = query.fetch_all(&mut **tx).await?;
         let mut ret = HashMap::new();
         for r in records {
             let account_id = AccountId::from(r.get::<Uuid, _>("account_id"));
@@ -236,7 +236,7 @@ impl Balances {
             },
         );
         if any_new {
-            query_builder.build().execute(&mut *tx).await?;
+            query_builder.build().execute(&mut **tx).await?;
         }
         let mut query_builder: QueryBuilder<Postgres> =
             QueryBuilder::new(r#"UPDATE sqlx_ledger_current_balances SET version = CASE"#);
@@ -263,7 +263,7 @@ impl Balances {
                 builder.push_bind(version);
             },
         );
-        let result = query_builder.build().execute(&mut *tx).await?;
+        let result = query_builder.build().execute(&mut **tx).await?;
         if result.rows_affected() != (expected_accounts_effected as u64) {
             return Err(SqlxLedgerError::OptimisticLockingError);
         }
@@ -298,7 +298,7 @@ impl Balances {
             builder.push_bind(b.modified_at);
             builder.push_bind(b.created_at);
         });
-        query_builder.build().execute(&mut *tx).await?;
+        query_builder.build().execute(&mut **tx).await?;
         Ok(())
     }
 }

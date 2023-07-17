@@ -43,7 +43,7 @@ impl Journals {
             description,
             status as Status,
         )
-        .fetch_one(&mut *tx)
+        .fetch_one(&mut **tx)
         .await?;
         Ok(JournalId::from(record.id))
     }

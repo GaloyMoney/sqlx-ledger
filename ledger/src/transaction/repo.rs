@@ -44,7 +44,7 @@ impl Transactions {
             description,
             metadata
         )
-        .fetch_one(&mut *tx)
+        .fetch_one(&mut **tx)
         .await?;
         Ok((journal_id, TransactionId::from(record.id)))
     }
