@@ -50,7 +50,7 @@ impl Accounts {
             status as Status,
             metadata
         )
-        .fetch_one(&mut *tx)
+        .fetch_one(&mut **tx)
         .await?;
         Ok(AccountId::from(record.id))
     }

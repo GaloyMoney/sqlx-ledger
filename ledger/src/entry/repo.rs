@@ -84,7 +84,7 @@ impl Entries {
             "RETURNING id, sequence, created_at ) SELECT * FROM new_entries ORDER BY sequence",
         );
         let query = query_builder.build();
-        let records = query.fetch_all(&mut *tx).await?;
+        let records = query.fetch_all(&mut **tx).await?;
 
         let mut ret = Vec::new();
         sequence = 1;
