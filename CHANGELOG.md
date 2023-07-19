@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.9.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.9.0)
+
+
+### Miscellaneous Tasks
+
+- [**breaking**] Update sqlx to 0.7.1 (#45)
+
 # [sqlx-ledger release v0.8.5](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.8.5)
 
 
