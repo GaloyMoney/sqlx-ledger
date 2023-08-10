@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.10.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.10.0)
+
+
+### Miscellaneous Tasks
+
+- [**breaking**] Update opentelemetry and tracing-opentelemetry (#47)
+
 # [sqlx-ledger release v0.9.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.9.0)
 
 
