@@ -2,3 +2,5 @@
 .envrc
 
 Cargo.lock
+
+.direnv/
