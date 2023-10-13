@@ -224,6 +224,49 @@ async fn post_transaction() -> anyhow::Result<()> {
         get_balance(&ledger, journal_id, sender_account_id, Currency::Iso(usd)).await?;
     assert_eq!(usd_credit_balance.settled(), Decimal::from(-100));
 
+    let external_id = uuid::Uuid::new_v4().to_string();
+    params = TxParams::new();
+    params.insert("journal_id", journal_id);
+    params.insert("sender", sender_account_id);
+    params.insert("recipient", recipient_account_id);
+    params.insert("external_id", external_id.clone());
+
+    ledger
+        .post_transaction(TransactionId::new(), &tx_code, Some(params))
+        .await
+        .unwrap();
+
+    let usd_credit_balance = get_balance(
+        &ledger,
+        journal_id,
+        recipient_account_id,
+        Currency::Iso(usd),
+    )
+    .await?;
+    assert_eq!(usd_credit_balance.settled(), Decimal::from(200));
+
+    let btc_credit_balance = get_balance(
+        &ledger,
+        journal_id,
+        recipient_account_id,
+        Currency::Crypto(btc),
+    )
+    .await?;
+    assert_eq!(btc_credit_balance.settled(), Decimal::from(2580));
+
+    let btc_debit_balance = get_balance(
+        &ledger,
+        journal_id,
+        sender_account_id,
+        Currency::Crypto(btc),
+    )
+    .await?;
+    assert_eq!(btc_debit_balance.settled(), Decimal::from(-2580));
+
+    let usd_credit_balance =
+        get_balance(&ledger, journal_id, sender_account_id, Currency::Iso(usd)).await?;
+    assert_eq!(usd_credit_balance.settled(), Decimal::from(-200));
+
     Ok(())
 }
 

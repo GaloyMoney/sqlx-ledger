@@ -102,10 +102,9 @@ impl SqlxLedger {
                 HashMap::new();
             let mut new_balances = Vec::new();
             for entry in entries.iter() {
-                let key = (entry.account_id, &entry.currency);
                 let balance = match (
-                    latest_balances.remove(&key),
-                    balances.remove(&entry.account_id),
+                    latest_balances.remove(&(entry.account_id, &entry.currency)),
+                    balances.remove(&(entry.account_id, entry.currency)),
                 ) {
                     (Some(latest), _) => {
                         new_balances.push(latest.clone());
@@ -113,11 +112,14 @@ impl SqlxLedger {
                     }
                     (_, Some(balance)) => balance,
                     _ => {
-                        latest_balances.insert(key, BalanceDetails::init(journal_id, entry));
+                        latest_balances.insert(
+                            (entry.account_id, &entry.currency),
+                            BalanceDetails::init(journal_id, entry),
+                        );
                         continue;
                     }
                 };
-                latest_balances.insert(key, balance.update(entry));
+                latest_balances.insert((entry.account_id, &entry.currency), balance.update(entry));
             }
             new_balances.extend(latest_balances.into_values());
 
