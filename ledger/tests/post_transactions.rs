@@ -1,7 +1,9 @@
 mod helpers;
 
+use rust_decimal::Decimal;
+
 use rand::distributions::{Alphanumeric, DistString};
-use sqlx_ledger::{account::*, event::*, journal::*, tx_template::*, *};
+use sqlx_ledger::{account::*, balance::AccountBalance, event::*, journal::*, tx_template::*, *};
 
 #[tokio::test]
 async fn post_transaction() -> anyhow::Result<()> {
@@ -61,7 +63,7 @@ async fn post_transaction() -> anyhow::Result<()> {
     ];
     let entries = vec![
         EntryInput::builder()
-            .entry_type("'TEST_DR'")
+            .entry_type("'TEST_BTC_DR'")
             .account_id("params.sender")
             .layer("SETTLED")
             .direction("DEBIT")
@@ -70,12 +72,30 @@ async fn post_transaction() -> anyhow::Result<()> {
             .build()
             .unwrap(),
         EntryInput::builder()
-            .entry_type("'TEST_CR'")
+            .entry_type("'TEST_BTC_CR'")
             .account_id("params.recipient")
             .layer("SETTLED")
             .direction("CREDIT")
             .units("decimal('1290')")
             .currency("'BTC'")
+            .build()
+            .unwrap(),
+        EntryInput::builder()
+            .entry_type("'TEST_USD_DR'")
+            .account_id("params.sender")
+            .layer("SETTLED")
+            .direction("DEBIT")
+            .units("decimal('100')")
+            .currency("'USD'")
+            .build()
+            .unwrap(),
+        EntryInput::builder()
+            .entry_type("'TEST_USD_CR'")
+            .account_id("params.recipient")
+            .layer("SETTLED")
+            .direction("CREDIT")
+            .units("decimal('100')")
+            .currency("'USD'")
             .build()
             .unwrap(),
     ];
@@ -131,7 +151,7 @@ async fn post_transaction() -> anyhow::Result<()> {
         .await?;
 
     assert!(entries.get(&transactions[0].id).is_some());
-    assert_eq!(entries.get(&transactions[0].id).unwrap().len(), 2);
+    assert_eq!(entries.get(&transactions[0].id).unwrap().len(), 4);
 
     assert_eq!(
         sender_account_balance_events.recv().await.unwrap().r#type,
@@ -170,5 +190,53 @@ async fn post_transaction() -> anyhow::Result<()> {
         SqlxLedgerEventType::BalanceUpdated
     );
 
+    let usd = rusty_money::iso::find("USD").unwrap();
+    let btc = rusty_money::crypto::find("BTC").unwrap();
+
+    let usd_credit_balance = get_balance(
+        &ledger,
+        journal_id,
+        recipient_account_id,
+        Currency::Iso(usd),
+    )
+    .await?;
+    assert_eq!(usd_credit_balance.settled(), Decimal::from(100));
+
+    let btc_credit_balance = get_balance(
+        &ledger,
+        journal_id,
+        recipient_account_id,
+        Currency::Crypto(btc),
+    )
+    .await?;
+    assert_eq!(btc_credit_balance.settled(), Decimal::from(1290));
+
+    let btc_debit_balance = get_balance(
+        &ledger,
+        journal_id,
+        sender_account_id,
+        Currency::Crypto(btc),
+    )
+    .await?;
+    assert_eq!(btc_debit_balance.settled(), Decimal::from(-1290));
+
+    let usd_credit_balance =
+        get_balance(&ledger, journal_id, sender_account_id, Currency::Iso(usd)).await?;
+    assert_eq!(usd_credit_balance.settled(), Decimal::from(-100));
+
     Ok(())
+}
+
+async fn get_balance(
+    ledger: &SqlxLedger,
+    journal_id: JournalId,
+    account_id: AccountId,
+    currency: Currency,
+) -> anyhow::Result<AccountBalance> {
+    let balance = ledger
+        .balances()
+        .find(journal_id, account_id, currency)
+        .await?
+        .unwrap();
+    Ok(balance)
 }
