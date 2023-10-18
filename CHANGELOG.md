@@ -1,3 +1,17 @@
+# [sqlx-ledger release v0.11.1](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.11.1)
+
+
+### Bug Fixes
+
+- Current_balance error when executing template (#58)
+- Check-code error on concourse (#57)
+- Account can have multiple currencies (#56)
+
+### Miscellaneous Tasks
+
+- Add flake
+- Update tracing-opentelemetry requirement from 0.20 to 0.21 (#53)
+
 # [sqlx-ledger release v0.11.0](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.11.0)
 
 
