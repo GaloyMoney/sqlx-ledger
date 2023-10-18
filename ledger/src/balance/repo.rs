@@ -2,7 +2,7 @@ use sqlx::{PgPool, Postgres, QueryBuilder, Row, Transaction};
 use tracing::instrument;
 use uuid::Uuid;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 use super::entity::*;
 use crate::{error::*, primitives::*};
@@ -138,7 +138,7 @@ impl Balances {
         journal_id: JournalId,
         ids: Vec<(AccountId, &Currency)>,
         tx: &mut Transaction<'a, Postgres>,
-    ) -> Result<HashMap<AccountId, BalanceDetails>, SqlxLedgerError> {
+    ) -> Result<HashMap<(AccountId, Currency), BalanceDetails>, SqlxLedgerError> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"SELECT
               b.journal_id, b.account_id, entry_id, b.currency,
@@ -165,8 +165,10 @@ impl Balances {
         let mut ret = HashMap::new();
         for r in records {
             let account_id = AccountId::from(r.get::<Uuid, _>("account_id"));
+            let currency =
+                Currency::from_str(r.get("currency")).expect("currency code should be valid");
             ret.insert(
-                account_id,
+                (account_id, currency),
                 BalanceDetails {
                     account_id,
                     journal_id: JournalId::from(r.get::<Uuid, _>("journal_id")),
