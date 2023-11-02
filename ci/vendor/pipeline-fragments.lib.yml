@@ -4,6 +4,10 @@
 #@  return "us.gcr.io/galoy-org"
 #@ end
 
+#@ def private_docker_registry():
+#@  return "gcr.io/galoy-org"
+#@ end
+
 #@ def nodejs_concourse_image():
 #@   return public_docker_registry() + "/nodejs-concourse"
 #@ end
@@ -134,6 +138,7 @@ plan:
   - { get: repo, trigger: true }
   - { get: pipeline-tasks }
 - task: #@ container
+  attempts: 2
   timeout: 12m
   tags: ["galoy-staging"]
   config:
@@ -365,6 +370,7 @@ plan:
       platform: linux
       image_resource: #@ nodejs_task_image_config()
       inputs:
+        - name: repo
         - name: pipeline-tasks
         - name: edge-image
         - name: charts-repo
@@ -401,14 +407,14 @@ source:
   private_key: #@ data.values.github_private_key
 #@ end
 
-#@ def edge_image_resource():
+#@ def edge_image_resource(publicRepo = True):
 name: edge-image
 type: registry-image
 source:
   tag: edge
   username: #@ data.values.docker_registry_user
   password: #@ data.values.docker_registry_password
-  repository: #@ public_docker_registry() + "/" + data.values.gh_repository
+  repository: #@ public_docker_registry() + "/" + data.values.gh_repository if publicRepo else private_docker_registry() + "/" + data.values.gh_repository
 #@ end
 
 #@ def nodejs_deps_resource(webhook = False):
