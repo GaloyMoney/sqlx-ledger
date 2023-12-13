@@ -50,7 +50,7 @@ mod tests {
 
     #[test]
     fn fails_when_mandatory_fields_are_missing() {
-        let new_account = NewJournal::builder().build();
-        assert!(new_account.is_err());
+        let new_journal = NewJournal::builder().build();
+        assert!(new_journal.is_err());
     }
 }
