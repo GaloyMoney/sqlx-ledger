@@ -1,3 +1,14 @@
+# [sqlx-ledger release v0.11.3](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.11.3)
+
+
+### Bug Fixes
+
+- Var naming (#65)
+
+### Miscellaneous Tasks
+
+- Bump otel tracing, derive-builder and cached (#73)
+
 # [sqlx-ledger release v0.11.2](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.11.2)
 
 
