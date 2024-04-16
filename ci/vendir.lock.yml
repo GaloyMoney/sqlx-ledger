@@ -2,14 +2,14 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - git:
-      commitTitle: 'chore: add webhook config'
-      sha: 9d0f008e41df2f5d5e0461171c02fc0c4aee1d6f
+      commitTitle: 'chore: use kaniko builder in shared build task (#50)'
+      sha: 3d1a7c11c7967952e84231e39aa5425ad704d93d
     path: .
   path: ../.github/workflows/vendor
 - contents:
   - git:
-      commitTitle: 'chore: add webhook config'
-      sha: 9d0f008e41df2f5d5e0461171c02fc0c4aee1d6f
+      commitTitle: 'chore: use kaniko builder in shared build task (#50)'
+      sha: 3d1a7c11c7967952e84231e39aa5425ad704d93d
     path: .
   path: ./vendor
 kind: LockConfig
