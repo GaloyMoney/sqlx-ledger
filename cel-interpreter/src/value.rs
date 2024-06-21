@@ -81,7 +81,7 @@ impl CelMap {
     pub fn get(&self, key: impl Into<CelKey>) -> CelValue {
         self.inner
             .get(&key.into())
-            .map(Clone::clone)
+            .cloned()
             .unwrap_or(CelValue::Null)
     }
 }
