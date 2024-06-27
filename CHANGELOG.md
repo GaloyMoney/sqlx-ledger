@@ -1,3 +1,10 @@
+# [sqlx-ledger release v0.11.4](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.11.4)
+
+
+### Miscellaneous Tasks
+
+- Bump opentelemetry deps (#79)
+
 # [sqlx-ledger release v0.11.3](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.11.3)
 
 
