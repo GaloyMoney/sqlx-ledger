@@ -13,7 +13,7 @@ categories = ["parsing"]
 fail-on-warnings = []
 
 [dependencies]
-lalrpop-util = { version = "0.20", features = ["lexer"] }
+lalrpop-util = { version = "0.22", features = ["lexer"] }
 
 [build-dependencies]
 lalrpop = { version = "0.22", features = ["lexer"] }
