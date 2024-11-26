@@ -16,4 +16,4 @@ fail-on-warnings = []
 lalrpop-util = { version = "0.20", features = ["lexer"] }
 
 [build-dependencies]
-lalrpop = { version = "0.20", features = ["lexer"] }
+lalrpop = { version = "0.22", features = ["lexer"] }
