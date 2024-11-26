@@ -1,3 +1,16 @@
+# [sqlx-ledger release v0.11.5](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.11.5)
+
+
+### Bug Fixes
+
+- Audit and slugs issues (#90)
+
+### Miscellaneous Tasks
+
+- Update opentelemetry requirements (#86)
+- Update lalrpop-util requirement from 0.20 to 0.22 (#87)
+- Update lalrpop requirement from 0.20 to 0.22 (#89)
+
 # [sqlx-ledger release v0.11.3](https://github.com/GaloyMoney/sqlx-ledger/releases/tag/v0.11.3)
 
 
