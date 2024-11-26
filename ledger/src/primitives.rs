@@ -148,7 +148,7 @@ where
     &'r str: sqlx::Decode<'r, DB>,
 {
     fn decode(
-        value: <DB as sqlx::database::HasValueRef<'r>>::ValueRef,
+        value: <DB as sqlx::Database>::ValueRef<'r>,
     ) -> Result<Currency, Box<dyn std::error::Error + 'static + Send + Sync>> {
         let value = <&str as sqlx::Decode<DB>>::decode(value)?;
 
